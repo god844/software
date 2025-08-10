@@ -444,7 +444,7 @@
             registerBtn.textContent = 'Creating Account...';
 
             try {
-                const response = await fetch(window.location.href, {
+                const response = await fetch('api.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -491,13 +491,13 @@
         // Setup database on page load
         async function setupDatabase() {
             try {
-                await fetch(window.location.href, {
+                await fetch('api.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        action: 'setup'
+                        action: 'createDatabase'
                     })
                 });
             } catch (error) {
