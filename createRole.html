@@ -1,0 +1,518 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - Tailor Company</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #F8F9FA 0%, #E9ECEF 50%, #DEE2E6 100%);
+            min-height: 100vh;
+            color: #212529;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #495057;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: #6C757D;
+            font-weight: 400;
+        }
+
+        .create-account-section {
+            background: #FFFFFF;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            border: 1px solid #E9ECEF;
+        }
+
+        .form-title {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #495057;
+            font-size: 1.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #DEE2E6;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #F8F9FA;
+            color: #495057;
+            font-weight: 500;
+        }
+
+        .form-group input::placeholder {
+            color: #6C757D;
+            font-weight: 400;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #6C757D;
+            background: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(108, 117, 125, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #495057 0%, #6C757D 100%);
+            color: white;
+            padding: 16px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(73, 80, 87, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(73, 80, 87, 0.3);
+            background: linear-gradient(135deg, #6C757D 0%, #495057 100%);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .role-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .role-card {
+            background: #F8F9FA;
+            border: 2px solid #DEE2E6;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #495057;
+            font-weight: 500;
+        }
+
+        .role-card:hover {
+            border-color: #6C757D;
+            background: #FFFFFF;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(108, 117, 125, 0.15);
+        }
+
+        .role-card.selected {
+            background: #495057;
+            color: white;
+            border-color: #495057;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(73, 80, 87, 0.3);
+        }
+
+        .role-card h3 {
+            margin-bottom: 8px;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .role-card p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .branch-selector {
+            margin-top: 20px;
+        }
+
+        .branch-selector label {
+            color: #495057;
+            font-weight: 600;
+            font-size: 1rem;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            display: block;
+            letter-spacing: 0.5px;
+        }
+
+        .branch-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .branch-btn {
+            padding: 12px 24px;
+            border: 2px solid #6C757D;
+            background: #F8F9FA;
+            color: #495057;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .branch-btn:hover, .branch-btn.selected {
+            background: #6C757D;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(108, 117, 125, 0.3);
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            font-size: 1rem;
+        }
+
+        .alert-success {
+            background: #D1E7DD;
+            color: #0F5132;
+            border: 1px solid #BADBCC;
+        }
+
+        .alert-error {
+            background: #F8D7DA;
+            color: #842029;
+            border: 1px solid #F5C2C7;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .create-account-section {
+                padding: 25px;
+            }
+
+            .role-selector {
+                grid-template-columns: 1fr;
+            }
+
+            .branch-buttons {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .form-group input {
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+        }
+
+        /* Success Animation */
+        @keyframes slideInFromTop {
+            from {
+                transform: translateY(-30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .create-account-section {
+            animation: slideInFromTop 0.6s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧵 Tailor Company Management</h1>
+            <p>Professional Account Registration System</p>
+        </div>
+
+        <div class="create-account-section">
+            <h2 class="form-title">🎯 Create New Account</h2>
+            
+            <div class="form-group">
+                <label for="registerMobile">📱 Mobile Number</label>
+                <input type="tel" id="registerMobile" placeholder="Enter mobile number (username)" maxlength="10">
+            </div>
+
+            <div class="form-group">
+                <label for="registerPassword">🔑 Password</label>
+                <input type="password" id="registerPassword" placeholder="Create a strong password">
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword">🔒 Confirm Password</label>
+                <input type="password" id="confirmPassword" placeholder="Confirm your password">
+            </div>
+
+            <div class="form-group">
+                <label>👤 Select Your Role</label>
+                <div class="role-selector">
+                    <div class="role-card" onclick="selectRole('owner')">
+                        <h3>👑 OWNER</h3>
+                        <p>Supreme Control Access</p>
+                    </div>
+                    <div class="role-card" onclick="selectRole('company')">
+                        <h3>🏢 COMPANY</h3>
+                        <p>Multi-Branch Management</p>
+                    </div>
+                    <div class="role-card" onclick="selectRole('principal')">
+                        <h3>🎓 PRINCIPAL</h3>
+                        <p>Academic Leadership</p>
+                    </div>
+                    <div class="role-card" onclick="selectRole('teacher')">
+                        <h3>👩‍🏫 TEACHER</h3>
+                        <p>Educational Access</p>
+                    </div>
+                    <div class="role-card" onclick="selectRole('tailor')">
+                        <h3>✂️ TAILOR</h3>
+                        <p>Craft Specialist</p>
+                    </div>
+                    <div class="role-card" onclick="selectRole('student')">
+                        <h3>👨‍🎓 STUDENT</h3>
+                        <p>Learning Portal</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="branchSelector" class="branch-selector hidden">
+                <label>🏪 Select Branch</label>
+                <div class="branch-buttons">
+                    <div class="branch-btn" onclick="selectBranch('branch1')">🌟 Branch 1</div>
+                    <div class="branch-btn" onclick="selectBranch('branch2')">⭐ Branch 2</div>
+                    <div class="branch-btn" onclick="selectBranch('branch3')">💫 Branch 3</div>
+                </div>
+            </div>
+
+            <button class="btn" onclick="register()" id="registerBtn">
+                🎉 Create Account
+            </button>
+
+            <div id="alertContainer"></div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let selectedRole = '';
+        let selectedBranch = '';
+
+        // Show alerts
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alertContainer');
+            alertContainer.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => {
+                alertContainer.innerHTML = '';
+            }, 5000);
+        }
+
+        // Role selection
+        function selectRole(role) {
+            selectedRole = role;
+            document.querySelectorAll('.role-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.target.closest('.role-card').classList.add('selected');
+
+            const branchSelector = document.getElementById('branchSelector');
+            if (role === 'company') {
+                branchSelector.classList.remove('hidden');
+            } else {
+                branchSelector.classList.add('hidden');
+                selectedBranch = '';
+                document.querySelectorAll('.branch-btn').forEach(btn => {
+                    btn.classList.remove('selected');
+                });
+            }
+        }
+
+        // Branch selection
+        function selectBranch(branch) {
+            selectedBranch = branch;
+            document.querySelectorAll('.branch-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+        }
+
+        // Validate mobile number
+        function validateMobile(mobile) {
+            return /^[6-9]\d{9}$/.test(mobile);
+        }
+
+        // Register new user
+        async function register() {
+            const mobile = document.getElementById('registerMobile').value.trim();
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const registerBtn = document.getElementById('registerBtn');
+
+            // Validation
+            if (!validateMobile(mobile)) {
+                showAlert('❌ Please enter a valid 10-digit mobile number starting with 6, 7, 8, or 9', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showAlert('❌ Password must be at least 6 characters long', 'error');
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showAlert('❌ Passwords do not match', 'error');
+                return;
+            }
+
+            if (!selectedRole) {
+                showAlert('❌ Please select a role', 'error');
+                return;
+            }
+
+            if (selectedRole === 'company' && !selectedBranch) {
+                showAlert('❌ Please select a branch for company role', 'error');
+                return;
+            }
+
+            // Disable button during submission
+            registerBtn.disabled = true;
+            registerBtn.textContent = 'Creating Account...';
+
+            try {
+                const response = await fetch('api.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'register',
+                        mobile: mobile,
+                        password: password,
+                        role: selectedRole,
+                        branch: selectedBranch
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert('✅ Account created successfully! You can now login with your credentials.', 'success');
+                    clearForm();
+                } else {
+                    showAlert('❌ ' + result.message, 'error');
+                }
+            } catch (error) {
+                showAlert('❌ Connection error. Please check your internet connection.', 'error');
+                console.error('Registration error:', error);
+            }
+
+            // Re-enable button
+            registerBtn.disabled = false;
+            registerBtn.textContent = '🎉 Create Account';
+        }
+
+        // Clear form
+        function clearForm() {
+            document.getElementById('registerMobile').value = '';
+            document.getElementById('registerPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            selectedRole = '';
+            selectedBranch = '';
+            document.querySelectorAll('.role-card').forEach(card => card.classList.remove('selected'));
+            document.querySelectorAll('.branch-btn').forEach(btn => btn.classList.remove('selected'));
+            document.getElementById('branchSelector').classList.add('hidden');
+        }
+
+        // Setup database on page load
+        async function setupDatabase() {
+            try {
+                await fetch('api.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'createDatabase'
+                    })
+                });
+            } catch (error) {
+                console.error('Database setup error:', error);
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Setup database tables
+            setupDatabase();
+            
+            // Focus on first input for better UX
+            document.getElementById('registerMobile').focus();
+        });
+    </script>
+</body>
+</html>
