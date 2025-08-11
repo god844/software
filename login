@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Login - Tailor Company</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #F8F9FA 0%, #E9ECEF 30%, #DEE2E6 70%, #CED4DA 100%);
+            min-height: 100vh;
+            color: #212529;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated background elements */
+        body::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(108, 117, 125, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: backgroundMove 20s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes backgroundMove {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(-50px, -50px) rotate(360deg); }
+        }
+
+        .login-container {
+            max-width: 420px;
+            width: 100%;
+            padding: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header h1 {
+            font-size: clamp(2rem, 5vw, 2.8rem);
+            margin-bottom: 8px;
+            color: #495057;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .header h1::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, #495057, #6C757D);
+            border-radius: 2px;
+        }
+
+        .header p {
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            color: #6C757D;
+            font-weight: 500;
+            margin-top: 10px;
+        }
+
+        .login-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: clamp(25px, 6vw, 45px);
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.1),
+                0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+            border: 1px solid rgba(233, 236, 239, 0.8);
+            animation: slideUp 0.8s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(60px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .login-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, #495057, #6C757D, #ADB5BD, #6C757D, #495057);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .form-title {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #495057;
+            font-size: clamp(1.3rem, 4vw, 1.8rem);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            position: relative;
+        }
+
+        .form-title::before {
+            content: '🔐';
+            position: absolute;
+            left: -35px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5em;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translateY(-50%) scale(1); }
+            50% { transform: translateY(-50%) scale(1.1); }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 700;
+            color: #495057;
+            font-size: clamp(0.8rem, 2.5vw, 1rem);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            transition: all 0.3s ease;
+        }
+
+        .input-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 16px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 18px 20px 18px 55px;
+            border: 2px solid #DEE2E6;
+            border-radius: 16px;
+            font-size: clamp(14px, 3vw, 16px);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(145deg, #F8F9FA, #FFFFFF);
+            color: #495057;
+            font-weight: 500;
+            outline: none;
+            position: relative;
+            z-index: 2;
+        }
+
+        .form-group input:focus {
+            border-color: #6C757D;
+            background: #FFFFFF;
+            box-shadow: 
+                0 0 0 4px rgba(108, 117, 125, 0.15),
+                0 8px 16px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-group input:focus + .input-icon {
+            color: #495057;
+            transform: translateY(-50%) scale(1.2);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.3rem;
+            color: #6C757D;
+            transition: all 0.3s ease;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        .form-group input::placeholder {
+            color: #ADB5BD;
+            font-weight: 400;
+            font-style: italic;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #495057 0%, #6C757D 50%, #868E96 100%);
+            color: white;
+            padding: 20px 30px;
+            border: none;
+            border-radius: 16px;
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 100%;
+            margin-top: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            box-shadow: 
+                0 8px 20px rgba(73, 80, 87, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+            position: relative;
+            overflow: hidden;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 
+                0 12px 30px rgba(73, 80, 87, 0.4),
+                0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+            background: linear-gradient(135deg, #6C757D 0%, #495057 50%, #343A40 100%);
+        }
+
+        .btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn:active {
+            transform: translateY(-2px);
+        }
+
+        .links-section {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 2px solid #E9ECEF;
+            position: relative;
+        }
+
+        .links-section::before {
+            content: '⚡';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 0 10px;
+            color: #6C757D;
+            font-size: 1.2rem;
+        }
+
+        .link {
+            color: #6C757D;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-block;
+            margin: 5px 8px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: clamp(0.8rem, 2.5vw, 0.95rem);
+        }
+
+        .link:hover {
+            color: #495057;
+            background: rgba(108, 117, 125, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .alert {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin: 15px 0;
+            font-weight: 600;
+            font-size: clamp(0.85rem, 2.5vw, 1rem);
+            animation: alertSlide 0.5s ease;
+            border-left: 4px solid;
+        }
+
+        @keyframes alertSlide {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #D1E7DD, #C3E6CB);
+            color: #0F5132;
+            border-left-color: #198754;
+        }
+
+        .alert-error {
+            background: linear-gradient(135deg, #F8D7DA, #F1AEB5);
+            color: #842029;
+            border-left-color: #DC3545;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 22px;
+            height: 22px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Enhanced floating animation */
+        .floating {
+            animation: floating 4s ease-in-out infinite;
+        }
+
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            25% { transform: translateY(-8px) rotate(1deg); }
+            50% { transform: translateY(-15px) rotate(0deg); }
+            75% { transform: translateY(-8px) rotate(-1deg); }
+        }
+
+        /* Enhanced redirect overlay */
+        .redirect-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #495057, #6C757D, #868E96);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.6s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .redirect-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .redirect-content {
+            text-align: center;
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .redirect-spinner {
+            width: 80px;
+            height: 80px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 25px;
+        }
+
+        .redirect-content h2 {
+            font-size: clamp(1.2rem, 4vw, 1.8rem);
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .redirect-content p {
+            font-size: clamp(0.9rem, 3vw, 1.1rem);
+            opacity: 0.9;
+            font-weight: 500;
+        }
+
+        /* Enhanced mobile responsiveness */
+        @media (max-width: 768px) {
+            body {
+                padding: 8px;
+            }
+
+            .login-container {
+                max-width: 100%;
+                padding: 10px;
+            }
+
+            .header {
+                margin-bottom: 25px;
+            }
+
+            .login-section {
+                padding: 20px;
+                border-radius: 20px;
+            }
+
+            .form-group {
+                margin-bottom: 18px;
+            }
+
+            .form-group input {
+                padding: 16px 18px 16px 50px;
+                font-size: 16px; /* Prevents zoom on iOS */
+                min-height: 54px;
+            }
+
+            .input-icon {
+                left: 18px;
+                font-size: 1.2rem;
+            }
+
+            .btn {
+                padding: 18px 25px;
+                min-height: 56px;
+                font-size: 1rem;
+            }
+
+            .links-section {
+                margin-top: 20px;
+                padding-top: 15px;
+            }
+
+            .link {
+                display: block;
+                margin: 8px 0;
+                padding: 12px 15px;
+                border-radius: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .form-title::before {
+                display: none;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .login-section {
+                margin: 5px;
+                padding: 18px;
+            }
+        }
+
+        /* Touch improvements for mobile */
+        @media (hover: none) and (pointer: coarse) {
+            .btn:hover {
+                transform: none;
+            }
+            
+            .btn:active {
+                transform: scale(0.98);
+            }
+            
+            .link:hover {
+                transform: none;
+            }
+            
+            .link:active {
+                background: rgba(108, 117, 125, 0.2);
+            }
+        }
+
+        /* High DPI display optimization */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .login-section {
+                border: 0.5px solid rgba(233, 236, 239, 0.8);
+            }
+            
+            .form-group input {
+                border-width: 1px;
+            }
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, #343A40 0%, #495057 30%, #6C757D 70%, #868E96 100%);
+            }
+            
+            .login-section {
+                background: rgba(52, 58, 64, 0.95);
+                border-color: rgba(108, 117, 125, 0.3);
+            }
+            
+            .header h1, .form-title, .form-group label {
+                color: #F8F9FA;
+            }
+            
+            .header p {
+                color: #ADB5BD;
+            }
+            
+            .form-group input {
+                background: linear-gradient(145deg, #495057, #6C757D);
+                color: #F8F9FA;
+                border-color: #6C757D;
+            }
+            
+            .form-group input::placeholder {
+                color: #ADB5BD;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="header">
+            <h1 class="floating">🧵 Tailor Company</h1>
+            <p>Secure Login Portal</p>
+        </div>
+
+        <div class="login-section">
+            <h2 class="form-title">Login to Dashboard</h2>
+            
+            <div class="form-group">
+                <label for="loginUsername">📱 Mobile Number (Username)</label>
+                <div class="input-container">
+                    <input type="tel" id="loginUsername" placeholder="Enter your mobile number" maxlength="10" autocomplete="username">
+                    <div class="input-icon">📱</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="loginPassword">🔑 Password</label>
+                <div class="input-container">
+                    <input type="password" id="loginPassword" placeholder="Enter your password" autocomplete="current-password">
+                    <div class="input-icon">🔑</div>
+                </div>
+            </div>
+
+            <button class="btn" onclick="login()" id="loginBtn">
+                <span id="loginBtnText">🚀 Login Now</span>
+                <span id="loginLoader" class="loading-spinner hidden"></span>
+            </button>
+
+            <div class="links-section">
+                <a href="#" class="link" onclick="showForgotPassword()">🔐 Forgot Password?</a>
+            </div>
+
+            <div id="alertContainer"></div>
+        </div>
+    </div>
+
+    <!-- Enhanced Redirect Overlay -->
+    <div id="redirectOverlay" class="redirect-overlay">
+        <div class="redirect-content">
+            <div class="redirect-spinner"></div>
+            <h2 id="redirectMessage">Redirecting to Dashboard...</h2>
+            <p id="redirectRole"></p>
+        </div>
+    </div>
+
+    <script>
+        // Show alerts with enhanced animations
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alertContainer');
+            alertContainer.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => {
+                const alert = alertContainer.querySelector('.alert');
+                if (alert) {
+                    alert.style.animation = 'alertSlide 0.3s ease reverse';
+                    setTimeout(() => {
+                        alertContainer.innerHTML = '';
+                    }, 300);
+                }
+            }, 5000);
+        }
+
+        // Enhanced mobile number validation
+        function validateMobile(mobile) {
+            return /^[6-9]\d{9}$/.test(mobile);
+        }
+
+        // Enhanced user info collection for mobile
+        async function getUserInfo() {
+            const userAgent = navigator.userAgent;
+            const platform = navigator.platform;
+            
+            // Enhanced browser detection
+            let browser = 'Unknown';
+            let browserVersion = '';
+            
+            if (userAgent.includes('Edg/')) {
+                browser = 'Microsoft Edge';
+                browserVersion = userAgent.match(/Edg\/([0-9.]+)/)?.[1] || '';
+            } else if (userAgent.includes('Chrome/')) {
+                browser = 'Google Chrome';
+                browserVersion = userAgent.match(/Chrome\/([0-9.]+)/)?.[1] || '';
+            } else if (userAgent.includes('Firefox/')) {
+                browser = 'Mozilla Firefox';
+                browserVersion = userAgent.match(/Firefox\/([0-9.]+)/)?.[1] || '';
+            } else if (userAgent.includes('Safari/') && !userAgent.includes('Chrome')) {
+                browser = 'Safari';
+                browserVersion = userAgent.match(/Version\/([0-9.]+)/)?.[1] || '';
+            } else if (userAgent.includes('Opera')) {
+                browser = 'Opera';
+                browserVersion = userAgent.match(/Opera\/([0-9.]+)/)?.[1] || '';
+            }
+            
+            // Enhanced OS detection
+            let os = 'Unknown';
+            let osVersion = '';
+            
+            if (userAgent.includes('Windows NT 10.0')) {
+                os = 'Windows 10/11';
+                osVersion = '10+';
+            } else if (userAgent.includes('Windows NT 6.3')) {
+                os = 'Windows 8.1';
+                osVersion = '8.1';
+            } else if (userAgent.includes('Windows NT 6.1')) {
+                os = 'Windows 7';
+                osVersion = '7';
+            } else if (userAgent.includes('Mac OS X')) {
+                os = 'macOS';
+                osVersion = userAgent.match(/Mac OS X ([0-9_]+)/)?.[1]?.replace(/_/g, '.') || '';
+            } else if (userAgent.includes('Android')) {
+                os = 'Android';
+                osVersion = userAgent.match(/Android ([0-9.]+)/)?.[1] || '';
+            } else if (userAgent.includes('iPhone') || userAgent.includes('iPad')) {
+                os = 'iOS';
+                osVersion = userAgent.match(/OS ([0-9_]+)/)?.[1]?.replace(/_/g, '.') || '';
+            } else if (userAgent.includes('Linux')) {
+                os = 'Linux';
+            }
+            
+            // Enhanced device type detection
+            let deviceType = 'Desktop';
+            if (userAgent.includes('Mobile') && !userAgent.includes('Tablet')) {
+                deviceType = 'Mobile Phone';
+            } else if (userAgent.includes('Tablet') || userAgent.includes('iPad')) {
+                deviceType = 'Tablet';
+            } else if (userAgent.includes('Smart TV') || userAgent.includes('TV')) {
+                deviceType = 'Smart TV';
+            }
+            
+            // Enhanced device info for mobile
+            const deviceInfo = {
+                screenWidth: screen.width,
+                screenHeight: screen.height,
+                colorDepth: screen.colorDepth,
+                pixelRatio: window.devicePixelRatio || 1,
+                orientation: screen.orientation?.type || 'unknown',
+                touchSupport: 'ontouchstart' in window
+            };
+            
+            // Try to get MAC address (limited by browser security)
+            let macAddress = 'Not Available';
+            try {
+                if (navigator.connection) {
+                    macAddress = 'Network API Available';
+                }
+            } catch (e) {
+                macAddress = 'Restricted by Browser';
+            }
+            
+            // Get timezone and language
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const language = navigator.language || navigator.userLanguage || 'unknown';
+            
+            return {
+                browser: browser + (browserVersion ? ' ' + browserVersion : ''),
+                os: os + (osVersion ? ' ' + osVersion : ''),
+                deviceType: deviceType,
+                userAgent: userAgent,
+                referrer: document.referrer || 'Direct Access',
+                sessionId: generateSessionId(),
+                macAddress: macAddress,
+                screenResolution: `${deviceInfo.screenWidth}x${deviceInfo.screenHeight}`,
+                colorDepth: deviceInfo.colorDepth + '-bit',
+                pixelRatio: deviceInfo.pixelRatio,
+                orientation: deviceInfo.orientation,
+                touchSupport: deviceInfo.touchSupport,
+                timezone: timezone,
+                language: language,
+                cookiesEnabled: navigator.cookieEnabled,
+                onlineStatus: navigator.onLine ? 'Online' : 'Offline',
+                platform: platform
+            };
+        }
+
+        // Generate session ID
+        function generateSessionId() {
+            return 'sess_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        // Enhanced login function with better mobile support
+        async function login() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const loginBtnText = document.getElementById('loginBtnText');
+            const loginLoader = document.getElementById('loginLoader');
+
+            // Enhanced validation with better mobile feedback
+            if (!validateMobile(username)) {
+                showAlert('❌ Please enter a valid 10-digit mobile number starting with 6, 7, 8, or 9', 'error');
+                document.getElementById('loginUsername').focus();
+                return;
+            }
+
+            if (!password || password.length < 6) {
+                showAlert('❌ Please enter your password (minimum 6 characters)', 'error');
+                document.getElementById('loginPassword').focus();
+                return;
+            }
+
+            // Show loading state with haptic feedback on mobile
+            loginBtn.disabled = true;
+            loginBtnText.classList.add('hidden');
+            loginLoader.classList.remove('hidden');
+
+            // Haptic feedback for mobile devices
+            if (navigator.vibrate) {
+                navigator.vibrate(50);
+            }
+
+            // Get user info for logging
+            const userInfo = await getUserInfo();
+
+            try {
+                const response = await fetch('api.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'login',
+                        mobile: username,
+                        password: password,
+                        userInfo: userInfo
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    const user = result.user;
+                    showAlert(`✅ Welcome ${user.role}! Redirecting to your dashboard...`, 'success');
+                    
+                    // Success haptic feedback
+                    if (navigator.vibrate) {
+                        navigator.vibrate([100, 50, 100]);
+                    }
+                    
+                    // Show redirect overlay
+                    showRedirectOverlay(user.role);
+                    
+                    // Redirect based on role after 3 seconds
+                    setTimeout(() => {
+                        redirectToRoleDashboard(user.role);
+                    }, 3000);
+                    
+                } else {
+                    showAlert('❌ ' + result.message, 'error');
+                    
+                    // Error haptic feedback
+                    if (navigator.vibrate) {
+                        navigator.vibrate([200, 100, 200]);
+                    }
+                }
+            } catch (error) {
+                showAlert('❌ Connection error. Please check your internet connection.', 'error');
+                console.error('Login error:', error);
+                
+                // Error haptic feedback
+                if (navigator.vibrate) {
+                    navigator.vibrate([300, 100, 300]);
+                }
+            }
+
+            // Hide loading state
+            loginBtn.disabled = false;
+            loginBtnText.classList.remove('hidden');
+            loginLoader.classList.add('hidden');
+        }
+
+        // Enhanced redirect overlay with better mobile animation
+        function showRedirectOverlay(role) {
+            const overlay = document.getElementById('redirectOverlay');
+            const roleElement = document.getElementById('redirectRole');
+            
+            const roleMessages = {
+                'owner': '👑 Owner Dashboard - Full System Access',
+                'director': '🏢 Director Dashboard - Multi-Branch Management',
+                'manager': '👨‍💼 Manager Dashboard - Operations Management',
+                'pattern_master': '📐 Pattern Master Dashboard - Design & Patterns',
+                'principal': '🎓 Principal Dashboard - Academic Leadership',
+                'teacher': '👩‍🏫 Teacher Dashboard - Educational Tools',
+                'tailor': '✂️ Tailor Dashboard - Craft Management',
+                'student': '👨‍🎓 Student Dashboard - Learning Portal'
+            };
+            
+            roleElement.textContent = roleMessages[role] || 'Dashboard Access';
+            overlay.classList.add('active');
+        }
+
+        // Redirect to role-based dashboard
+        function redirectToRoleDashboard(role) {
+            const dashboardUrls = {
+                'owner': 'dashboards/owner_dashboard.html',
+                'director': 'dashboards/director_dashboard.html',
+                'manager': 'dashboards/manager_dashboard.html',
+                'pattern_master': 'dashboards/pattern_master_dashboard.html',
+                'principal': 'dashboards/principal_dashboard.html',
+                'teacher': 'dashboards/teacher_dashboard.html',
+                'tailor': 'dashboards/tailor_dashboard.html',
+                'student': 'dashboards/student_dashboard.html'
+            };
+            
+            const url = dashboardUrls[role] || 'dashboards/default_dashboard.html';
+            window.location.href = url;
+        }
+
+        // Show forgot password (redirects to createRole.html)
+        function showForgotPassword() {
+            window.location.href = 'createRole.html';
+        }
+
+        // Enhanced page initialization with mobile optimizations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Focus on username field (only on desktop)
+            if (window.innerWidth > 768) {
+                document.getElementById('loginUsername').focus();
+            }
+            
+            // Enhanced enter key support
+            document.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    login();
+                }
+            });
+            
+            // Enhanced input animations with mobile considerations
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.parentElement.style.transform = 'scale(1.02)';
+                    this.parentElement.style.transition = 'transform 0.3s ease';
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.parentElement.style.transform = 'scale(1)';
+                });
+                
+                // Mobile-specific: prevent zoom on input focus for iOS
+                if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+                    input.addEventListener('focus', function() {
+                        document.querySelector('meta[name=viewport]').setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+                    });
+                    
+                    input.addEventListener('blur', function() {
+                        document.querySelector('meta[name=viewport]').setAttribute('content', 'width=device-width, initial-scale=1.0, user-scalable=no');
+                    });
+                }
+            });
+            
+            // Handle orientation change on mobile
+            window.addEventListener('orientationchange', function() {
+                setTimeout(function() {
+                    window.scrollTo(0, 0);
+                }, 100);
+            });
+            
+            // PWA-like behavior: prevent pull-to-refresh on mobile
+            document.body.addEventListener('touchstart', function(e) {
+                if (e.touches.length === 1 && window.pageYOffset === 0) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+            
+            document.body.addEventListener('touchmove', function(e) {
+                if (e.touches.length === 1 && window.pageYOffset === 0) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+        });
+
+        // Enhanced error handling for network issues
+        window.addEventListener('online', function() {
+            showAlert('🌐 Connection restored!', 'success');
+        });
+
+        window.addEventListener('offline', function() {
+            showAlert('📡 No internet connection. Please check your network.', 'error');
+        });
+    </script>
+</body>
+</html>
