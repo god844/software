@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -284,6 +283,52 @@
         .create-account-section {
             animation: slideInFromTop 0.6s ease;
         }
+
+        /* Modal Styles */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: #FFFFFF;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal h3 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #495057;
+            font-size: 1.5rem;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6C757D 0%, #495057 100%) !important;
+        }
     </style>
 </head>
 <body>
@@ -297,8 +342,8 @@
             <h2 class="form-title">🎯 Create New Account</h2>
             
             <div class="form-group">
-                <label for="registerMobile">📱 Mobile Number</label>
-                <input type="tel" id="registerMobile" placeholder="Enter mobile number (username)" maxlength="10">
+                <label for="registerMobile">📱 Mobile Number (Username)</label>
+                <input type="tel" id="registerMobile" placeholder="Enter mobile number (this will be your username)" maxlength="10">
             </div>
 
             <div class="form-group">
@@ -318,9 +363,17 @@
                         <h3>👑 OWNER</h3>
                         <p>Supreme Control Access</p>
                     </div>
-                    <div class="role-card" onclick="selectRole('company')">
-                        <h3>🏢 COMPANY</h3>
+                    <div class="role-card" onclick="selectRole('director')">
+                        <h3>🏢 DIRECTOR</h3>
                         <p>Multi-Branch Management</p>
+                    </div>
+                    <div class="role-card" onclick="selectRole('manager')">
+                        <h3>👨‍💼 MANAGER</h3>
+                        <p>Operations Management</p>
+                    </div>
+                    <div class="role-card" onclick="selectRole('pattern_master')">
+                        <h3>📐 PATTERN MASTER</h3>
+                        <p>Design & Pattern Specialist</p>
                     </div>
                     <div class="role-card" onclick="selectRole('principal')">
                         <h3>🎓 PRINCIPAL</h3>
@@ -381,7 +434,7 @@
             event.target.closest('.role-card').classList.add('selected');
 
             const branchSelector = document.getElementById('branchSelector');
-            if (role === 'company') {
+            if (role === 'director') {
                 branchSelector.classList.remove('hidden');
             } else {
                 branchSelector.classList.add('hidden');
@@ -434,8 +487,8 @@
                 return;
             }
 
-            if (selectedRole === 'company' && !selectedBranch) {
-                showAlert('❌ Please select a branch for company role', 'error');
+            if (selectedRole === 'director' && !selectedBranch) {
+                showAlert('❌ Please select a branch for director role', 'error');
                 return;
             }
 
@@ -486,6 +539,69 @@
             document.querySelectorAll('.role-card').forEach(card => card.classList.remove('selected'));
             document.querySelectorAll('.branch-btn').forEach(btn => btn.classList.remove('selected'));
             document.getElementById('branchSelector').classList.add('hidden');
+        }
+
+        // Show reset password modal
+        function showResetPassword() {
+            document.getElementById('resetPasswordModal').classList.remove('hidden');
+        }
+
+        // Close modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        // Reset password function
+        async function resetPassword() {
+            const mobile = document.getElementById('resetMobile').value.trim();
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+
+            // Validation
+            if (!validateMobile(mobile)) {
+                showAlert('❌ Please enter a valid 10-digit mobile number starting with 6, 7, 8, or 9', 'error');
+                return;
+            }
+
+            if (newPassword.length < 6) {
+                showAlert('❌ Password must be at least 6 characters long', 'error');
+                return;
+            }
+
+            if (newPassword !== confirmNewPassword) {
+                showAlert('❌ Passwords do not match', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('api.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'resetPassword',
+                        mobile: mobile,
+                        newPassword: newPassword
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showAlert('✅ Password reset successfully! You can now login with your new password.', 'success');
+                    closeModal('resetPasswordModal');
+                    // Clear form fields
+                    document.getElementById('resetMobile').value = '';
+                    document.getElementById('newPassword').value = '';
+                    document.getElementById('confirmNewPassword').value = '';
+                } else {
+                    showAlert('❌ ' + result.message, 'error');
+                }
+            } catch (error) {
+                showAlert('❌ Connection error. Please check your internet connection.', 'error');
+                console.error('Reset password error:', error);
+            }
         }
 
         // Setup database on page load
