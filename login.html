@@ -150,16 +150,6 @@
             position: relative;
         }
 
-        .form-title::before {
-            content: '🔐';
-            position: absolute;
-            left: 10%;
-            top: -30px;
-            transform: translateX(-50%);
-            font-size: 1.5em;
-            animation: pulse 2s infinite;
-        }
-
         @keyframes pulse {
             0%, 100% { transform: translateX(-50%) scale(1); }
             50% { transform: translateX(-50%) scale(1.1); }
