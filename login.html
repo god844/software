@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Tailor Company</title>
     <style>
         * {
@@ -22,9 +22,10 @@
             justify-content: center;
             position: relative;
             overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
         }
 
-        /* Animated background elements */
+        /* Animated background elements - simplified for mobile */
         body::before {
             content: '';
             position: absolute;
@@ -99,6 +100,7 @@
         .login-section {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border-radius: 24px;
             padding: clamp(25px, 6vw, 45px);
             box-shadow: 
@@ -151,16 +153,16 @@
         .form-title::before {
             content: '🔐';
             position: absolute;
-            left: -35px;
-            top: 50%;
-            transform: translateY(-50%);
+            left: 10%;
+            top: -30px;
+            transform: translateX(-50%);
             font-size: 1.5em;
             animation: pulse 2s infinite;
         }
 
         @keyframes pulse {
-            0%, 100% { transform: translateY(-50%) scale(1); }
-            50% { transform: translateY(-50%) scale(1.1); }
+            0%, 100% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.1); }
         }
 
         .form-group {
@@ -181,7 +183,6 @@
 
         .input-container {
             position: relative;
-            overflow: hidden;
             border-radius: 16px;
         }
 
@@ -190,7 +191,7 @@
             padding: 18px 20px 18px 55px;
             border: 2px solid #DEE2E6;
             border-radius: 16px;
-            font-size: clamp(14px, 3vw, 16px);
+            font-size: 16px; /* Fixed font size for mobile */
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             background: linear-gradient(145deg, #F8F9FA, #FFFFFF);
             color: #495057;
@@ -198,6 +199,10 @@
             outline: none;
             position: relative;
             z-index: 2;
+            -webkit-appearance: none;
+            -webkit-border-radius: 16px;
+            min-height: 60px;
+            touch-action: manipulation;
         }
 
         .form-group input:focus {
@@ -255,6 +260,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            -webkit-appearance: none;
+            -webkit-border-radius: 16px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .btn::before {
@@ -317,9 +326,13 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: inline-block;
             margin: 5px 8px;
-            padding: 8px 12px;
+            padding: 12px 16px;
             border-radius: 8px;
             font-size: clamp(0.8rem, 2.5vw, 0.95rem);
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            min-height: 44px;
+            min-width: 44px;
         }
 
         .link:hover {
@@ -409,6 +422,7 @@
             visibility: hidden;
             transition: all 0.6s ease;
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
         }
 
         .redirect-overlay.active {
@@ -423,6 +437,7 @@
             border-radius: 20px;
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
 
@@ -452,6 +467,12 @@
         @media (max-width: 768px) {
             body {
                 padding: 8px;
+                /* Remove conflicting background animation on mobile */
+            }
+            
+            body::before {
+                animation: none;
+                opacity: 0.3;
             }
 
             .login-container {
@@ -500,13 +521,13 @@
                 padding: 12px 15px;
                 border-radius: 10px;
             }
+            
+            .form-title::before {
+                top: -25px;
+            }
         }
 
         @media (max-width: 480px) {
-            .form-title::before {
-                display: none;
-            }
-
             .header h1 {
                 font-size: 1.8rem;
             }
@@ -521,18 +542,30 @@
         @media (hover: none) and (pointer: coarse) {
             .btn:hover {
                 transform: none;
+                background: linear-gradient(135deg, #495057 0%, #6C757D 50%, #868E96 100%);
+                box-shadow: 
+                    0 8px 20px rgba(73, 80, 87, 0.3),
+                    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
             }
             
             .btn:active {
                 transform: scale(0.98);
+                background: linear-gradient(135deg, #6C757D 0%, #495057 50%, #343A40 100%);
             }
             
             .link:hover {
                 transform: none;
+                color: #6C757D;
+                background: transparent;
             }
             
             .link:active {
                 background: rgba(108, 117, 125, 0.2);
+                color: #495057;
+            }
+            
+            .form-group input:hover {
+                transform: none;
             }
         }
 
@@ -892,10 +925,10 @@
             window.location.href = 'createRole.html';
         }
 
-        // Enhanced page initialization with mobile optimizations
+        // Simplified page initialization optimized for mobile
         document.addEventListener('DOMContentLoaded', function() {
             // Focus on username field (only on desktop)
-            if (window.innerWidth > 768) {
+            if (window.innerWidth > 768 && !('ontouchstart' in window)) {
                 document.getElementById('loginUsername').focus();
             }
             
@@ -907,28 +940,21 @@
                 }
             });
             
-            // Enhanced input animations with mobile considerations
+            // Simplified input animations for mobile
             const inputs = document.querySelectorAll('input');
             inputs.forEach(input => {
                 input.addEventListener('focus', function() {
-                    this.parentElement.style.transform = 'scale(1.02)';
-                    this.parentElement.style.transition = 'transform 0.3s ease';
+                    if (window.innerWidth > 768) {
+                        this.parentElement.style.transform = 'scale(1.02)';
+                        this.parentElement.style.transition = 'transform 0.3s ease';
+                    }
                 });
                 
                 input.addEventListener('blur', function() {
-                    this.parentElement.style.transform = 'scale(1)';
+                    if (window.innerWidth > 768) {
+                        this.parentElement.style.transform = 'scale(1)';
+                    }
                 });
-                
-                // Mobile-specific: prevent zoom on input focus for iOS
-                if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-                    input.addEventListener('focus', function() {
-                        document.querySelector('meta[name=viewport]').setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
-                    });
-                    
-                    input.addEventListener('blur', function() {
-                        document.querySelector('meta[name=viewport]').setAttribute('content', 'width=device-width, initial-scale=1.0, user-scalable=no');
-                    });
-                }
             });
             
             // Handle orientation change on mobile
@@ -937,19 +963,6 @@
                     window.scrollTo(0, 0);
                 }, 100);
             });
-            
-            // PWA-like behavior: prevent pull-to-refresh on mobile
-            document.body.addEventListener('touchstart', function(e) {
-                if (e.touches.length === 1 && window.pageYOffset === 0) {
-                    e.preventDefault();
-                }
-            }, { passive: false });
-            
-            document.body.addEventListener('touchmove', function(e) {
-                if (e.touches.length === 1 && window.pageYOffset === 0) {
-                    e.preventDefault();
-                }
-            }, { passive: false });
         });
 
         // Enhanced error handling for network issues
