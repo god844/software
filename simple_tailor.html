@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tailor Dashboard - Student Measurements</title>
+    <style>
+        :root {
+            --primary-color: #495057;
+            --secondary-color: #6C757D;
+            --accent-color: #007bff;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --light-bg: #F8F9FA;
+            --white-bg: #FFFFFF;
+            --text-primary: #212529;
+            --text-secondary: #6C757D;
+            --border-color: #DEE2E6;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --border-radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--light-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: var(--white-bg);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: var(--primary-color);
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: var(--white-bg);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+
+        .student-grid {
+            display: grid;
+            gap: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .student-card {
+            background: var(--light-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .student-card:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .student-card.selected {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .student-info h4 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .student-details {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .btn-success { background: var(--success-color); }
+        .btn-warning { background: var(--warning-color); color: var(--text-primary); }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .measurement-panel {
+            margin-top: 20px;
+        }
+
+        .selected-student-info {
+            background: var(--light-bg);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .garment-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .garment-btn {
+            padding: 15px;
+            border: 2px solid var(--border-color);
+            background: var(--white-bg);
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .garment-btn:hover {
+            border-color: var(--accent-color);
+        }
+
+        .garment-btn.selected {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .measurement-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🧵 Tailor Dashboard</h1>
+            <p>Professional Measurement System with Auto-Fill Intelligence</p>
+        </div>
+
+        <!-- Main Dashboard -->
+        <div class="dashboard-grid">
+            <!-- Student Selection -->
+            <div class="card">
+                <h2 class="card-title">👥 Students Ready for Measurements</h2>
+                
+                <input type="text" 
+                       id="studentSearch" 
+                       class="search-input" 
+                       placeholder="🔍 Search students..."
+                       oninput="filterStudents()">
+
+                <div id="studentGrid" class="student-grid">
+                    <div style="text-align: center; padding: 20px; color: var(--text-secondary);">
+                        Loading students...
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <button class="btn" onclick="loadStudents()">🔄 Refresh</button>
+                    <button class="btn" onclick="showInfo()">ℹ️ Info</button>
+                </div>
+            </div>
+
+            <!-- Measurements Entry -->
+            <div class="card">
+                <h2 class="card-title">📐 Measurements Entry</h2>
+
+                <div id="noSelection" class="alert alert-warning">
+                    <span>⚠️</span>
+                    <span>Please select a student from the left panel to start measurements</span>
+                </div>
+
+                <div id="measurementPanel" class="measurement-panel hidden">
+                    <!-- Selected Student Info -->
+                    <div id="selectedStudentInfo" class="selected-student-info">
+                        <!-- Student info will be displayed here -->
+                    </div>
+
+                    <!-- Garment Selection -->
+                    <h3>Select Garment Type:</h3>
+                    <div class="garment-buttons" id="garmentButtons">
+                        <!-- Will be populated based on gender -->
+                    </div>
+
+                    <!-- Quick Measurements -->
+                    <div id="measurementForm" class="hidden">
+                        <h3>Enter Measurements (cm):</h3>
+                        <div class="measurement-form" id="measurementInputs">
+                            <!-- Will be populated based on garment type -->
+                        </div>
+                        
+                        <div style="margin-top: 20px;">
+                            <button class="btn btn-success" onclick="saveMeasurements()">💾 Save Measurements</button>
+                            <button class="btn btn-warning" onclick="clearForm()">🔄 Clear</button>
+                            <button class="btn" onclick="nextStudent()">➡️ Next Student</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Container -->
+        <div id="alertContainer"></div>
+    </div>
+
+    <script>
+        // Global variables
+        let allStudents = [];
+        let selectedStudent = null;
+        let selectedGarment = '';
+        const API_KEY = 'tailor_mgmt_sk_7f2d9e4a8c1b6h3j5k9m2p7q4r8s6t1x3z';
+
+        // Garment types
+        const garmentTypes = {
+            M: [
+                { id: 'formal_shirt_boys', name: 'Formal Shirt' },
+                { id: 'formal_trousers', name: 'Formal Trousers' },
+                { id: 'blazer', name: 'Blazer' },
+                { id: 'pe_tshirt', name: 'PE T-Shirt' }
+            ],
+            F: [
+                { id: 'formal_shirt_girls', name: 'Formal Shirt' },
+                { id: 'formal_skirt', name: 'Formal Skirt' },
+                { id: 'tunic', name: 'Tunic' },
+                { id: 'pe_tshirt', name: 'PE T-Shirt' }
+            ]
+        };
+
+        // Measurement fields
+        const measurementFields = {
+            formal_shirt_boys: [
+                { id: 'chest', label: 'Chest' },
+                { id: 'waist', label: 'Waist' },
+                { id: 'shoulder', label: 'Shoulder' },
+                { id: 'sleeve_length', label: 'Sleeve Length' },
+                { id: 'shirt_length', label: 'Shirt Length' },
+                { id: 'collar', label: 'Collar' }
+            ],
+            formal_shirt_girls: [
+                { id: 'bust', label: 'Bust' },
+                { id: 'waist', label: 'Waist' },
+                { id: 'shoulder', label: 'Shoulder' },
+                { id: 'sleeve_length', label: 'Sleeve Length' },
+                { id: 'shirt_length', label: 'Shirt Length' },
+                { id: 'collar', label: 'Collar' }
+            ],
+            formal_trousers: [
+                { id: 'waist', label: 'Waist' },
+                { id: 'hip', label: 'Hip' },
+                { id: 'thigh', label: 'Thigh' },
+                { id: 'inseam', label: 'Inseam' },
+                { id: 'outseam', label: 'Outseam' }
+            ],
+            formal_skirt: [
+                { id: 'waist', label: 'Waist' },
+                { id: 'hip', label: 'Hip' },
+                { id: 'length', label: 'Length' }
+            ],
+            tunic: [
+                { id: 'bust', label: 'Bust' },
+                { id: 'waist', label: 'Waist' },
+                { id: 'hip', label: 'Hip' },
+                { id: 'shoulder', label: 'Shoulder' },
+                { id: 'tunic_length', label: 'Tunic Length' }
+            ],
+            blazer: [
+                { id: 'chest', label: 'Chest' },
+                { id: 'waist', label: 'Waist' },
+                { id: 'shoulder', label: 'Shoulder' },
+                { id: 'sleeve_length', label: 'Sleeve Length' },
+                { id: 'blazer_length', label: 'Blazer Length' }
+            ],
+            pe_tshirt: [
+                { id: 'chest', label: 'Chest' },
+                { id: 'waist', label: 'Waist' },
+                { id: 'shoulder', label: 'Shoulder' },
+                { id: 'tshirt_length', label: 'T-Shirt Length' }
+            ]
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStudents();
+        });
+
+        // Load students
+        async function loadStudents() {
+            try {
+                showAlert('Loading students...', 'info');
+                
+                const response = await fetch('student_api.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-API-Key': API_KEY
+                    },
+                    body: JSON.stringify({
+                        action: 'getStudentsForTailor'
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    allStudents = result.students;
+                    displayStudents(allStudents);
+                    showAlert(`✅ Loaded ${allStudents.length} students ready for measurements`, 'success');
+                } else {
+                    showAlert('Error: ' + result.message, 'error');
+                }
+            } catch (error) {
+                showAlert('Connection error: ' + error.message, 'error');
+                console.error('Load error:', error);
+            }
+        }
+
+        // Display students
+        function displayStudents(students) {
+            const grid = document.getElementById('studentGrid');
+            
+            if (students.length === 0) {
+                grid.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-secondary);">No students ready for measurements</div>';
+                return;
+            }
+
+            grid.innerHTML = students.map(student => `
+                <div class="student-card" onclick="selectStudent('${student.roll_number}')">
+                    <div class="student-info">
+                        <h4>${student.student_name}</h4>
+                        <div class="student-details">
+                            Roll: ${student.roll_number} | Class: ${student.class}-${student.division}<br>
+                            ${student.gender === 'M' ? 'Male' : 'Female'} | ${student.height_cm}cm, ${student.weight_kg}kg<br>
+                            Status: ${getStatusText(student.tailor_data_entry_status)}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Get status text
+        function getStatusText(status) {
+            switch(status) {
+                case 'pending': return '⏳ Ready to Start';
+                case 'in_progress': return '🧵 In Progress';
+                case 'completed': return '✅ Completed';
+                default: return '❓ Unknown';
+            }
+        }
+
+        // Filter students
+        function filterStudents() {
+            const searchTerm = document.getElementById('studentSearch').value.toLowerCase();
+            
+            if (searchTerm === '') {
+                displayStudents(allStudents);
+                return;
+            }
+
+            const filtered = allStudents.filter(student => 
+                student.student_name.toLowerCase().includes(searchTerm) ||
+                student.roll_number.toLowerCase().includes(searchTerm) ||
+                student.class.toLowerCase().includes(searchTerm)
+            );
+
+            displayStudents(filtered);
+        }
+
+        // Select student
+        async function selectStudent(rollNumber) {
+            const student = allStudents.find(s => s.roll_number === rollNumber);
+            if (!student) return;
+
+            selectedStudent = student;
+            
+            // Update UI
+            document.querySelectorAll('.student-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.target.closest('.student-card').classList.add('selected');
+
+            // Update status to in_progress
+            if (student.tailor_data_entry_status === 'pending') {
+                await updateStatus(rollNumber, 'in_progress');
+            }
+
+            // Show student info
+            document.getElementById('selectedStudentInfo').innerHTML = `
+                <h3>📋 ${student.student_name}</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 10px;">
+                    <div><strong>Roll:</strong> ${student.roll_number}</div>
+                    <div><strong>Class:</strong> ${student.class}-${student.division}</div>
+                    <div><strong>Gender:</strong> ${student.gender === 'M' ? 'Male' : 'Female'}</div>
+                    <div><strong>Height:</strong> ${student.height_cm}cm</div>
+                    <div><strong>Weight:</strong> ${student.weight_kg}kg</div>
+                    <div><strong>Size:</strong> ${student.size_category || 'Not set'}</div>
+                </div>
+            `;
+
+            // Show garment options
+            updateGarmentOptions();
+            
+            document.getElementById('noSelection').classList.add('hidden');
+            document.getElementById('measurementPanel').classList.remove('hidden');
+        }
+
+        // Update garment options
+        function updateGarmentOptions() {
+            const buttons = document.getElementById('garmentButtons');
+            
+            if (selectedStudent && garmentTypes[selectedStudent.gender]) {
+                buttons.innerHTML = garmentTypes[selectedStudent.gender].map(garment => `
+                    <div class="garment-btn" onclick="selectGarment('${garment.id}')">
+                        ${garment.name}
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Select garment
+        function selectGarment(garmentId) {
+            selectedGarment = garmentId;
+            
+            document.querySelectorAll('.garment-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+            
+            loadMeasurementForm();
+        }
+
+        // Load measurement form
+        function loadMeasurementForm() {
+            const inputs = document.getElementById('measurementInputs');
+            
+            if (selectedGarment && measurementFields[selectedGarment]) {
+                inputs.innerHTML = measurementFields[selectedGarment].map(field => `
+                    <div class="form-group">
+                        <label for="${field.id}">${field.label} (cm)</label>
+                        <input type="number" id="${field.id}" step="0.1" placeholder="Enter measurement">
+                    </div>
+                `).join('');
+                
+                document.getElementById('measurementForm').classList.remove('hidden');
+            }
+        }
+
+        // Update status
+        async function updateStatus(rollNumber, status) {
+            try {
+                const response = await fetch('student_api.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-API-Key': API_KEY
+                    },
+                    body: JSON.stringify({
+                        action: 'updateTailorStatus',
+                        rollNumber: rollNumber,
+                        status: status
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    // Update local data
+                    const student = allStudents.find(s => s.roll_number === rollNumber);
+                    if (student) {
+                        student.tailor_data_entry_status = status;
+                    }
+                    displayStudents(allStudents);
+                }
+            } catch (error) {
+                console.error('Status update error:', error);
+            }
+        }
+
+        // Save measurements
+        async function saveMeasurements() {
+            if (!selectedStudent || !selectedGarment) {
+                showAlert('Please select a student and garment first', 'error');
+                return;
+            }
+
+            const measurements = {};
+            let hasValues = false;
+
+            measurementFields[selectedGarment].forEach(field => {
+                const value = document.getElementById(field.id).value;
+                if (value && parseFloat(value) > 0) {
+                    measurements[field.id] = parseFloat(value);
+                    hasValues = true;
+                }
+            });
+
+            if (!hasValues) {
+                showAlert('Please enter at least one measurement', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('student_api.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-API-Key': API_KEY
+                    },
+                    body: JSON.stringify({
+                        action: 'saveMeasurements',
+                        studentData: {
+                            studentId: selectedStudent.roll_number,
+                            schoolRegNumber: selectedStudent.reg_number,
+                            studentName: selectedStudent.student_name,
+                            studentClass: selectedStudent.class,
+                            division: selectedStudent.division,
+                            dob: selectedStudent.dob,
+                            sex: selectedStudent.gender,
+                            height: selectedStudent.height_cm,
+                            weight: selectedStudent.weight_kg
+                        },
+                        garmentType: selectedGarment,
+                        measurements: measurements,
+                        isAutoFilled: false
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('✅ Measurements saved successfully!', 'success');
+                    
+                    // Update status to completed
+                    await updateStatus(selectedStudent.roll_number, 'completed');
+                    
+                    setTimeout(() => {
+                        if (confirm('Measurements saved! Select next student?')) {
+                            nextStudent();
+                        }
+                    }, 1500);
+                } else {
+                    showAlert('Error: ' + result.message, 'error');
+                }
+            } catch (error) {
+                showAlert('Save error: ' + error.message, 'error');
+            }
+        }
+
+        // Clear form
+        function clearForm() {
+            if (selectedGarment && measurementFields[selectedGarment]) {
+                measurementFields[selectedGarment].forEach(field => {
+                    const input = document.getElementById(field.id);
+                    if (input) input.value = '';
+                });
+            }
+        }
+
+        // Next student
+        function nextStudent() {
+            if (!selectedStudent) return;
+
+            const currentIndex = allStudents.findIndex(s => s.roll_number === selectedStudent.roll_number);
+            const nextIndex = (currentIndex + 1) % allStudents.length;
+            const nextStudent = allStudents[nextIndex];
+
+            if (nextStudent) {
+                selectStudent(nextStudent.roll_number);
+            }
+        }
+
+        // Show info
+        function showInfo() {
+            showAlert(`📊 System Status: ${allStudents.length} students ready for measurements. API working correctly!`, 'success');
+        }
+
+        // Show alerts
+        function showAlert(message, type) {
+            const container = document.getElementById('alertContainer');
+            const alertId = 'alert_' + Date.now();
+            
+            container.innerHTML = `
+                <div id="${alertId}" class="alert alert-${type}">
+                    <span>${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            setTimeout(() => {
+                const alert = document.getElementById(alertId);
+                if (alert) alert.remove();
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
