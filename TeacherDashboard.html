@@ -282,6 +282,125 @@
             box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
         }
 
+        /* Squad Selection */
+        .squad-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 8px;
+        }
+
+        .squad-btn {
+            padding: 18px 12px;
+            border: 3px solid var(--border-color);
+            background: var(--white-bg);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .squad-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .squad-btn.selected {
+            color: white;
+            border-width: 3px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+            transform: translateY(-3px);
+        }
+
+        .squad-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.1;
+            transition: opacity 0.3s ease;
+        }
+
+        .squad-btn.selected::before {
+            opacity: 0.2;
+        }
+
+        /* Squad Colors */
+        .squad-btn[data-squad="red"] {
+            border-color: #e74c3c;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+        }
+
+        .squad-btn[data-squad="red"].selected {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            border-color: #c0392b;
+        }
+
+        .squad-btn[data-squad="yellow"] {
+            border-color: #f1c40f;
+            background: linear-gradient(135deg, #feca57, #ff9ff3);
+        }
+
+        .squad-btn[data-squad="yellow"].selected {
+            background: linear-gradient(135deg, #f1c40f, #f39c12);
+            border-color: #f39c12;
+        }
+
+        .squad-btn[data-squad="green"] {
+            border-color: #27ae60;
+            background: linear-gradient(135deg, #55efc4, #00b894);
+        }
+
+        .squad-btn[data-squad="green"].selected {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            border-color: #229954;
+        }
+
+        .squad-btn[data-squad="pink"] {
+            border-color: #e91e63;
+            background: linear-gradient(135deg, #fd79a8, #e84393);
+        }
+
+        .squad-btn[data-squad="pink"].selected {
+            background: linear-gradient(135deg, #e91e63, #ad1457);
+            border-color: #ad1457;
+        }
+
+        .squad-btn[data-squad="blue"] {
+            border-color: #3498db;
+            background: linear-gradient(135deg, #74b9ff, #0984e3);
+        }
+
+        .squad-btn[data-squad="blue"].selected {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border-color: #2980b9;
+        }
+
+        .squad-btn[data-squad="orange"] {
+            border-color: #e67e22;
+            background: linear-gradient(135deg, #fab1a0, #e17055);
+        }
+
+        .squad-btn[data-squad="orange"].selected {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            border-color: #d35400;
+        }
+
+        .squad-emoji {
+            font-size: 1.5rem;
+        }
+
         /* Button Styles */
         .btn {
             background: var(--primary-color);
@@ -304,6 +423,13 @@
             background: var(--secondary-color);
             transform: translateY(-3px);
             box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn:disabled {
+            background: var(--text-secondary);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
         }
 
         .btn-success { 
@@ -541,6 +667,24 @@
             font-size: 0.9rem;
         }
 
+        /* Squad Badge */
+        .squad-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .squad-red { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .squad-yellow { background: linear-gradient(135deg, #f1c40f, #f39c12); }
+        .squad-green { background: linear-gradient(135deg, #27ae60, #229954); }
+        .squad-pink { background: linear-gradient(135deg, #e91e63, #ad1457); }
+        .squad-blue { background: linear-gradient(135deg, #3498db, #2980b9); }
+        .squad-orange { background: linear-gradient(135deg, #e67e22, #d35400); }
+
         /* Filters */
         .filters-bar {
             background: var(--white-bg);
@@ -721,6 +865,10 @@
                 grid-template-columns: 1fr;
             }
 
+            .squad-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
             .filters-grid {
                 grid-template-columns: 1fr;
             }
@@ -760,6 +908,10 @@
                 padding: 12px 20px;
                 font-size: 0.9rem;
             }
+
+            .squad-buttons {
+                grid-template-columns: 1fr;
+            }
         }
 
         /* Utility Classes */
@@ -779,6 +931,24 @@
         [data-theme="dark"] .data-table th {
             background: var(--primary-color);
             color: white;
+        }
+
+        /* Error message styling */
+        .error-message {
+            color: var(--danger-color);
+            font-size: 0.9rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .form-group.error input,
+        .form-group.error select {
+            border-color: var(--danger-color);
+            box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.1);
+        }
+
+        .form-group.error .error-message {
+            display: block;
         }
     </style>
 </head>
@@ -852,26 +1022,31 @@
                         <div class="form-group">
                             <label for="rollNumber">Roll Number *</label>
                             <input type="text" id="rollNumber" name="rollNumber" placeholder="Enter roll number" required>
+                            <div class="error-message" id="rollNumberError"></div>
                         </div>
                         <div class="form-group">
                             <label for="regNumber">Register Number *</label>
                             <input type="text" id="regNumber" name="regNumber" placeholder="Enter register number" required>
+                            <div class="error-message" id="regNumberError"></div>
                         </div>
                     </div>
 
                     <div class="form-group">
                         <label for="studentName">Student Full Name *</label>
                         <input type="text" id="studentName" name="studentName" placeholder="Enter student's full name" required>
+                        <div class="error-message" id="studentNameError"></div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label for="class">Class *</label>
                             <input type="text" id="class" name="class" placeholder="Enter class (e.g., 1, 2, 10, 12)" required>
+                            <div class="error-message" id="classError"></div>
                         </div>
                         <div class="form-group">
                             <label for="division">Division *</label>
                             <input type="text" id="division" name="division" placeholder="Enter division (e.g., A, B, C)" required>
+                            <div class="error-message" id="divisionError"></div>
                         </div>
                     </div>
 
@@ -879,6 +1054,7 @@
                         <div class="form-group">
                             <label for="dob">Date of Birth *</label>
                             <input type="date" id="dob" name="dob" onchange="calculateAge()" required>
+                            <div class="error-message" id="dobError"></div>
                         </div>
                         <div class="form-group">
                             <label for="age">Age (Auto-calculated)</label>
@@ -897,16 +1073,51 @@
                             </div>
                         </div>
                         <input type="hidden" id="gender" name="gender" required>
+                        <div class="error-message" id="genderError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Squad/House *</label>
+                        <div class="squad-buttons">
+                            <div class="squad-btn" onclick="selectSquad('red')" data-squad="red">
+                                <span class="squad-emoji">🔴</span>
+                                <span>Red</span>
+                            </div>
+                            <div class="squad-btn" onclick="selectSquad('yellow')" data-squad="yellow">
+                                <span class="squad-emoji">🟡</span>
+                                <span>Yellow</span>
+                            </div>
+                            <div class="squad-btn" onclick="selectSquad('green')" data-squad="green">
+                                <span class="squad-emoji">🟢</span>
+                                <span>Green</span>
+                            </div>
+                            <div class="squad-btn" onclick="selectSquad('pink')" data-squad="pink">
+                                <span class="squad-emoji">🩷</span>
+                                <span>Pink</span>
+                            </div>
+                            <div class="squad-btn" onclick="selectSquad('blue')" data-squad="blue">
+                                <span class="squad-emoji">🔵</span>
+                                <span>Blue</span>
+                            </div>
+                            <div class="squad-btn" onclick="selectSquad('orange')" data-squad="orange">
+                                <span class="squad-emoji">🟠</span>
+                                <span>Orange</span>
+                            </div>
+                        </div>
+                        <input type="hidden" id="squadColor" name="squadColor" required>
+                        <div class="error-message" id="squadError"></div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label for="height">Height (cm) *</label>
                             <input type="number" id="height" name="height" placeholder="e.g., 165" step="0.1" min="80" max="250" required>
+                            <div class="error-message" id="heightError"></div>
                         </div>
                         <div class="form-group">
                             <label for="weight">Weight (kg) *</label>
                             <input type="number" id="weight" name="weight" placeholder="e.g., 55.5" step="0.1" min="10" max="200" required>
+                            <div class="error-message" id="weightError"></div>
                         </div>
                     </div>
 
@@ -991,6 +1202,7 @@
                                     <th>Division</th>
                                     <th>DOB (YYYY-MM-DD)</th>
                                     <th>Gender (M/F)</th>
+                                    <th>Squad Color</th>
                                     <th>Height (cm)</th>
                                     <th>Weight (kg)</th>
                                 </tr>
@@ -1004,6 +1216,7 @@
                                     <td>A</td>
                                     <td>2008-05-15</td>
                                     <td>M</td>
+                                    <td>red</td>
                                     <td>165</td>
                                     <td>55</td>
                                 </tr>
@@ -1014,7 +1227,7 @@
 
                 <div class="actions-grid mt-20">
                     <button class="btn" onclick="downloadTemplate()">
-                        📥 Download Template
+                        💾 Download Template
                     </button>
                     <button class="btn btn-success" onclick="processUploadedFile()" id="processBtn" disabled>
                         🚀 Process Upload
@@ -1049,9 +1262,15 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Filter by Division</label>
-                        <select id="divisionFilter" onchange="filterStudents()">
-                            <option value="">All Divisions</option>
+                        <label>Filter by Squad</label>
+                        <select id="squadFilter" onchange="filterStudents()">
+                            <option value="">All Squads</option>
+                            <option value="red">Red Squad</option>
+                            <option value="yellow">Yellow Squad</option>
+                            <option value="green">Green Squad</option>
+                            <option value="pink">Pink Squad</option>
+                            <option value="blue">Blue Squad</option>
+                            <option value="orange">Orange Squad</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -1091,6 +1310,7 @@
                                     <th>Name</th>
                                     <th>Class</th>
                                     <th>Gender</th>
+                                    <th>Squad</th>
                                     <th>Age</th>
                                     <th>Height</th>
                                     <th>Weight</th>
@@ -1168,6 +1388,7 @@
                         <select id="reportType">
                             <option value="class_wise">Class-wise Summary</option>
                             <option value="gender_wise">Gender-wise Distribution</option>
+                            <option value="squad_wise">Squad-wise Distribution</option>
                             <option value="age_wise">Age Group Analysis</option>
                             <option value="height_weight">Height-Weight Statistics</option>
                             <option value="complete_list">Complete Student List</option>
@@ -1226,16 +1447,16 @@
                     <input type="text" id="editStudentName" name="studentName" required>
                 </div>
 
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="editClass">Class</label>
-                                <input type="text" id="editClass" name="class" placeholder="Enter class" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="editDivision">Division</label>
-                                <input type="text" id="editDivision" name="division" placeholder="Enter division" required>
-                            </div>
-                        </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editClass">Class</label>
+                        <input type="text" id="editClass" name="class" placeholder="Enter class" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editDivision">Division</label>
+                        <input type="text" id="editDivision" name="division" placeholder="Enter division" required>
+                    </div>
+                </div>
 
                 <div class="form-row">
                     <div class="form-group">
@@ -1259,6 +1480,37 @@
                         </div>
                     </div>
                     <input type="hidden" id="editGender" name="gender">
+                </div>
+
+                <div class="form-group">
+                    <label>Squad/House</label>
+                    <div class="squad-buttons">
+                        <div class="squad-btn" onclick="selectEditSquad('red')" data-squad="red">
+                            <span class="squad-emoji">🔴</span>
+                            <span>Red</span>
+                        </div>
+                        <div class="squad-btn" onclick="selectEditSquad('yellow')" data-squad="yellow">
+                            <span class="squad-emoji">🟡</span>
+                            <span>Yellow</span>
+                        </div>
+                        <div class="squad-btn" onclick="selectEditSquad('green')" data-squad="green">
+                            <span class="squad-emoji">🟢</span>
+                            <span>Green</span>
+                        </div>
+                        <div class="squad-btn" onclick="selectEditSquad('pink')" data-squad="pink">
+                            <span class="squad-emoji">🩷</span>
+                            <span>Pink</span>
+                        </div>
+                        <div class="squad-btn" onclick="selectEditSquad('blue')" data-squad="blue">
+                            <span class="squad-emoji">🔵</span>
+                            <span>Blue</span>
+                        </div>
+                        <div class="squad-btn" onclick="selectEditSquad('orange')" data-squad="orange">
+                            <span class="squad-emoji">🟠</span>
+                            <span>Orange</span>
+                        </div>
+                    </div>
+                    <input type="hidden" id="editSquadColor" name="squadColor">
                 </div>
 
                 <div class="form-row">
@@ -1303,7 +1555,9 @@
         let allStudents = [];
         let filteredStudents = [];
         let selectedGender = '';
+        let selectedSquad = '';
         let selectedEditGender = '';
+        let selectedEditSquad = '';
         let currentViewMode = 'grid'; // 'grid' or 'table'
         let uploadedFile = null;
 
@@ -1331,7 +1585,7 @@
             // Set up form handlers
             setupFormHandlers();
             
-            // Setup drag and drop for file uploads (only for bulk upload)
+            // Setup drag and drop for file uploads
             setupDragAndDropForBulkUpload();
         }
 
@@ -1339,7 +1593,9 @@
             // Student form submission
             document.getElementById('studentForm').addEventListener('submit', function(e) {
                 e.preventDefault();
-                saveStudent();
+                if (validateForm()) {
+                    saveStudent();
+                }
             });
 
             // Edit student form submission
@@ -1348,7 +1604,7 @@
                 updateStudent();
             });
 
-            // File upload handlers (only for bulk upload)
+            // File upload handlers
             document.getElementById('excelInput').addEventListener('change', handleFileUpload);
         }
 
@@ -1375,19 +1631,90 @@
                     
                     const files = e.dataTransfer.files;
                     if (files.length > 0) {
-                        // Only take the first file
                         const file = files[0];
-                        
-                        // Manually set the file to the input and trigger the change event
                         const fileInput = document.getElementById('excelInput');
                         const dataTransfer = new DataTransfer();
                         dataTransfer.items.add(file);
                         fileInput.files = dataTransfer.files;
-                        
-                        // Trigger the change event
                         handleFileUpload({ target: { files: [file] } });
                     }
                 });
+            }
+        }
+
+        // Form Validation
+        function validateForm() {
+            let isValid = true;
+            const fields = [
+                { id: 'rollNumber', message: 'Roll number is required' },
+                { id: 'regNumber', message: 'Register number is required' },
+                { id: 'studentName', message: 'Student name is required' },
+                { id: 'class', message: 'Class is required' },
+                { id: 'division', message: 'Division is required' },
+                { id: 'dob', message: 'Date of birth is required' },
+                { id: 'height', message: 'Height is required' },
+                { id: 'weight', message: 'Weight is required' }
+            ];
+
+            // Clear previous errors
+            document.querySelectorAll('.form-group').forEach(group => {
+                group.classList.remove('error');
+            });
+
+            // Validate required fields
+            fields.forEach(field => {
+                const element = document.getElementById(field.id);
+                if (!element.value.trim()) {
+                    showFieldError(field.id, field.message);
+                    isValid = false;
+                }
+            });
+
+            // Validate gender selection
+            if (!selectedGender) {
+                showFieldError('gender', 'Please select gender');
+                isValid = false;
+            }
+
+            // Validate squad selection
+            if (!selectedSquad) {
+                showFieldError('squad', 'Please select a squad');
+                isValid = false;
+            }
+
+            // Validate height range
+            const height = parseFloat(document.getElementById('height').value);
+            if (height && (height < 80 || height > 250)) {
+                showFieldError('height', 'Height must be between 80-250 cm');
+                isValid = false;
+            }
+
+            // Validate weight range
+            const weight = parseFloat(document.getElementById('weight').value);
+            if (weight && (weight < 10 || weight > 200)) {
+                showFieldError('weight', 'Weight must be between 10-200 kg');
+                isValid = false;
+            }
+
+            // Validate age (calculated from DOB)
+            const dob = new Date(document.getElementById('dob').value);
+            const today = new Date();
+            const age = today.getFullYear() - dob.getFullYear();
+            if (age < 3 || age > 25) {
+                showFieldError('dob', 'Age must be between 3-25 years');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        function showFieldError(fieldId, message) {
+            const fieldContainer = document.getElementById(fieldId).closest('.form-group');
+            const errorElement = fieldContainer.querySelector('.error-message');
+            
+            fieldContainer.classList.add('error');
+            if (errorElement) {
+                errorElement.textContent = message;
             }
         }
 
@@ -1456,6 +1783,29 @@
             document.querySelector(`#editStudentModal [data-gender="${gender}"]`).classList.add('selected');
         }
 
+        // Squad Selection
+        function selectSquad(squad) {
+            selectedSquad = squad;
+            document.getElementById('squadColor').value = squad;
+            
+            document.querySelectorAll('#student-entry .squad-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            document.querySelector(`#student-entry [data-squad="${squad}"]`).classList.add('selected');
+        }
+
+        function selectEditSquad(squad) {
+            selectedEditSquad = squad;
+            document.getElementById('editSquadColor').value = squad;
+            
+            document.querySelectorAll('#editStudentModal .squad-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            document.querySelector(`#editStudentModal [data-squad="${squad}"]`).classList.add('selected');
+        }
+
         // Age Calculation
         function calculateAge() {
             const dob = document.getElementById('dob').value;
@@ -1489,11 +1839,6 @@
             }
         }
 
-        // Photo Upload (removed)
-        // function handlePhotoUpload(event) {
-        //     // Photo upload functionality removed as requested
-        // }
-
         // File Upload for Bulk
         function handleFileUpload(event) {
             const file = event.target.files[0];
@@ -1521,7 +1866,6 @@
                 uploadedFile = file;
                 displayFilePreview(file);
                 document.getElementById('processBtn').disabled = false;
-                // Removed the success alert here to prevent double notification
             }
         }
 
@@ -1547,7 +1891,6 @@
             document.getElementById('uploadProgress').classList.add('hidden');
             document.getElementById('uploadResults').classList.add('hidden');
             
-            // Show single success notification here instead
             showAlert(`File "${file.name}" selected successfully`, 'success');
         }
 
@@ -1573,7 +1916,6 @@
             resetFileInput();
             document.getElementById('filePreview').classList.add('hidden');
             document.getElementById('processBtn').disabled = true;
-            // Removed alert notification here - visual feedback is enough
         }
 
         function resetFileInput() {
@@ -1621,11 +1963,9 @@
                     document.getElementById('progressText').textContent = step.text;
                     currentStep++;
                     
-                    // Vary timing to make it feel more realistic
                     const delay = currentStep <= 3 ? 300 : currentStep <= 6 ? 500 : 700;
                     setTimeout(processStep, delay);
                 } else {
-                    // Simulate completion with results
                     setTimeout(() => {
                         showUploadResults();
                     }, 500);
@@ -1642,8 +1982,8 @@
             
             // Simulate realistic results based on file
             const fileName = uploadedFile.name;
-            const estimatedRecords = Math.floor(Math.random() * 50) + 10; // 10-60 records
-            const successCount = estimatedRecords - Math.floor(Math.random() * 3); // Most successful
+            const estimatedRecords = Math.floor(Math.random() * 50) + 10;
+            const successCount = estimatedRecords - Math.floor(Math.random() * 3);
             const errorCount = estimatedRecords - successCount;
             
             const resultsHTML = `
@@ -1677,6 +2017,7 @@
                         <li>Duplicate roll numbers or register numbers</li>
                         <li>Invalid date formats (use YYYY-MM-DD)</li>
                         <li>Missing required fields</li>
+                        <li>Invalid squad colors (use: red, yellow, green, pink, blue, orange)</li>
                     </ul>
                 </div>
                 ` : ''}
@@ -1688,24 +2029,29 @@
             loadStudents();
             loadStatistics();
             
-            // Single final notification with clear completion message
             showAlert(`✅ Bulk upload completed! ${successCount} of ${estimatedRecords} students processed successfully.`, 'success');
         }
 
         // Save Student
         async function saveStudent() {
-            const formData = new FormData(document.getElementById('studentForm'));
-            
-            // Remove photo handling as requested
-            // const photoFile = document.getElementById('photoInput').files[0];
-            // if (photoFile) {
-            //     formData.append('photo', photoFile);
-            // }
-
             try {
                 showAlert('Saving student profile...', 'info');
                 
-                // Simulate API call (replace with actual API endpoint)
+                const formData = new FormData(document.getElementById('studentForm'));
+                const studentData = {
+                    rollNumber: formData.get('rollNumber'),
+                    regNumber: formData.get('regNumber'),
+                    studentName: formData.get('studentName'),
+                    class: formData.get('class'),
+                    division: formData.get('division'),
+                    dob: formData.get('dob'),
+                    gender: selectedGender,
+                    squadColor: selectedSquad,
+                    height: parseFloat(formData.get('height')),
+                    weight: parseFloat(formData.get('weight'))
+                };
+
+                // Simulate API call
                 await new Promise(resolve => setTimeout(resolve, 1500));
                 
                 showAlert('✅ Student profile saved successfully!', 'success');
@@ -1726,10 +2072,12 @@
         }
 
         function saveAndAddNew() {
-            saveStudent().then(() => {
-                clearForm();
-                showAlert('Ready to add new student', 'info');
-            });
+            if (validateForm()) {
+                saveStudent().then(() => {
+                    clearForm();
+                    showAlert('Ready to add new student', 'info');
+                });
+            }
         }
 
         // Clear Form
@@ -1737,15 +2085,22 @@
             document.getElementById('studentForm').reset();
             document.getElementById('age').value = '';
             document.getElementById('gender').value = '';
+            document.getElementById('squadColor').value = '';
             selectedGender = '';
+            selectedSquad = '';
             
             document.querySelectorAll('.gender-btn').forEach(btn => {
                 btn.classList.remove('selected');
             });
             
-            // Remove photo preview clearing since photo upload is removed
-            // document.getElementById('photoPreview').classList.add('hidden');
-            // document.getElementById('photoInput').value = '';
+            document.querySelectorAll('#student-entry .squad-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // Clear error states
+            document.querySelectorAll('.form-group').forEach(group => {
+                group.classList.remove('error');
+            });
             
             showAlert('Form cleared successfully', 'success');
         }
@@ -1756,60 +2111,11 @@
             loadingIndicator.classList.remove('hidden');
             
             try {
-                // Simulate API call (replace with actual endpoint)
+                // Simulate API call
                 await new Promise(resolve => setTimeout(resolve, 1000));
                 
-                // Sample data (replace with actual API response)
-                allStudents = [
-                    {
-                        id: 1,
-                        rollNumber: '2024001',
-                        regNumber: 'REG001',
-                        studentName: 'John Doe',
-                        class: '10',
-                        division: 'A',
-                        dob: '2008-05-15',
-                        age: 16,
-                        gender: 'M',
-                        height: 165,
-                        weight: 55,
-                        parentContact: '9876543210',
-                        address: '123 Main St, City',
-                        status: 'Active'
-                    },
-                    {
-                        id: 2,
-                        rollNumber: '2024002',
-                        regNumber: 'REG002',
-                        studentName: 'Jane Smith',
-                        class: '10',
-                        division: 'A',
-                        dob: '2008-03-20',
-                        age: 16,
-                        gender: 'F',
-                        height: 160,
-                        weight: 50,
-                        parentContact: '9876543211',
-                        address: '456 Oak Ave, City',
-                        status: 'Active'
-                    },
-                    {
-                        id: 3,
-                        rollNumber: '2024003',
-                        regNumber: 'REG003',
-                        studentName: 'Mike Johnson',
-                        class: '9',
-                        division: 'B',
-                        dob: '2009-07-10',
-                        age: 15,
-                        gender: 'M',
-                        height: 158,
-                        weight: 48,
-                        parentContact: '9876543212',
-                        address: '789 Pine Rd, City',
-                        status: 'Active'
-                    }
-                ];
+                // Load from localStorage or use empty array
+                allStudents = JSON.parse(localStorage.getItem('students') || '[]');
                 
                 filteredStudents = [...allStudents];
                 displayStudents();
@@ -1844,6 +2150,8 @@
             filteredStudents.forEach(student => {
                 const card = document.createElement('div');
                 card.className = 'student-card';
+                const squadBadge = student.squadColor ? `<span class="squad-badge squad-${student.squadColor}">${student.squadColor.toUpperCase()}</span>` : '';
+                
                 card.innerHTML = `
                     <div class="student-header">
                         <div class="student-info">
@@ -1852,13 +2160,14 @@
                                 <strong>Roll:</strong> ${student.rollNumber}<br>
                                 <strong>Class:</strong> ${student.class}-${student.division}<br>
                                 <strong>Gender:</strong> ${student.gender === 'M' ? '👦 Male' : '👧 Female'}<br>
+                                <strong>Squad:</strong> ${squadBadge}<br>
                                 <strong>Age:</strong> ${student.age} years<br>
                                 <strong>Height:</strong> ${student.height}cm | <strong>Weight:</strong> ${student.weight}kg
                             </div>
                         </div>
                         <div style="text-align: center;">
                             <div style="padding: 8px 16px; background: var(--success-color); color: white; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">
-                                ${student.status}
+                                Active
                             </div>
                         </div>
                     </div>
@@ -1883,21 +2192,24 @@
             tableBody.innerHTML = '';
             
             if (filteredStudents.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="9" class="text-center" style="color: var(--text-secondary);">No students found</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="10" class="text-center" style="color: var(--text-secondary);">No students found</td></tr>';
                 return;
             }
             
             filteredStudents.forEach(student => {
                 const row = document.createElement('tr');
+                const squadBadge = student.squadColor ? `<span class="squad-badge squad-${student.squadColor}">${student.squadColor.charAt(0).toUpperCase() + student.squadColor.slice(1)}</span>` : 'N/A';
+                
                 row.innerHTML = `
                     <td><strong>${student.rollNumber}</strong></td>
                     <td>${student.studentName}</td>
                     <td>${student.class}-${student.division}</td>
                     <td>${student.gender === 'M' ? '👦 Male' : '👧 Female'}</td>
+                    <td>${squadBadge}</td>
                     <td>${student.age}</td>
                     <td>${student.height}cm</td>
                     <td>${student.weight}kg</td>
-                    <td><span style="padding: 4px 12px; background: var(--success-color); color: white; border-radius: 15px; font-size: 0.8rem;">${student.status}</span></td>
+                    <td><span style="padding: 4px 12px; background: var(--success-color); color: white; border-radius: 15px; font-size: 0.8rem;">Active</span></td>
                     <td>
                         <div style="display: flex; gap: 5px;">
                             <button class="btn btn-sm" onclick="editStudent(${student.id})" title="Edit">✏️</button>
@@ -1934,23 +2246,18 @@
         // Filter Functions
         function populateFilterOptions() {
             const classes = [...new Set(allStudents.map(s => s.class))].sort();
-            const divisions = [...new Set(allStudents.map(s => s.division))].sort();
             
             const classFilter = document.getElementById('classFilter');
-            const divisionFilter = document.getElementById('divisionFilter');
             
             classFilter.innerHTML = '<option value="">All Classes</option>' +
                 classes.map(c => `<option value="${c}">Class ${c}</option>`).join('');
-            
-            divisionFilter.innerHTML = '<option value="">All Divisions</option>' +
-                divisions.map(d => `<option value="${d}">Division ${d}</option>`).join('');
         }
 
         function filterStudents() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const genderFilter = document.getElementById('genderFilter').value;
             const classFilter = document.getElementById('classFilter').value;
-            const divisionFilter = document.getElementById('divisionFilter').value;
+            const squadFilter = document.getElementById('squadFilter').value;
 
             filteredStudents = allStudents.filter(student => {
                 const matchesSearch = !searchTerm || 
@@ -1960,9 +2267,9 @@
                 
                 const matchesGender = !genderFilter || student.gender === genderFilter;
                 const matchesClass = !classFilter || student.class === classFilter;
-                const matchesDivision = !divisionFilter || student.division === divisionFilter;
+                const matchesSquad = !squadFilter || student.squadColor === squadFilter;
                 
-                return matchesSearch && matchesGender && matchesClass && matchesDivision;
+                return matchesSearch && matchesGender && matchesClass && matchesSquad;
             });
 
             displayStudents();
@@ -1972,7 +2279,7 @@
             document.getElementById('searchInput').value = '';
             document.getElementById('genderFilter').value = '';
             document.getElementById('classFilter').value = '';
-            document.getElementById('divisionFilter').value = '';
+            document.getElementById('squadFilter').value = '';
             
             filteredStudents = [...allStudents];
             displayStudents();
@@ -2001,18 +2308,43 @@
             document.getElementById('editWeight').value = student.weight;
             
             selectEditGender(student.gender);
+            if (student.squadColor) {
+                selectEditSquad(student.squadColor);
+            }
             
             showModal('editStudentModal');
         }
 
         function updateStudent() {
-            const formData = new FormData(document.getElementById('editStudentForm'));
-            const studentId = formData.get('studentId');
-            
             try {
                 showAlert('Updating student profile...', 'info');
                 
-                // Simulate API call
+                const studentId = parseInt(document.getElementById('editStudentId').value);
+                const studentIndex = allStudents.findIndex(s => s.id === studentId);
+                
+                if (studentIndex === -1) {
+                    throw new Error('Student not found');
+                }
+                
+                // Update student data
+                allStudents[studentIndex] = {
+                    ...allStudents[studentIndex],
+                    rollNumber: document.getElementById('editRollNumber').value,
+                    regNumber: document.getElementById('editRegNumber').value,
+                    studentName: document.getElementById('editStudentName').value,
+                    class: document.getElementById('editClass').value,
+                    division: document.getElementById('editDivision').value,
+                    dob: document.getElementById('editDob').value,
+                    age: parseInt(document.getElementById('editAge').value),
+                    gender: selectedEditGender,
+                    squadColor: selectedEditSquad,
+                    height: parseFloat(document.getElementById('editHeight').value),
+                    weight: parseFloat(document.getElementById('editWeight').value)
+                };
+                
+                // Save to localStorage
+                localStorage.setItem('students', JSON.stringify(allStudents));
+                
                 setTimeout(() => {
                     showAlert('✅ Student profile updated successfully!', 'success');
                     closeModal('editStudentModal');
@@ -2031,12 +2363,17 @@
                 return;
             }
             
-            const studentId = document.getElementById('editStudentId').value;
+            const studentId = parseInt(document.getElementById('editStudentId').value);
             
             try {
                 showAlert('Deleting student...', 'warning');
                 
-                // Simulate API call
+                // Remove from array
+                allStudents = allStudents.filter(s => s.id !== studentId);
+                
+                // Save to localStorage
+                localStorage.setItem('students', JSON.stringify(allStudents));
+                
                 setTimeout(() => {
                     showAlert('Student deleted successfully', 'success');
                     closeModal('editStudentModal');
@@ -2058,7 +2395,6 @@
             }
             
             showAlert(`Viewing profile for ${student.studentName}`, 'info');
-            // Implement profile view modal or redirect
         }
 
         function approveStudent(studentId) {
@@ -2070,7 +2406,6 @@
             
             if (confirm(`Approve ${student.studentName} for uniform tailoring?`)) {
                 showAlert(`✅ ${student.studentName} approved for tailoring!`, 'success');
-                // Update status and refresh
                 loadStudents();
             }
         }
@@ -2103,7 +2438,6 @@
             
             showAlert('Searching...', 'info');
             
-            // Simulate search
             setTimeout(() => {
                 let results = [];
                 
@@ -2129,11 +2463,6 @@
                             s.class === searchClass && s.division === searchDiv?.toUpperCase()
                         );
                         break;
-                    case 'contact':
-                        results = allStudents.filter(s => 
-                            s.parentContact && s.parentContact.includes(searchTerm)
-                        );
-                        break;
                     default:
                         results = allStudents.filter(s => 
                             s.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -2154,28 +2483,32 @@
             if (results.length === 0) {
                 container.innerHTML = '<p class="text-center" style="color: var(--text-secondary);">No students found matching your search criteria.</p>';
             } else {
-                container.innerHTML = results.map(student => `
-                    <div class="student-card">
-                        <div class="student-header">
-                            <div class="student-info">
-                                <h4>${student.studentName}</h4>
-                                <div class="student-meta">
-                                    <strong>Roll:</strong> ${student.rollNumber} | 
-                                    <strong>Reg:</strong> ${student.regNumber}<br>
-                                    <strong>Class:</strong> ${student.class}-${student.division} | 
-                                    <strong>Gender:</strong> ${student.gender === 'M' ? 'Male' : 'Female'}<br>
-                                    <strong>Age:</strong> ${student.age} | 
-                                    <strong>Height:</strong> ${student.height}cm | 
-                                    <strong>Weight:</strong> ${student.weight}kg
+                container.innerHTML = results.map(student => {
+                    const squadBadge = student.squadColor ? `<span class="squad-badge squad-${student.squadColor}">${student.squadColor.toUpperCase()}</span>` : '';
+                    return `
+                        <div class="student-card">
+                            <div class="student-header">
+                                <div class="student-info">
+                                    <h4>${student.studentName}</h4>
+                                    <div class="student-meta">
+                                        <strong>Roll:</strong> ${student.rollNumber} | 
+                                        <strong>Reg:</strong> ${student.regNumber}<br>
+                                        <strong>Class:</strong> ${student.class}-${student.division} | 
+                                        <strong>Gender:</strong> ${student.gender === 'M' ? 'Male' : 'Female'}<br>
+                                        <strong>Squad:</strong> ${squadBadge}<br>
+                                        <strong>Age:</strong> ${student.age} | 
+                                        <strong>Height:</strong> ${student.height}cm | 
+                                        <strong>Weight:</strong> ${student.weight}kg
+                                    </div>
                                 </div>
                             </div>
+                            <div class="student-actions">
+                                <button class="btn btn-sm" onclick="editStudent(${student.id})">✏️ Edit</button>
+                                <button class="btn btn-success btn-sm" onclick="viewProfile(${student.id})">👁️ View</button>
+                            </div>
                         </div>
-                        <div class="student-actions">
-                            <button class="btn btn-sm" onclick="editStudent(${student.id})">✏️ Edit</button>
-                            <button class="btn btn-success btn-sm" onclick="viewProfile(${student.id})">👁️ View</button>
-                        </div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
             }
             
             searchResults.classList.remove('hidden');
@@ -2201,6 +2534,9 @@
                         break;
                     case 'gender_wise':
                         content = generateGenderWiseReport();
+                        break;
+                    case 'squad_wise':
+                        content = generateSquadWiseReport();
                         break;
                     case 'age_wise':
                         content = generateAgeWiseReport();
@@ -2256,11 +2592,11 @@
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-number">${male}</div>
-                        <div class="stat-label">Male Students (${((male/total)*100).toFixed(1)}%)</div>
+                        <div class="stat-label">Male Students (${total > 0 ? ((male/total)*100).toFixed(1) : 0}%)</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-number">${female}</div>
-                        <div class="stat-label">Female Students (${((female/total)*100).toFixed(1)}%)</div>
+                        <div class="stat-label">Female Students (${total > 0 ? ((female/total)*100).toFixed(1) : 0}%)</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-number">${total}</div>
@@ -2268,6 +2604,28 @@
                     </div>
                 </div>
             `;
+        }
+
+        function generateSquadWiseReport() {
+            const squads = ['red', 'yellow', 'green', 'pink', 'blue', 'orange'];
+            const squadCounts = {};
+            
+            squads.forEach(squad => {
+                squadCounts[squad] = allStudents.filter(s => s.squadColor === squad).length;
+            });
+            
+            const total = allStudents.length;
+            
+            let html = '<table class="data-table"><thead><tr><th>Squad</th><th>Count</th><th>Percentage</th></tr></thead><tbody>';
+            
+            Object.entries(squadCounts).forEach(([squad, count]) => {
+                const percentage = total > 0 ? ((count/total)*100).toFixed(1) : 0;
+                const squadName = squad.charAt(0).toUpperCase() + squad.slice(1);
+                html += `<tr><td><span class="squad-badge squad-${squad}">${squadName}</span></td><td>${count}</td><td>${percentage}%</td></tr>`;
+            });
+            
+            html += '</tbody></table>';
+            return html;
         }
 
         function generateAgeWiseReport() {
@@ -2287,7 +2645,7 @@
             const total = allStudents.length;
             
             Object.entries(ageGroups).forEach(([group, count]) => {
-                const percentage = ((count/total)*100).toFixed(1);
+                const percentage = total > 0 ? ((count/total)*100).toFixed(1) : 0;
                 html += `<tr><td>${group} years</td><td>${count}</td><td>${percentage}%</td></tr>`;
             });
             
@@ -2296,6 +2654,10 @@
         }
 
         function generateHeightWeightReport() {
+            if (allStudents.length === 0) {
+                return '<p>No data available</p>';
+            }
+            
             const heights = allStudents.map(s => s.height);
             const weights = allStudents.map(s => s.weight);
             
@@ -2329,19 +2691,20 @@
         }
 
         function generateCompleteListReport() {
-            let html = '<table class="data-table"><thead><tr><th>Roll No.</th><th>Name</th><th>Class</th><th>Gender</th><th>Age</th><th>Height</th><th>Weight</th>                        <th>Contact</th></tr></thead><tbody>';
+            let html = '<table class="data-table"><thead><tr><th>Roll No.</th><th>Name</th><th>Class</th><th>Gender</th><th>Squad</th><th>Age</th><th>Height</th><th>Weight</th></tr></thead><tbody>';
             
             allStudents.forEach(student => {
+                const squadBadge = student.squadColor ? `<span class="squad-badge squad-${student.squadColor}">${student.squadColor.charAt(0).toUpperCase() + student.squadColor.slice(1)}</span>` : 'N/A';
                 html += `
                     <tr>
                         <td>${student.rollNumber}</td>
                         <td>${student.studentName}</td>
                         <td>${student.class}-${student.division}</td>
                         <td>${student.gender === 'M' ? 'Male' : 'Female'}</td>
+                        <td>${squadBadge}</td>
                         <td>${student.age}</td>
                         <td>${student.height}cm</td>
                         <td>${student.weight}kg</td>
-                        <td>${student.parentContact || 'N/A'}</td>
                     </tr>
                 `;
             });
@@ -2354,7 +2717,7 @@
         function loadStatistics() {
             const total = allStudents.length;
             const male = allStudents.filter(s => s.gender === 'M').length;
-            const pending = Math.floor(total * 0.3); // Simulate pending profiles
+            const pending = Math.floor(total * 0.3);
             const completed = total - pending;
             
             document.getElementById('totalStudents').textContent = total;
@@ -2365,9 +2728,8 @@
 
         // Utility Functions
         function downloadTemplate() {
-            // Create a sample CSV template (updated format)
-            const headers = ['Roll Number', 'Register Number', 'Student Name', 'Class', 'Division', 'DOB (YYYY-MM-DD)', 'Gender (M/F)', 'Height (cm)', 'Weight (kg)'];
-            const sampleData = ['2024001', 'REG001', 'John Doe', '10', 'A', '2008-05-15', 'M', '165', '55'];
+            const headers = ['Roll Number', 'Register Number', 'Student Name', 'Class', 'Division', 'DOB (YYYY-MM-DD)', 'Gender (M/F)', 'Squad Color', 'Height (cm)', 'Weight (kg)'];
+            const sampleData = ['2024001', 'REG001', 'John Doe', '10', 'A', '2008-05-15', 'M', 'red', '165', '55'];
             
             const csvContent = [headers.join(','), sampleData.join(',')].join('\n');
             const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -2383,7 +2745,7 @@
         }
 
         function showNotifications() {
-            showAlert('📧 You have 3 new notifications: 2 pending approvals, 1 new student registration', 'info');
+            showAlert('🔧 You have 3 new notifications: 2 pending approvals, 1 new student registration', 'info');
         }
 
         // Modal Management
@@ -2447,16 +2809,16 @@
 
         // Keyboard shortcuts
         document.addEventListener('keydown', function(e) {
-            // Ctrl+S to save form
             if (e.ctrlKey && e.key === 's') {
                 e.preventDefault();
                 const activeTab = document.querySelector('.tab-content.active');
                 if (activeTab.id === 'student-entry') {
-                    saveStudent();
+                    if (validateForm()) {
+                        saveStudent();
+                    }
                 }
             }
             
-            // Escape to close modals
             if (e.key === 'Escape') {
                 const openModal = document.querySelector('.modal.show');
                 if (openModal) {
