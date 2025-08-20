@@ -1,0 +1,4463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniForm Smart - Student Dashboard</title>
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #3b82f6;
+            --light-bg: #f8fafc;
+            --white-bg: #ffffff;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.12);
+            --border-radius: 16px;
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-success: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+            --gradient-warning: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+        }
+
+        [data-theme="dark"] {
+            --light-bg: #0f172a;
+            --white-bg: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --border-color: #334155;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--light-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: var(--gradient-primary);
+            color: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="white" opacity="0.1"/><circle cx="80" cy="30" r="1.5" fill="white" opacity="0.1"/><circle cx="40" cy="70" r="1" fill="white" opacity="0.1"/></svg>');
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-title h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header-title .logo {
+            font-size: 3rem;
+        }
+
+        .header-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-top: 8px;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .theme-toggle, .help-btn, .image-center-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .theme-toggle:hover, .help-btn:hover, .image-center-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Progress Stepper - Enhanced for Mobile */
+        .progress-stepper {
+            background: var(--white-bg);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 20px;
+            z-index: 100;
+        }
+
+        .stepper-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .step-circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            border: 3px solid var(--border-color);
+            background: var(--white-bg);
+            color: var(--text-secondary);
+        }
+
+        .step.active .step-circle {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .step.completed .step-circle {
+            background: var(--success-color);
+            border-color: var(--success-color);
+            color: white;
+        }
+
+        .step-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        .step.active .step-label,
+        .step.completed .step-label {
+            color: var(--text-primary);
+        }
+
+        .step-connector {
+            position: absolute;
+            top: 25px;
+            right: -50%;
+            width: 100%;
+            height: 3px;
+            background: var(--border-color);
+            z-index: -1;
+        }
+
+        .step.completed .step-connector {
+            background: var(--success-color);
+        }
+
+        .step:last-child .step-connector {
+            display: none;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .content-panel {
+            background: var(--white-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 25px 30px;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+
+        .panel-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .panel-body {
+            padding: 30px;
+        }
+
+        /* Step Content */
+        .step-content {
+            display: none;
+        }
+
+        .step-content.active {
+            display: block;
+        }
+
+        /* Form Styles - Enhanced for Mobile */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 1rem;
+            background: var(--white-bg);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            font-family: inherit;
+            min-height: 48px; /* Better mobile touch targets */
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-helper {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+
+        .form-helper.error {
+            color: var(--danger-color);
+        }
+
+        .form-helper.warning {
+            color: var(--warning-color);
+        }
+
+        .form-helper.success {
+            color: var(--success-color);
+        }
+
+        /* Gender Selection - Enhanced for Mobile */
+        .gender-selection {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 8px;
+        }
+
+        .gender-option {
+            padding: 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            background: var(--white-bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            min-height: 80px; /* Better mobile touch targets */
+        }
+
+        .gender-option:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+
+        .gender-option.selected {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .gender-icon {
+            font-size: 2rem;
+        }
+
+        .gender-label {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        /* Gender-Specific Measurement Fields */
+        .gender-specific-fields {
+            display: none;
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border-radius: 12px;
+            border: 2px solid #3b82f6;
+        }
+
+        .gender-specific-fields.active {
+            display: block;
+            animation: slideInDown 0.3s ease;
+        }
+
+        @keyframes slideInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .gender-fields-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            color: #1e40af;
+        }
+
+        .gender-fields-header h4 {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        /* Measurement Helper Cards */
+        .measurement-guide-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .measurement-card {
+            background: var(--white-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .measurement-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .measurement-card.active {
+            border-color: var(--success-color);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .measurement-card-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .measurement-card-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--text-primary);
+        }
+
+        .measurement-card-desc {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        /* Visual Measurement Guide */
+        .visual-guide-container {
+            background: var(--white-bg);
+            border: 2px solid var(--info-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .guide-image {
+            width: 100%;
+            max-width: 200px;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .guide-steps {
+            text-align: left;
+            margin-top: 15px;
+        }
+
+        .guide-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 10px;
+            padding: 8px;
+            background: var(--light-bg);
+            border-radius: 8px;
+        }
+
+        .step-number {
+            background: var(--primary-color);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        /* Squad Selection - Enhanced for Mobile */
+        .squad-selection {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 15px;
+            margin-top: 8px;
+        }
+
+        .squad-option {
+            padding: 15px 8px;
+            border: 3px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            background: var(--white-bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            position: relative;
+            overflow: hidden;
+            min-height: 80px; /* Better mobile touch targets */
+        }
+
+        .squad-option:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+
+        .squad-option.selected {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .squad-red {
+            border-color: #ef4444;
+            background: linear-gradient(135deg, #fee2e2, #fecaca);
+        }
+
+        .squad-red.selected {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            border-color: #dc2626;
+        }
+
+        .squad-yellow {
+            border-color: #eab308;
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+        }
+
+        .squad-yellow.selected {
+            background: linear-gradient(135deg, #eab308, #ca8a04);
+            color: white;
+            border-color: #ca8a04;
+        }
+
+        .squad-green {
+            border-color: #22c55e;
+            background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+        }
+
+        .squad-green.selected {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            border-color: #16a34a;
+        }
+
+        .squad-pink {
+            border-color: #ec4899;
+            background: linear-gradient(135deg, #fce7f3, #fbcfe8);
+        }
+
+        .squad-pink.selected {
+            background: linear-gradient(135deg, #ec4899, #db2777);
+            color: white;
+            border-color: #db2777;
+        }
+
+        .squad-blue {
+            border-color: #3b82f6;
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+        }
+
+        .squad-blue.selected {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            border-color: #2563eb;
+        }
+
+        .squad-orange {
+            border-color: #f97316;
+            background: linear-gradient(135deg, #fed7aa, #fdba74);
+        }
+
+        .squad-orange.selected {
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white;
+            border-color: #ea580c;
+        }
+
+        .squad-emoji {
+            font-size: 1.5rem;
+        }
+
+        .squad-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* Measurement Input Helper */
+        .measurement-helper {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border: 1px solid #0ea5e9;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .helper-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .helper-icon {
+            font-size: 2.5rem;
+            color: #0ea5e9;
+        }
+
+        .helper-text h4 {
+            color: #0c4a6e;
+            margin-bottom: 5px;
+        }
+
+        .helper-text p {
+            color: #075985;
+            font-size: 0.9rem;
+        }
+
+        /* Toggles */
+        .toggle-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 8px;
+        }
+
+        .toggle-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--white-bg);
+            min-height: 60px; /* Better mobile touch targets */
+        }
+
+        .toggle-option:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .toggle-option.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+        }
+
+        .toggle-switch {
+            width: 50px;
+            height: 28px;
+            background: var(--border-color);
+            border-radius: 14px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-option.active .toggle-switch {
+            background: white;
+        }
+
+        .toggle-option.active .toggle-switch::after {
+            transform: translateX(22px);
+            background: var(--primary-color);
+        }
+
+        /* Step Validation Indicator */
+        .step-validation {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 20px;
+            margin: 20px 0;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .step-validation.incomplete {
+            background: #fef3c7;
+            color: #92400e;
+            border: 2px solid #f59e0b;
+        }
+
+        .step-validation.complete {
+            background: #ecfdf5;
+            color: #065f46;
+            border: 2px solid #10b981;
+        }
+
+        .validation-icon {
+            font-size: 1.2rem;
+        }
+
+        /* Sidebar - Enhanced for Mobile */
+        .sidebar {
+            position: sticky;
+            top: 20px;
+        }
+
+        .recommendation-panel {
+            background: var(--white-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .recommendation-header {
+            background: var(--gradient-success);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .recommendation-header h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .recommendation-body {
+            padding: 25px;
+        }
+
+        .size-recommendation {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .size-display {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .confidence-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: var(--gradient-success);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .ai-comparison {
+            background: #f0f9ff;
+            border: 1px solid #0ea5e9;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .ai-comparison h5 {
+            color: #0c4a6e;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ai-suggestion {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0ea5e9;
+        }
+
+        /* Garment Grid - Enhanced for Mobile */
+        .garments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .garment-card {
+            background: var(--white-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .garment-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .garment-card.selected {
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .garment-image {
+            height: 200px;
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .garment-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 0;
+        }
+
+        .garment-image .emoji-fallback {
+            font-size: 4rem;
+        }
+
+        .garment-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--primary-color);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .garment-info {
+            padding: 20px;
+        }
+
+        .garment-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .garment-measures {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .measure-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: var(--light-bg);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            position: relative;
+        }
+
+        .measure-value {
+            font-weight: 600;
+            color: var(--primary-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .measure-value:hover {
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 4px;
+            padding: 2px 4px;
+        }
+
+        .measure-edit-icon {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .measure-value:hover .measure-edit-icon {
+            opacity: 1;
+        }
+
+        .measure-badge {
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .measure-badge.auto {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .measure-badge.manual {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        /* Inline Edit Styles */
+        .measure-edit-input {
+            width: 50px;
+            padding: 2px 6px;
+            border: 1px solid var(--primary-color);
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            background: white;
+            text-align: center;
+        }
+
+        .measure-edit-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+        }
+
+        .measure-edit-buttons {
+            display: flex;
+            gap: 4px;
+            margin-left: 8px;
+        }
+
+        .measure-edit-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            transition: background 0.2s ease;
+            min-width: 32px; /* Better mobile touch targets */
+            min-height: 32px;
+        }
+
+        .measure-edit-btn.save {
+            color: var(--success-color);
+        }
+
+        .measure-edit-btn.cancel {
+            color: var(--danger-color);
+        }
+
+        .measure-edit-btn:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        /* Buttons - Enhanced for Mobile */
+        .btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 16px 32px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            justify-content: center;
+            min-width: 120px;
+            min-height: 48px; /* Better mobile touch targets */
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            background: #5b5bd6;
+        }
+
+        .btn:disabled {
+            background: var(--text-secondary);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: var(--text-secondary);
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .btn-success {
+            background: var(--success-color);
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-warning {
+            background: var(--warning-color);
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        /* Alerts */
+        .alert {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-success {
+            background: #ecfdf5;
+            color: #065f46;
+            border-left: 4px solid var(--success-color);
+        }
+
+        .alert-error {
+            background: #fef2f2;
+            color: #991b1b;
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .alert-warning {
+            background: #fffbeb;
+            color: #92400e;
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .alert-info {
+            background: #eff6ff;
+            color: #1e40af;
+            border-left: 4px solid var(--info-color);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: var(--white-bg);
+            margin: 2% auto;
+            padding: 0;
+            border-radius: var(--border-radius);
+            width: 95%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            transform: scale(0.9);
+            transition: all 0.3s ease;
+        }
+
+        .modal.show .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            min-width: 40px; /* Better mobile touch targets */
+            min-height: 40px;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        /* Summary Panel */
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-label {
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .summary-value {
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .summary-section {
+            margin-bottom: 30px;
+        }
+
+        .summary-section h4 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(99, 102, 241, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Feedback Stars */
+        .rating-stars {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .star {
+            font-size: 2rem;
+            color: #d1d5db;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 48px; /* Better mobile touch targets */
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .star:hover,
+        .star.active {
+            color: #fbbf24;
+            transform: scale(1.1);
+        }
+
+        /* Enhanced Mobile Responsive Design */
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .sidebar {
+                position: static;
+                order: -1;
+            }
+
+            .progress-stepper {
+                position: relative;
+                top: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+
+            .header-title h1 {
+                font-size: 2rem;
+            }
+
+            .header-controls {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .theme-toggle, .help-btn, .image-center-btn {
+                padding: 10px 16px;
+                font-size: 0.9rem;
+            }
+
+            .progress-stepper {
+                padding: 20px 15px;
+                margin-bottom: 20px;
+            }
+
+            .stepper-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .step {
+                flex-direction: row;
+                justify-content: center;
+                min-width: auto;
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .step-circle {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+
+            .step-connector {
+                display: none;
+            }
+
+            .panel-body {
+                padding: 20px 15px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .gender-selection {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .gender-option {
+                padding: 15px;
+                min-height: 70px;
+            }
+
+            .squad-selection {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .squad-option {
+                padding: 12px 6px;
+                min-height: 70px;
+            }
+
+            .garments-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .btn-group {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 300px;
+                padding: 14px 24px;
+            }
+
+            .modal-content {
+                margin: 5% auto;
+                width: 98%;
+            }
+
+            .modal-body {
+                padding: 20px 15px;
+            }
+
+            .measurement-guide-cards {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .measurement-card {
+                padding: 12px;
+            }
+
+            .helper-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+
+            .visual-guide-container {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 8px;
+            }
+
+            .header-title .logo {
+                font-size: 2rem;
+            }
+
+            .header-title h1 {
+                font-size: 1.5rem;
+            }
+
+            .step-circle {
+                width: 35px;
+                height: 35px;
+                font-size: 0.9rem;
+            }
+
+            .form-group input, .form-group select {
+                padding: 12px 15px;
+                font-size: 0.9rem;
+            }
+
+            .squad-selection {
+                grid-template-columns: 1fr;
+            }
+
+            .btn {
+                font-size: 0.9rem;
+                padding: 12px 20px;
+            }
+        }
+
+        /* Dark mode specific adjustments */
+        [data-theme="dark"] .measurement-helper {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            border-color: #3b82f6;
+        }
+
+        [data-theme="dark"] .ai-comparison {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: #3b82f6;
+        }
+
+        [data-theme="dark"] .panel-header {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        }
+
+        [data-theme="dark"] .gender-specific-fields {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            border-color: #3b82f6;
+        }
+
+        [data-theme="dark"] .visual-guide-container {
+            background: var(--white-bg);
+            border-color: #3b82f6;
+        }
+
+        /* Utility Classes */
+        .hidden { display: none !important; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .mt-20 { margin-top: 20px; }
+        .mb-20 { margin-bottom: 20px; }
+        .fw-bold { font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-content">
+                <div class="header-title">
+                    <div class="logo">👕</div>
+                    <div>
+                        <h1>UniForm Smart</h1>
+                        <div class="header-subtitle">AI-Powered Uniform Sizing Platform</div>
+                    </div>
+                </div>
+                <div class="header-controls">
+                    <a href="image_upload_dashboard.html" class="image-center-btn">
+                        📸 Image Center
+                    </a>
+                    <button class="help-btn" onclick="showHelp()">
+                        ❓ Help
+                    </button>
+                    <button class="theme-toggle" onclick="toggleTheme()">
+                        🌙 Dark Mode
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Stepper -->
+        <div class="progress-stepper">
+            <div class="stepper-container">
+                <div class="step active" id="step-1">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Student Info</div>
+                    <div class="step-connector"></div>
+                </div>
+                <div class="step" id="step-2">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Measurements</div>
+                    <div class="step-connector"></div>
+                </div>
+                <div class="step" id="step-3">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Garments</div>
+                    <div class="step-connector"></div>
+                </div>
+                <div class="step" id="step-4">
+                    <div class="step-circle">4</div>
+                    <div class="step-label">Review</div>
+                    <div class="step-connector"></div>
+                </div>
+                <div class="step" id="step-5">
+                    <div class="step-circle">✓</div>
+                    <div class="step-label">Complete</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Main Panel -->
+            <div class="content-panel">
+                <!-- Step 1: Student Information -->
+                <div class="step-content active" id="content-step-1">
+                    <div class="panel-header">
+                        <h2 class="panel-title">
+                            <span>👤</span>
+                            Student Information
+                        </h2>
+                    </div>
+                    <div class="panel-body">
+                        <!-- Step Validation Indicator -->
+                        <div class="step-validation incomplete" id="step1-validation">
+                            <span class="validation-icon">⚠️</span>
+                            <span>Please complete all required fields to proceed</span>
+                        </div>
+
+                        <form id="studentInfoForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="studentName">Full Name *</label>
+                                    <input type="text" id="studentName" name="studentName" placeholder="Enter student's full name" required>
+                                    <div class="form-helper">This will appear on the uniform labels</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="rollNumber">Roll Number *</label>
+                                    <input type="text" id="rollNumber" name="rollNumber" placeholder="e.g., 2024001" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="registerNumber">Register Number</label>
+                                    <input type="text" id="registerNumber" name="registerNumber" placeholder="e.g., REG2024001">
+                                    <div class="form-helper">Optional registration number for school records</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="class">Class *</label>
+                                    <select id="class" name="class" required onchange="toggleCustomClass()">
+                                        <option value="">Select Class</option>
+                                        <option value="1">Class 1</option>
+                                        <option value="2">Class 2</option>
+                                        <option value="3">Class 3</option>
+                                        <option value="4">Class 4</option>
+                                        <option value="5">Class 5</option>
+                                        <option value="6">Class 6</option>
+                                        <option value="7">Class 7</option>
+                                        <option value="8">Class 8</option>
+                                        <option value="9">Class 9</option>
+                                        <option value="10">Class 10</option>
+                                        <option value="11">Class 11</option>
+                                        <option value="12">Class 12</option>
+                                        <option value="custom">Other (Custom Entry)</option>
+                                    </select>
+                                    <input type="text" id="customClass" name="customClass" placeholder="Enter custom class" style="display: none; margin-top: 10px;">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="division">Division *</label>
+                                    <select id="division" name="division" required onchange="toggleCustomDivision()">
+                                        <option value="">Select Division</option>
+                                        <option value="A">Division A</option>
+                                        <option value="B">Division B</option>
+                                        <option value="C">Division C</option>
+                                        <option value="D">Division D</option>
+                                        <option value="E">Division E</option>
+                                        <option value="F">Division F</option>
+                                        <option value="custom">Other (Custom Entry)</option>
+                                    </select>
+                                    <input type="text" id="customDivision" name="customDivision" placeholder="Enter custom division" style="display: none; margin-top: 10px;">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="dateOfBirth">Date of Birth *</label>
+                                    <input type="date" id="dateOfBirth" name="dateOfBirth" onchange="calculateAge()" required>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="age">Age (Auto-calculated)</label>
+                                    <input type="number" id="age" name="age" readonly style="background: var(--light-bg);">
+                                    <div class="form-helper" id="ageHelper"></div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Gender *</label>
+                                <div class="gender-selection">
+                                    <div class="gender-option" onclick="selectGender('M')" data-gender="M">
+                                        <div class="gender-icon">👦</div>
+                                        <div class="gender-label">Male</div>
+                                    </div>
+                                    <div class="gender-option" onclick="selectGender('F')" data-gender="F">
+                                        <div class="gender-icon">👧</div>
+                                        <div class="gender-label">Female</div>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="gender" name="gender" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Squad/House Color *</label>
+                                <div class="squad-selection">
+                                    <div class="squad-option squad-red" onclick="selectSquad('red')" data-squad="red">
+                                        <div class="squad-emoji">🔴</div>
+                                        <div class="squad-name">Red</div>
+                                    </div>
+                                    <div class="squad-option squad-yellow" onclick="selectSquad('yellow')" data-squad="yellow">
+                                        <div class="squad-emoji">🟡</div>
+                                        <div class="squad-name">Yellow</div>
+                                    </div>
+                                    <div class="squad-option squad-green" onclick="selectSquad('green')" data-squad="green">
+                                        <div class="squad-emoji">🟢</div>
+                                        <div class="squad-name">Green</div>
+                                    </div>
+                                    <div class="squad-option squad-pink" onclick="selectSquad('pink')" data-squad="pink">
+                                        <div class="squad-emoji">🩷</div>
+                                        <div class="squad-name">Pink</div>
+                                    </div>
+                                    <div class="squad-option squad-blue" onclick="selectSquad('blue')" data-squad="blue">
+                                        <div class="squad-emoji">🔵</div>
+                                        <div class="squad-name">Blue</div>
+                                    </div>
+                                    <div class="squad-option squad-orange" onclick="selectSquad('orange')" data-squad="orange">
+                                        <div class="squad-emoji">🟠</div>
+                                        <div class="squad-name">Orange</div>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="squadColor" name="squadColor" required>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="button" class="btn" onclick="nextStep()" id="step1NextBtn" disabled>
+                                    Next: Measurements →
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Step 2: Measurements -->
+                <div class="step-content" id="content-step-2">
+                    <div class="panel-header">
+                        <h2 class="panel-title">
+                            <span>📏</span>
+                            Physical Measurements
+                        </h2>
+                    </div>
+                    <div class="panel-body">
+                        <!-- Step Validation Indicator -->
+                        <div class="step-validation incomplete" id="step2-validation">
+                            <span class="validation-icon">⚠️</span>
+                            <span>Please enter height and weight to proceed</span>
+                        </div>
+
+                        <div class="measurement-helper">
+                            <div class="helper-content">
+                                <div class="helper-icon">📏</div>
+                                <div class="helper-text">
+                                    <h4>Measurement Tips</h4>
+                                    <p>Height and weight are required. Additional measurements are optional but provide better fit accuracy!</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form id="measurementsForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="height">Height (cm) *</label>
+                                    <input type="number" id="height" name="height" placeholder="e.g., 165" step="0.1" min="80" max="250" onchange="validateMeasurements()" required>
+                                    <button type="button" class="btn btn-outline" style="margin-top: 8px; padding: 8px 16px; font-size: 0.9rem;" onclick="enableManualEdit('height')">
+                                        ✏️ Manual Edit
+                                    </button>
+                                    <div class="form-helper" id="heightHelper">Typical range for your age group will be shown here</div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="weight">Weight (kg) *</label>
+                                    <input type="number" id="weight" name="weight" placeholder="e.g., 55.5" step="0.1" min="10" max="200" onchange="validateMeasurements()" required>
+                                    <button type="button" class="btn btn-outline" style="margin-top: 8px; padding: 8px 16px; font-size: 0.9rem;" onclick="enableManualEdit('weight')">
+                                        ✏️ Manual Edit
+                                    </button>
+                                    <div class="form-helper" id="weightHelper">Healthy weight range will be calculated</div>
+                                </div>
+                            </div>
+
+                            <!-- Gender-Specific Measurement Fields -->
+                            <div class="gender-specific-fields" id="maleFields">
+                                <div class="gender-fields-header">
+                                    <span>👦</span>
+                                    <h4>Male-Specific Measurements (Optional)</h4>
+                                    <span style="font-size: 0.9rem; color: #64748b; margin-left: 10px;">Enhance sizing accuracy</span>
+                                </div>
+                                
+                                <!-- Visual Guide for Male Measurements -->
+                                <div class="visual-guide-container">
+                                    <h5>📏 How to Measure (Male)</h5>
+                                    <div class="measurement-guide-cards">
+                                        <div class="measurement-card" onclick="showMeasurementGuide('male', 'chest')">
+                                            <div class="measurement-card-icon">🫀</div>
+                                            <div class="measurement-card-title">Chest</div>
+                                            <div class="measurement-card-desc">Around fullest part of chest</div>
+                                        </div>
+                                        <div class="measurement-card" onclick="showMeasurementGuide('male', 'shoulder')">
+                                            <div class="measurement-card-icon">👤</div>
+                                            <div class="measurement-card-title">Shoulder</div>
+                                            <div class="measurement-card-desc">Shoulder point to point</div>
+                                        </div>
+                                        <div class="measurement-card" onclick="showMeasurementGuide('male', 'waist')">
+                                            <div class="measurement-card-icon">⚫</div>
+                                            <div class="measurement-card-title">Waist</div>
+                                            <div class="measurement-card-desc">Natural waistline</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="maleChest">Chest (cm)</label>
+                                        <input type="number" id="maleChest" name="maleChest" placeholder="e.g., 85" step="0.1" min="30" max="200">
+                                        <div class="form-helper">Measure around the fullest part of the chest</div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="maleShoulder">Shoulder (cm)</label>
+                                        <input type="number" id="maleShoulder" name="maleShoulder" placeholder="e.g., 40" step="0.1" min="25" max="70">
+                                        <div class="form-helper">From shoulder point to shoulder point across the back</div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="maleWaist">Waist (cm)</label>
+                                        <input type="number" id="maleWaist" name="maleWaist" placeholder="e.g., 75" step="0.1" min="30" max="200">
+                                        <div class="form-helper">At natural waistline, typically above hip bones</div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="maleHip">Hip (cm)</label>
+                                        <input type="number" id="maleHip" name="maleHip" placeholder="e.g., 85" step="0.1" min="30" max="200">
+                                        <div class="form-helper">Around the fullest part of the hips</div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="maleSleeveLength">Sleeve Length (cm)</label>
+                                        <input type="number" id="maleSleeveLength" name="maleSleeveLength" placeholder="e.g., 60" step="0.1" min="30" max="100">
+                                        <div class="form-helper">From shoulder to wrist with arm slightly bent</div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="maleTopLength">Top/Shirt Length (cm)</label>
+                                        <input type="number" id="maleTopLength" name="maleTopLength" placeholder="e.g., 65" step="0.1" min="40" max="120">
+                                        <div class="form-helper">From shoulder to desired hem length</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="gender-specific-fields" id="femaleFields">
+                                <div class="gender-fields-header">
+                                    <span>👧</span>
+                                    <h4>Female-Specific Measurements (Optional)</h4>
+                                    <span style="font-size: 0.9rem; color: #64748b; margin-left: 10px;">Enhance sizing accuracy</span>
+                                </div>
+                                
+                                <!-- Visual Guide for Female Measurements -->
+                                <div class="visual-guide-container">
+                                    <h5>📏 How to Measure (Female)</h5>
+                                    <div class="measurement-guide-cards">
+                                        <div class="measurement-card" onclick="showMeasurementGuide('female', 'bust')">
+                                            <div class="measurement-card-icon">💚</div>
+                                            <div class="measurement-card-title">Bust</div>
+                                            <div class="measurement-card-desc">Around fullest part of bust</div>
+                                        </div>
+                                        <div class="measurement-card" onclick="showMeasurementGuide('female', 'waist')">
+                                            <div class="measurement-card-icon">⚫</div>
+                                            <div class="measurement-card-title">Waist</div>
+                                            <div class="measurement-card-desc">Narrowest part of torso</div>
+                                        </div>
+                                        <div class="measurement-card" onclick="showMeasurementGuide('female', 'hip')">
+                                            <div class="measurement-card-icon">🍑</div>
+                                            <div class="measurement-card-title">Hip</div>
+                                            <div class="measurement-card-desc">Fullest part of hips</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="femaleBust">Bust (cm)</label>
+                                        <input type="number" id="femaleBust" name="femaleBust" placeholder="e.g., 82" step="0.1" min="30" max="200">
+                                        <div class="form-helper">Bust is fullest around chest. Keep tape parallel to floor (Optional for enhanced sizing)</div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="femaleWaist">Waist (cm)</label>
+                                        <input type="number" id="femaleWaist" name="femaleWaist" placeholder="e.g., 70" step="0.1" min="30" max="200">
+                                        <div class="form-helper">Waist is narrowest part of torso, usually above belly button (Optional for enhanced sizing)</div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="femaleHip">Hip (cm)</label>
+                                        <input type="number" id="femaleHip" name="femaleHip" placeholder="e.g., 90" step="0.1" min="30" max="200">
+                                        <div class="form-helper">Hip is fullest part of hips and buttocks (Optional for enhanced sizing)</div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="femaleShoulder">Shoulder (cm)</label>
+                                        <input type="number" id="femaleShoulder" name="femaleShoulder" placeholder="e.g., 38" step="0.1" min="25" max="70">
+                                        <div class="form-helper">From shoulder point to shoulder point</div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="femaleSleeveLength">Sleeve Length (cm)</label>
+                                        <input type="number" id="femaleSleeveLength" name="femaleSleeveLength" placeholder="e.g., 55" step="0.1" min="30" max="100">
+                                        <div class="form-helper">From shoulder to wrist with arm slightly bent</div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="femaleTopLength">Top/Skirt Length (cm)</label>
+                                        <input type="number" id="femaleTopLength" name="femaleTopLength" placeholder="e.g., 60" step="0.1" min="30" max="120">
+                                        <div class="form-helper">From waist to desired length for skirts/dresses</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Body Shape (Optional)</label>
+                                <div class="toggle-group">
+                                    <div class="toggle-option" onclick="toggleBodyShape('slim')" data-shape="slim">
+                                        <div class="toggle-label">
+                                            <span>🏃</span>
+                                            <span>Slim Build</span>
+                                        </div>
+                                        <div class="toggle-switch"></div>
+                                    </div>
+                                    <div class="toggle-option" onclick="toggleBodyShape('broad_shoulders')" data-shape="broad_shoulders">
+                                        <div class="toggle-label">
+                                            <span>💪</span>
+                                            <span>Broad Shoulders</span>
+                                        </div>
+                                        <div class="toggle-switch"></div>
+                                    </div>
+                                    <div class="toggle-option" onclick="toggleBodyShape('long_arms')" data-shape="long_arms">
+                                        <div class="toggle-label">
+                                            <span>🤲</span>
+                                            <span>Long Arms</span>
+                                        </div>
+                                        <div class="toggle-switch"></div>
+                                    </div>
+                                    <div class="toggle-option" onclick="toggleBodyShape('long_legs')" data-shape="long_legs">
+                                        <div class="toggle-label">
+                                            <span>🦵</span>
+                                            <span>Long Legs</span>
+                                        </div>
+                                        <div class="toggle-switch"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="fitPreference">Fit Preference</label>
+                                <select id="fitPreference" name="fitPreference">
+                                    <option value="standard">Standard Fit (Recommended)</option>
+                                    <option value="snug">Snug Fit</option>
+                                    <option value="loose">Loose/Roomy Fit</option>
+                                </select>
+                                <div class="form-helper">Standard fit includes appropriate ease for comfort and movement</div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Additional Options</label>
+                                <div class="toggle-group">
+                                    <div class="toggle-option" onclick="toggleOption('sports')" data-option="sports">
+                                        <div class="toggle-label">
+                                            <span>⚽</span>
+                                            <span>Include Sports Uniforms</span>
+                                        </div>
+                                        <div class="toggle-switch"></div>
+                                    </div>
+                                    <div class="toggle-option" onclick="toggleOption('accessories')" data-option="accessories">
+                                        <div class="toggle-label">
+                                            <span>🎒</span>
+                                            <span>Include Accessories</span>
+                                        </div>
+                                        <div class="toggle-switch"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-secondary" onclick="prevStep()">
+                                    ← Previous
+                                </button>
+                                <button type="button" class="btn" onclick="generateRecommendations()" id="step2NextBtn" disabled>
+                                    Generate Recommendations →
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Step 3: Garments -->
+                <div class="step-content" id="content-step-3">
+                    <div class="panel-header">
+                        <h2 class="panel-title">
+                            <span>👕</span>
+                            Garment Selection & Measurements
+                        </h2>
+                    </div>
+                    <div class="panel-body">
+                        <!-- Step Validation Indicator -->
+                        <div class="step-validation incomplete" id="step3-validation">
+                            <span class="validation-icon">⚠️</span>
+                            <span>Please select at least one garment to proceed</span>
+                        </div>
+
+                        <div id="garmentFilters" class="form-group">
+                            <label>Filter Garments</label>
+                            <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                                <select id="categoryFilter" onchange="filterGarments()">
+                                    <option value="">All Categories</option>
+                                    <option value="formal">Formal</option>
+                                    <option value="sports">Sports</option>
+                                    <option value="accessories">Accessories</option>
+                                </select>
+                                <button type="button" class="btn btn-outline" onclick="toggleAllGarments()">
+                                    Select All
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="garments-grid" id="garmentsGrid">
+                            <!-- Garments will be loaded here -->
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-secondary" onclick="prevStep()">
+                                ← Previous
+                            </button>
+                            <button type="button" class="btn" onclick="nextStep()" id="step3NextBtn" disabled>
+                                Review Order →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Review -->
+                <div class="step-content" id="content-step-4">
+                    <div class="panel-header">
+                        <h2 class="panel-title">
+                            <span>✅</span>
+                            Order Review & Confirmation
+                        </h2>
+                    </div>
+                    <div class="panel-body">
+                        <div id="orderSummary">
+                            <!-- Order summary will be loaded here -->
+                        </div>
+
+                        <div class="alert alert-info">
+                            <span>ℹ️</span>
+                            <span>Please review all measurements carefully. You can go back to make changes if needed.</span>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-secondary" onclick="prevStep()">
+                                ← Previous
+                            </button>
+                            <button type="button" class="btn" onclick="exportSummary('pdf')">
+                                📄 Export PDF
+                            </button>
+                            <button type="button" class="btn btn-success" onclick="submitOrder()">
+                                🎯 Confirm Order
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 5: Complete -->
+                <div class="step-content" id="content-step-5">
+                    <div class="panel-header">
+                        <h2 class="panel-title">
+                            <span>🎉</span>
+                            Order Submitted Successfully!
+                        </h2>
+                    </div>
+                    <div class="panel-body">
+                        <div class="text-center">
+                            <div style="font-size: 4rem; margin-bottom: 20px;">✅</div>
+                            <h3>Thank you!</h3>
+                            <p>Your uniform order has been submitted successfully. Our tailors will begin working on it immediately.</p>
+                            
+                            <div style="background: var(--light-bg); padding: 20px; border-radius: 12px; margin: 30px 0;">
+                                <h4>What's Next?</h4>
+                                <ul style="text-align: left; margin: 15px 0;">
+                                    <li>📧 You'll receive an email confirmation shortly</li>
+                                    <li>👨‍🔧 Our tailors will review your measurements</li>
+                                    <li>📱 You'll get updates via SMS/WhatsApp</li>
+                                    <li>📦 Delivery in 7-10 business days</li>
+                                </ul>
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-outline" onclick="startNewOrder()">
+                                    ➕ New Order
+                                </button>
+                                <button type="button" class="btn" onclick="trackOrder()">
+                                    🔍 Track Order
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Size Recommendation Panel -->
+                <div class="recommendation-panel">
+                    <div class="recommendation-header">
+                        <h3>🎯 Size Recommendation</h3>
+                        <div>Powered by AI</div>
+                    </div>
+                    <div class="recommendation-body">
+                        <div class="size-recommendation">
+                            <div class="size-display" id="recommendedSize">-</div>
+                            <div>Recommended Size</div>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" id="confidenceFill" style="width: 0%"></div>
+                            </div>
+                            <div id="confidenceText">Complete measurements to get recommendation</div>
+                        </div>
+
+                        <div class="ai-comparison" id="aiComparison" style="display: none;">
+                            <h5>🤖 AI Suggests: <span class="ai-suggestion" id="aiSuggestion">-</span></h5>
+                            <div id="aiReasoning"></div>
+                            <button type="button" class="btn btn-outline" style="margin-top: 10px; padding: 8px 16px; font-size: 0.9rem;" onclick="showSizeComparison()">
+                                Why different?
+                            </button>
+                        </div>
+
+                        <div style="margin-top: 20px;">
+                            <h5>💡 Size Hints</h5>
+                            <div id="sizeHints" style="font-size: 0.9rem; color: var(--text-secondary);">
+                                Enter your measurements to see personalized tips
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Stats -->
+                <div class="recommendation-panel">
+                    <div class="recommendation-header">
+                        <h3>📊 Your Profile</h3>
+                    </div>
+                    <div class="recommendation-body">
+                        <div class="summary-item">
+                            <div class="summary-label">BMI</div>
+                            <div class="summary-value" id="bmiValue">-</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-label">Growth Stage</div>
+                            <div class="summary-value" id="growthStage">-</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-label">Size Stability</div>
+                            <div class="summary-value" id="sizeStability">-</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-label">Selected Items</div>
+                            <div class="summary-value" id="selectedCount">0</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-label">Gender Profile</div>
+                            <div class="summary-value" id="genderProfile">Not Set</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Help Panel -->
+                <div class="recommendation-panel">
+                    <div class="recommendation-header">
+                        <h3>🆘 Need Help?</h3>
+                    </div>
+                    <div class="recommendation-body">
+                        <div style="font-size: 0.9rem; line-height: 1.6;">
+                            <p><strong>📞 Call:</strong> +91-XXXX-XXXX</p>
+                            <p><strong>💬 WhatsApp:</strong> +91-XXXX-XXXX</p>
+                            <p><strong>📧 Email:</strong> support@uniform.school</p>
+                            <br>
+                            <p><strong>⏰ Support Hours:</strong><br>
+                            Mon-Fri: 9 AM - 6 PM<br>
+                            Sat: 9 AM - 2 PM</p>
+                            <br>
+                            <button class="btn btn-outline" style="width: 100%; padding: 8px 16px; font-size: 0.9rem;" onclick="showMeasurementGuideModal()">
+                                📏 Measurement Guide
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Container -->
+        <div id="alertContainer" style="position: fixed; top: 20px; right: 20px; z-index: 2000; max-width: 400px;"></div>
+    </div>
+
+    <!-- Modals -->
+
+    <!-- Feedback Modal -->
+    <div id="feedbackModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">📝 How did it fit?</h2>
+                <button class="modal-close" onclick="closeModal('feedbackModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center">
+                    <h4>Rate the overall fit:</h4>
+                    <div class="rating-stars">
+                        <span class="star" data-rating="1">⭐</span>
+                        <span class="star" data-rating="2">⭐</span>
+                        <span class="star" data-rating="3">⭐</span>
+                        <span class="star" data-rating="4">⭐</span>
+                        <span class="star" data-rating="5">⭐</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>How was the fit?</label>
+                    <select id="fitRating">
+                        <option value="">Select fit rating</option>
+                        <option value="too_small">Too Small</option>
+                        <option value="slightly_small">Slightly Small</option>
+                        <option value="perfect">Perfect Fit</option>
+                        <option value="slightly_large">Slightly Large</option>
+                        <option value="too_large">Too Large</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Any specific issues?</label>
+                    <textarea id="feedbackNotes" placeholder="Tell us what could be improved..." rows="4"></textarea>
+                </div>
+
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('feedbackModal')">
+                        Skip
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="submitFeedback()">
+                        Submit Feedback
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Size Comparison Modal -->
+    <div id="sizeComparisonModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">🤖 Why AI suggests different size?</h2>
+                <button class="modal-close" onclick="closeModal('sizeComparisonModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="comparisonContent">
+                    <!-- Comparison content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Measurement Guide Modal -->
+    <div id="measurementGuideModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">📏 Comprehensive Measurement Guide</h2>
+                <button class="modal-close" onclick="closeModal('measurementGuideModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h4>How to measure accurately:</h4>
+                </div>
+                
+                <!-- Gender Selection for Measurement Guide -->
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <label style="font-weight: 600; margin-bottom: 10px; display: block;">Select Gender for Specific Guide:</label>
+                    <select id="measurementGenderSelect" onchange="updateMeasurementGuide()" style="padding: 8px 16px; border-radius: 8px; border: 2px solid var(--border-color);">
+                        <option value="general">General Guide</option>
+                        <option value="male">Male Specific</option>
+                        <option value="female">Female Specific</option>
+                    </select>
+                </div>
+
+                <!-- Age Group Selection -->
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <label style="font-weight: 600; margin-bottom: 10px; display: block;">Age Group:</label>
+                    <select id="measurementAgeSelect" onchange="updateMeasurementGuide()" style="padding: 8px 16px; border-radius: 8px; border: 2px solid var(--border-color);">
+                        <option value="child">Child (5-10 years)</option>
+                        <option value="teen">Teen (11-15 years)</option>
+                        <option value="senior">Senior (16+ years)</option>
+                    </select>
+                </div>
+
+                <div id="measurementGuideContent">
+                    <!-- Content will be dynamically loaded -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Specific Measurement Guide Modal -->
+    <div id="specificMeasurementModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="specificMeasurementTitle">📏 Measurement Guide</h2>
+                <button class="modal-close" onclick="closeModal('specificMeasurementModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="specificMeasurementContent">
+                    <!-- Specific measurement content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global State
+        let currentStep = 1;
+        let studentData = {};
+        let selectedGender = '';
+        let selectedSquad = '';
+        let selectedBodyShapes = new Set();
+        let selectedOptions = new Set();
+        let selectedGarments = new Set();
+        let recommendedSize = null;
+        let aiRecommendation = null;
+        let currentTheme = 'light';
+        let genderSpecificMeasurements = {};
+
+        // Enhanced form validation tracking
+        let formValidation = {
+            step1: {
+                valid: false,
+                fields: ['studentName', 'rollNumber', 'class', 'division', 'dateOfBirth', 'gender', 'squadColor']
+            },
+            step2: {
+                valid: false,
+                fields: ['height', 'weight']
+            },
+            step3: {
+                valid: false,
+                fields: []
+            }
+        };
+
+        // Garment Database (simulating what would come from db.sql)
+        const garmentDatabase = {
+            formal: {
+                male: [
+                    { id: 'boys_formal_shirt_half', name: 'Formal Shirt (Half Sleeve)', emoji: '👔', category: 'formal', measures: ['chest', 'shoulder', 'sleeve_length'] },
+                    { id: 'boys_formal_shirt_full', name: 'Formal Shirt (Full Sleeve)', emoji: '👔', category: 'formal', measures: ['chest', 'shoulder', 'sleeve_length'] },
+                    { id: 'boys_formal_pants', name: 'Formal Pants', emoji: '👖', category: 'formal', measures: ['waist', 'hip', 'inseam', 'outseam'] },
+                    { id: 'boys_elastic_pants', name: 'Elastic Waist Pants', emoji: '👖', category: 'formal', measures: ['waist', 'hip', 'inseam'] },
+                    { id: 'boys_shorts', name: 'Formal Shorts', emoji: '🩳', category: 'formal', measures: ['waist', 'hip', 'outseam'] },
+                    { id: 'boys_waistcoat', name: 'Waistcoat', emoji: '🦺', category: 'formal', measures: ['chest', 'length'] },
+                    { id: 'boys_blazer', name: 'Blazer', emoji: '🧥', category: 'formal', measures: ['chest', 'shoulder', 'sleeve_length', 'length'] }
+                ],
+                female: [
+                    { id: 'girls_formal_shirt_half', name: 'Formal Shirt (Half Sleeve)', emoji: '👚', category: 'formal', measures: ['chest', 'shoulder', 'sleeve_length'] },
+                    { id: 'girls_formal_shirt_full', name: 'Formal Shirt (Full Sleeve)', emoji: '👚', category: 'formal', measures: ['chest', 'shoulder', 'sleeve_length'] },
+                    { id: 'girls_pinafore', name: 'Pinafore', emoji: '👗', category: 'formal', measures: ['chest', 'waist', 'length'] },
+                    { id: 'girls_skirt', name: 'Skirt', emoji: '👗', category: 'formal', measures: ['waist', 'hip', 'length'] },
+                    { id: 'girls_skorts', name: 'Skorts', emoji: '👗', category: 'formal', measures: ['waist', 'hip', 'length'] },
+                    { id: 'girls_formal_pants', name: 'Formal Pants', emoji: '👖', category: 'formal', measures: ['waist', 'hip', 'inseam'] },
+                    { id: 'girls_blazer', name: 'Blazer', emoji: '🧥', category: 'formal', measures: ['chest', 'shoulder', 'sleeve_length'] }
+                ]
+            },
+            sports: {
+                male: [
+                    { id: 'boys_sports_tshirt', name: 'Sports T-Shirt', emoji: '👕', category: 'sports', measures: ['chest', 'shoulder', 'length'] },
+                    { id: 'boys_track_pants', name: 'Track Pants', emoji: '👖', category: 'sports', measures: ['waist', 'hip', 'inseam'] },
+                    { id: 'boys_track_shorts', name: 'Track Shorts', emoji: '🩳', category: 'sports', measures: ['waist', 'hip', 'outseam'] },
+                    { id: 'boys_jerkin', name: 'Sports Jerkin', emoji: '🧥', category: 'sports', measures: ['chest', 'length'] },
+                    { id: 'boys_pullover_cap', name: 'Pullover with Cap', emoji: '🧢', category: 'sports', measures: ['chest', 'sleeve_length'] }
+                ],
+                female: [
+                    { id: 'girls_sports_tshirt', name: 'Sports T-Shirt', emoji: '👕', category: 'sports', measures: ['chest', 'shoulder', 'length'] },
+                    { id: 'girls_track_pants', name: 'Track Pants', emoji: '👖', category: 'sports', measures: ['waist', 'hip', 'inseam'] },
+                    { id: 'girls_track_shorts', name: 'Track Shorts', emoji: '🩳', category: 'sports', measures: ['waist', 'hip', 'outseam'] },
+                    { id: 'girls_jerkin', name: 'Sports Jerkin', emoji: '🧥', category: 'sports', measures: ['chest', 'length'] }
+                ]
+            },
+            accessories: {
+                unisex: [
+                    { id: 'tie', name: 'School Tie', emoji: '👔', category: 'accessories', measures: [] },
+                    { id: 'belt', name: 'Leather Belt', emoji: '👖', category: 'accessories', measures: ['waist'] },
+                    { id: 'socks', name: 'School Socks', emoji: '🧦', category: 'accessories', measures: [] },
+                    { id: 'shoes', name: 'School Shoes', emoji: '👞', category: 'accessories', measures: [] },
+                    { id: 'cap', name: 'School Cap', emoji: '🧢', category: 'accessories', measures: [] },
+                    { id: 'bag', name: 'School Bag', emoji: '🎒', category: 'accessories', measures: [] }
+                ]
+            }
+        };
+
+        // Initialize Application
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        function initializeApp() {
+            // Set max date for DOB to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('dateOfBirth').max = today;
+            
+            // Load saved theme
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            if (savedTheme === 'dark') {
+                toggleTheme();
+            }
+            
+            // Setup form validations
+            setupFormValidations();
+            
+            // Setup event listeners
+            setupEventListeners();
+            
+            // Show welcome message
+            showAlert('Welcome to UniForm Smart! Let\'s create your perfect uniform profile.', 'info');
+        }
+
+        function setupFormValidations() {
+            // Enhanced form validation with real-time feedback
+            const requiredFields = ['studentName', 'rollNumber', 'class', 'division', 'dateOfBirth', 'height', 'weight'];
+            
+            requiredFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.addEventListener('input', function() {
+                        validateFormField(fieldId);
+                        updateStepValidation();
+                    });
+                    field.addEventListener('change', function() {
+                        validateFormField(fieldId);
+                        updateStepValidation();
+                    });
+                }
+            });
+
+            // Gender-specific field validation
+            setupGenderSpecificValidation();
+        }
+
+        function setupGenderSpecificValidation() {
+            // All gender-specific fields are now optional
+            const allGenderFields = [
+                'femaleBust', 'femaleWaist', 'femaleHip', 'femaleShoulder', 'femaleSleeveLength', 'femaleTopLength',
+                'maleChest', 'maleShoulder', 'maleWaist', 'maleHip', 'maleSleeveLength', 'maleTopLength'
+            ];
+            
+            allGenderFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.addEventListener('input', function() {
+                        validateGenderSpecificFields();
+                        updateStepValidation();
+                    });
+                }
+            });
+        }
+
+        function validateFormField(fieldId) {
+            const field = document.getElementById(fieldId);
+            const helper = field.parentElement.querySelector('.form-helper');
+            
+            let isValid = true;
+            let message = '';
+            let className = '';
+
+            if (field.hasAttribute('required') && !field.value.trim()) {
+                isValid = false;
+                message = 'This field is required';
+                className = 'error';
+            } else if (field.type === 'number') {
+                const value = parseFloat(field.value);
+                const min = parseFloat(field.min);
+                const max = parseFloat(field.max);
+                
+                if (field.value && (isNaN(value) || value < min || value > max)) {
+                    isValid = false;
+                    message = `Please enter a value between ${min} and ${max}`;
+                    className = 'error';
+                } else if (field.value) {
+                    message = helper.dataset.originalText || helper.textContent;
+                    className = 'success';
+                }
+            }
+
+            if (helper && message) {
+                if (!helper.dataset.originalText) {
+                    helper.dataset.originalText = helper.textContent;
+                }
+                helper.textContent = message;
+                helper.className = `form-helper ${className}`;
+            }
+
+            // Update field styling
+            if (isValid && field.value) {
+                field.style.borderColor = 'var(--success-color)';
+            } else if (!isValid) {
+                field.style.borderColor = 'var(--danger-color)';
+            } else {
+                field.style.borderColor = '';
+            }
+
+            return isValid;
+        }
+
+        function validateGenderSpecificFields() {
+            // All gender-specific measurements are optional
+            // Only validate values if they are entered
+            
+            if (selectedGender === 'F') {
+                const femaleFields = ['femaleBust', 'femaleWaist', 'femaleHip', 'femaleShoulder', 'femaleSleeveLength', 'femaleTopLength'];
+                
+                femaleFields.forEach(fieldId => {
+                    const field = document.getElementById(fieldId);
+                    if (field.value) {
+                        const value = parseFloat(field.value);
+                        if (!isNaN(value) && value >= 30 && value <= 200) {
+                            field.style.borderColor = 'var(--success-color)';
+                            genderSpecificMeasurements[fieldId] = value;
+                        } else {
+                            field.style.borderColor = 'var(--danger-color)';
+                        }
+                    } else {
+                        field.style.borderColor = '';
+                        delete genderSpecificMeasurements[fieldId];
+                    }
+                });
+
+                return true; // Always valid since all fields are optional
+            } else if (selectedGender === 'M') {
+                const maleFields = ['maleChest', 'maleShoulder', 'maleWaist', 'maleHip', 'maleSleeveLength', 'maleTopLength'];
+                
+                maleFields.forEach(fieldId => {
+                    const field = document.getElementById(fieldId);
+                    if (field.value) {
+                        const value = parseFloat(field.value);
+                        if (!isNaN(value) && value >= 20 && value <= 200) {
+                            field.style.borderColor = 'var(--success-color)';
+                            genderSpecificMeasurements[fieldId] = value;
+                        } else {
+                            field.style.borderColor = 'var(--danger-color)';
+                        }
+                    } else {
+                        field.style.borderColor = '';
+                        delete genderSpecificMeasurements[fieldId];
+                    }
+                });
+
+                return true; // Always valid since all fields are optional
+            }
+
+            return true;
+        }
+
+        function updateStepValidation() {
+            // Update step validation indicators and next button states
+            updateStep1Validation();
+            updateStep2Validation();
+            updateStep3Validation();
+        }
+
+        function updateStep1Validation() {
+            const requiredFields = ['studentName', 'rollNumber', 'class', 'division', 'dateOfBirth'];
+            let allValid = true;
+            let missingFields = [];
+
+            // Check basic required fields
+            requiredFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                let value = field.value.trim();
+                
+                // Handle custom class/division
+                if (fieldId === 'class' && value === 'custom') {
+                    value = document.getElementById('customClass').value.trim();
+                }
+                if (fieldId === 'division' && value === 'custom') {
+                    value = document.getElementById('customDivision').value.trim();
+                }
+                
+                if (!value) {
+                    allValid = false;
+                    missingFields.push(field.previousElementSibling.textContent.replace(' *', ''));
+                }
+            });
+
+            // Check gender and squad selection
+            if (!selectedGender) {
+                allValid = false;
+                missingFields.push('Gender');
+            }
+            if (!selectedSquad) {
+                allValid = false;
+                missingFields.push('Squad Color');
+            }
+
+            // Update validation indicator
+            const validation = document.getElementById('step1-validation');
+            const nextBtn = document.getElementById('step1NextBtn');
+            
+            if (allValid) {
+                validation.className = 'step-validation complete';
+                validation.innerHTML = '<span class="validation-icon">✅</span><span>All required information completed</span>';
+                nextBtn.disabled = false;
+                formValidation.step1.valid = true;
+            } else {
+                validation.className = 'step-validation incomplete';
+                validation.innerHTML = `<span class="validation-icon">⚠️</span><span>Missing: ${missingFields.join(', ')}</span>`;
+                nextBtn.disabled = true;
+                formValidation.step1.valid = false;
+            }
+        }
+
+        function updateStep2Validation() {
+            const height = parseFloat(document.getElementById('height').value);
+            const weight = parseFloat(document.getElementById('weight').value);
+            
+            // Only height and weight are required for Step 2 validation
+            let isValid = !isNaN(height) && !isNaN(weight) && 
+                          height >= 80 && height <= 250 && 
+                          weight >= 10 && weight <= 200;
+
+            // Gender-specific fields are optional - validate only if entered
+            validateGenderSpecificFields();
+
+            const validation = document.getElementById('step2-validation');
+            const nextBtn = document.getElementById('step2NextBtn');
+            
+            if (isValid) {
+                validation.className = 'step-validation complete';
+                validation.innerHTML = '<span class="validation-icon">✅</span><span>Basic measurements completed - ready to proceed!</span>';
+                nextBtn.disabled = false;
+                formValidation.step2.valid = true;
+            } else {
+                validation.className = 'step-validation incomplete';
+                validation.innerHTML = '<span class="validation-icon">⚠️</span><span>Please enter valid height and weight to proceed</span>';
+                nextBtn.disabled = true;
+                formValidation.step2.valid = false;
+            }
+        }
+
+        function updateStep3Validation() {
+            const validation = document.getElementById('step3-validation');
+            const nextBtn = document.getElementById('step3NextBtn');
+            
+            if (selectedGarments.size > 0) {
+                validation.className = 'step-validation complete';
+                validation.innerHTML = `<span class="validation-icon">✅</span><span>${selectedGarments.size} garment(s) selected</span>`;
+                nextBtn.disabled = false;
+                formValidation.step3.valid = true;
+            } else {
+                validation.className = 'step-validation incomplete';
+                validation.innerHTML = '<span class="validation-icon">⚠️</span><span>Please select at least one garment to proceed</span>';
+                nextBtn.disabled = true;
+                formValidation.step3.valid = false;
+            }
+        }
+
+        function setupEventListeners() {
+            // Star rating for feedback
+            document.querySelectorAll('.star').forEach(star => {
+                star.addEventListener('click', function() {
+                    const rating = parseInt(this.dataset.rating);
+                    setStarRating(rating);
+                });
+            });
+        }
+
+        // Theme Management
+        function toggleTheme() {
+            const body = document.body;
+            const themeToggle = document.querySelector('.theme-toggle');
+            
+            if (currentTheme === 'light') {
+                body.setAttribute('data-theme', 'dark');
+                themeToggle.innerHTML = '☀️ Light Mode';
+                currentTheme = 'dark';
+            } else {
+                body.removeAttribute('data-theme');
+                themeToggle.innerHTML = '🌙 Dark Mode';
+                currentTheme = 'light';
+            }
+            
+            localStorage.setItem('theme', currentTheme);
+        }
+
+        // Enhanced Step Management
+        function nextStep() {
+            // Enhanced validation before proceeding
+            if (!validateCurrentStep()) {
+                return;
+            }
+
+            if (currentStep < 5) {
+                hideStep(currentStep);
+                currentStep++;
+                showStep(currentStep);
+                updateStepper();
+                
+                // Special handling for step 3 (garments)
+                if (currentStep === 3) {
+                    loadGarments();
+                }
+                
+                // Special handling for step 4 (review)
+                if (currentStep === 4) {
+                    generateOrderSummary();
+                }
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                hideStep(currentStep);
+                currentStep--;
+                showStep(currentStep);
+                updateStepper();
+            }
+        }
+
+        function showStep(step) {
+            document.getElementById(`content-step-${step}`).classList.add('active');
+            document.getElementById(`step-${step}`).classList.add('active');
+            
+            // Scroll to top smoothly
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function hideStep(step) {
+            document.getElementById(`content-step-${step}`).classList.remove('active');
+        }
+
+        function updateStepper() {
+            // Update step states
+            for (let i = 1; i <= 5; i++) {
+                const stepElement = document.getElementById(`step-${i}`);
+                stepElement.classList.remove('active', 'completed');
+                
+                if (i < currentStep) {
+                    stepElement.classList.add('completed');
+                } else if (i === currentStep) {
+                    stepElement.classList.add('active');
+                }
+            }
+        }
+
+        function validateCurrentStep() {
+            switch (currentStep) {
+                case 1:
+                    return validateStudentInfo();
+                case 2:
+                    return validateMeasurements();
+                case 3:
+                    return validateGarmentSelection();
+                default:
+                    return true;
+            }
+        }
+
+        // Enhanced Step 1: Student Information
+        function selectGender(gender) {
+            selectedGender = gender;
+            document.getElementById('gender').value = gender;
+            
+            // Update UI
+            document.querySelectorAll('.gender-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            document.querySelector(`[data-gender="${gender}"]`).classList.add('selected');
+            
+            // Show/hide gender-specific fields
+            showGenderSpecificFields(gender);
+            
+            // Update profile in sidebar
+            updateGenderProfile(gender);
+            
+            // Update validation
+            updateStep1Validation();
+            
+            showAlert(`${gender === 'M' ? 'Male' : 'Female'} profile activated. Additional measurements available.`, 'info');
+        }
+
+        function showGenderSpecificFields(gender) {
+            const maleFields = document.getElementById('maleFields');
+            const femaleFields = document.getElementById('femaleFields');
+            
+            // Hide both first
+            maleFields.classList.remove('active');
+            femaleFields.classList.remove('active');
+            
+            // Show appropriate fields
+            if (gender === 'M') {
+                maleFields.classList.add('active');
+            } else if (gender === 'F') {
+                femaleFields.classList.add('active');
+                // Remove required attribute since all fields are now optional
+                document.getElementById('femaleBust').required = false;
+                document.getElementById('femaleWaist').required = false;
+                document.getElementById('femaleHip').required = false;
+            }
+        }
+
+        function updateGenderProfile(gender) {
+            const genderText = gender === 'M' ? 'Male' : 'Female';
+            document.getElementById('genderProfile').textContent = genderText;
+        }
+
+        function selectSquad(squad) {
+            selectedSquad = squad;
+            document.getElementById('squadColor').value = squad;
+            
+            document.querySelectorAll('.squad-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            document.querySelector(`[data-squad="${squad}"]`).classList.add('selected');
+            
+            updateStep1Validation();
+        }
+
+        function calculateAge() {
+            const dob = document.getElementById('dateOfBirth').value;
+            if (dob) {
+                const today = new Date();
+                const birthDate = new Date(dob);
+                let age = today.getFullYear() - birthDate.getFullYear();
+                const monthDiff = today.getMonth() - birthDate.getMonth();
+                
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
+                }
+                
+                document.getElementById('age').value = age;
+                
+                // Update age-based hints
+                updateAgeBasedHints(age);
+                
+                // Store in student data
+                studentData.age = age;
+                studentData.dateOfBirth = dob;
+                
+                updateStep1Validation();
+            }
+        }
+
+        function updateAgeBasedHints(age) {
+            const helper = document.getElementById('ageHelper');
+            let message = '';
+            let className = '';
+            
+            if (age < 5) {
+                message = 'Age seems too young for school uniforms. Please verify.';
+                className = 'error';
+            } else if (age > 18) {
+                message = 'Age seems high for school uniforms. Please verify.';
+                className = 'warning';
+            } else if (age >= 5 && age <= 12) {
+                message = 'Growing age - we\'ll add extra room for growth.';
+                className = 'success';
+            } else {
+                message = 'Standard measurements will be used.';
+                className = 'success';
+            }
+            
+            helper.textContent = message;
+            helper.className = `form-helper ${className}`;
+        }
+
+        function validateStudentInfo() {
+            // Use the enhanced validation system
+            updateStep1Validation();
+            
+            if (formValidation.step1.valid) {
+                // Store student data
+                studentData = {
+                    ...studentData,
+                    studentName: document.getElementById('studentName').value,
+                    rollNumber: document.getElementById('rollNumber').value,
+                    registerNumber: document.getElementById('registerNumber').value,
+                    class: document.getElementById('class').value === 'custom' ? document.getElementById('customClass').value : document.getElementById('class').value,
+                    division: document.getElementById('division').value === 'custom' ? document.getElementById('customDivision').value : document.getElementById('division').value,
+                    gender: selectedGender,
+                    squadColor: selectedSquad
+                };
+                
+                showAlert('✅ Student information saved!', 'success');
+                return true;
+            }
+            
+            return false;
+        }
+
+        // Enhanced Step 2: Measurements
+        function validateMeasurements() {
+            updateStep2Validation();
+            
+            if (formValidation.step2.valid) {
+                const height = parseFloat(document.getElementById('height').value);
+                const weight = parseFloat(document.getElementById('weight').value);
+                
+                // Store measurements including gender-specific ones
+                studentData.height = height;
+                studentData.weight = weight;
+                studentData.fitPreference = document.getElementById('fitPreference').value;
+                studentData.bodyShapes = Array.from(selectedBodyShapes);
+                studentData.includesSports = selectedOptions.has('sports');
+                studentData.includesAccessories = selectedOptions.has('accessories');
+                studentData.genderSpecificMeasurements = { ...genderSpecificMeasurements };
+                
+                // Update profile stats
+                updateProfileStats();
+                
+                showAlert('✅ Measurements validated successfully!', 'success');
+                return true;
+            }
+            
+            return false;
+        }
+
+        function getHeightRangeForAge(age) {
+            // Simplified height ranges by age (in cm)
+            const ranges = {
+                5: { min: 100, max: 120 },
+                6: { min: 105, max: 125 },
+                7: { min: 110, max: 130 },
+                8: { min: 115, max: 135 },
+                9: { min: 120, max: 140 },
+                10: { min: 125, max: 145 },
+                11: { min: 130, max: 150 },
+                12: { min: 135, max: 160 },
+                13: { min: 140, max: 170 },
+                14: { min: 145, max: 175 },
+                15: { min: 150, max: 180 },
+                16: { min: 155, max: 185 },
+                17: { min: 160, max: 185 },
+                18: { min: 160, max: 190 }
+            };
+            
+            return ranges[age] || { min: 150, max: 180 };
+        }
+
+        function calculateBMI(height, weight) {
+            return weight / Math.pow(height / 100, 2);
+        }
+
+        function getBMICategory(bmi, age) {
+            // Simplified BMI categories for children/teens
+            if (age < 18) {
+                if (bmi < 16) return 'Underweight';
+                if (bmi < 23) return 'Normal';
+                if (bmi < 27) return 'Overweight';
+                return 'Obese';
+            } else {
+                if (bmi < 18.5) return 'Underweight';
+                if (bmi < 25) return 'Normal';
+                if (bmi < 30) return 'Overweight';
+                return 'Obese';
+            }
+        }
+
+        function toggleBodyShape(shape) {
+            const element = document.querySelector(`[data-shape="${shape}"]`);
+            
+            if (selectedBodyShapes.has(shape)) {
+                selectedBodyShapes.delete(shape);
+                element.classList.remove('active');
+            } else {
+                selectedBodyShapes.add(shape);
+                element.classList.add('active');
+            }
+        }
+
+        function toggleOption(option) {
+            const element = document.querySelector(`[data-option="${option}"]`);
+            
+            if (selectedOptions.has(option)) {
+                selectedOptions.delete(option);
+                element.classList.remove('active');
+            } else {
+                selectedOptions.add(option);
+                element.classList.add('active');
+            }
+        }
+
+        function updateProfileStats() {
+            const height = studentData.height;
+            const weight = studentData.weight;
+            const age = studentData.age;
+            
+            if (height && weight && age) {
+                // BMI calculation
+                const bmi = calculateBMI(height, weight);
+                document.getElementById('bmiValue').textContent = bmi.toFixed(1);
+                
+                // Growth stage
+                let growthStage = 'Stable';
+                if (age <= 12) growthStage = 'Growing';
+                else if (age <= 16) growthStage = 'Rapid Growth';
+                
+                document.getElementById('growthStage').textContent = growthStage;
+                
+                // Size stability
+                let stability = 'Good';
+                if (bmi < 16 || bmi > 27) stability = 'Monitor';
+                
+                document.getElementById('sizeStability').textContent = stability;
+            }
+        }
+
+        // Enhanced measurement guide functions
+        function showMeasurementGuide(gender, measurementType) {
+            const modal = document.getElementById('specificMeasurementModal');
+            const title = document.getElementById('specificMeasurementTitle');
+            const content = document.getElementById('specificMeasurementContent');
+            
+            // Set title
+            title.textContent = `📏 How to Measure: ${measurementType.charAt(0).toUpperCase() + measurementType.slice(1)}`;
+            
+            // Generate content based on gender and measurement type
+            const guideContent = generateMeasurementGuideContent(gender, measurementType);
+            content.innerHTML = guideContent;
+            
+            // Mark the card as active
+            document.querySelectorAll('.measurement-card').forEach(card => card.classList.remove('active'));
+            event.target.closest('.measurement-card').classList.add('active');
+            
+            showModal('specificMeasurementModal');
+        }
+
+        function generateMeasurementGuideContent(gender, measurementType) {
+            const guides = {
+                male: {
+                    chest: {
+                        title: 'Chest Measurement (Male)',
+                        icon: '🫀',
+                        description: 'Measure around the fullest part of the chest',
+                        steps: [
+                            'Stand straight with arms at your sides',
+                            'Place measuring tape around the fullest part of the chest',
+                            'Keep the tape level and parallel to the floor',
+                            'Breathe normally and take measurement',
+                            'Do not pull the tape too tight'
+                        ],
+                        tips: [
+                            'Wear a light t-shirt for comfort',
+                            'Have someone help you measure',
+                            'Take measurement over clothing, not directly on skin'
+                        ]
+                    },
+                    shoulder: {
+                        title: 'Shoulder Measurement (Male)',
+                        icon: '👤',
+                        description: 'Measure from shoulder point to shoulder point',
+                        steps: [
+                            'Stand straight with shoulders relaxed',
+                            'Find the shoulder points (where arm meets shoulder)',
+                            'Measure straight across the back',
+                            'Keep tape level across shoulder blades',
+                            'Record the measurement'
+                        ],
+                        tips: [
+                            'Don\'t measure across the front',
+                            'Keep shoulders in natural position',
+                            'Measure the widest point across back'
+                        ]
+                    },
+                    waist: {
+                        title: 'Waist Measurement (Male)',
+                        icon: '⚫',
+                        description: 'Measure at the natural waistline',
+                        steps: [
+                            'Find your natural waist (usually above hip bones)',
+                            'Wrap tape around waist at this point',
+                            'Keep tape parallel to floor',
+                            'Breathe normally, don\'t suck in',
+                            'Take measurement on exhale'
+                        ],
+                        tips: [
+                            'Natural waist is narrowest part of torso',
+                            'Don\'t measure at belt line',
+                            'Keep one finger space for comfort'
+                        ]
+                    }
+                },
+                female: {
+                    bust: {
+                        title: 'Bust Measurement (Female)',
+                        icon: '💚',
+                        description: 'Measure around the fullest part of the bust',
+                        steps: [
+                            'Wear a well-fitted, non-padded bra',
+                            'Stand straight with arms at your sides',
+                            'Place tape around fullest part of bust',
+                            'Keep tape parallel to the floor',
+                            'Breathe normally and record measurement'
+                        ],
+                        tips: [
+                            'This is different from bra size',
+                            'Keep tape snug but not tight',
+                            'Measure over the bra, not under'
+                        ]
+                    },
+                    waist: {
+                        title: 'Waist Measurement (Female)',
+                        icon: '⚫',
+                        description: 'Measure at the narrowest part of the torso',
+                        steps: [
+                            'Find the narrowest part of your waist',
+                            'This is usually above your belly button',
+                            'Wrap tape around this point',
+                            'Keep tape level and parallel to floor',
+                            'Breathe normally and measure'
+                        ],
+                        tips: [
+                            'Bend to the side to find natural waist',
+                            'Don\'t measure at hip level',
+                            'Stand naturally, don\'t suck in'
+                        ]
+                    },
+                    hip: {
+                        title: 'Hip Measurement (Female)',
+                        icon: '🍑',
+                        description: 'Measure around the fullest part of hips',
+                        steps: [
+                            'Stand with feet together',
+                            'Find the fullest part of your hips/buttocks',
+                            'Wrap tape around this area',
+                            'Keep tape level and parallel to floor',
+                            'Record the measurement'
+                        ],
+                        tips: [
+                            'This is usually 7-9 inches below waist',
+                            'Include buttocks in measurement',
+                            'Don\'t pull tape too tight'
+                        ]
+                    }
+                }
+            };
+
+            const guide = guides[gender] && guides[gender][measurementType];
+            if (!guide) {
+                return '<p>Measurement guide not available for this combination.</p>';
+            }
+
+            return `
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <div style="font-size: 4rem; margin-bottom: 15px;">${guide.icon}</div>
+                    <h3>${guide.title}</h3>
+                    <p style="color: var(--text-secondary); margin-top: 10px;">${guide.description}</p>
+                </div>
+                
+                <div style="background: var(--light-bg); padding: 20px; border-radius: 12px; margin-bottom: 30px;">
+                    <h4 style="margin-bottom: 15px; color: var(--text-primary);">📋 Step-by-Step Guide:</h4>
+                    <div class="guide-steps">
+                        ${guide.steps.map((step, index) => `
+                            <div class="guide-step">
+                                <div class="step-number">${index + 1}</div>
+                                <div>${step}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <div style="background: #fffbeb; border: 2px solid #f59e0b; border-radius: 12px; padding: 20px;">
+                    <h4 style="color: #92400e; margin-bottom: 15px;">💡 Pro Tips:</h4>
+                    <ul style="color: #92400e; margin: 0; padding-left: 20px;">
+                        ${guide.tips.map(tip => `<li style="margin-bottom: 8px;">${tip}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+
+        // Continue with remaining functions...
+        // Step 2.5: Generate Recommendations
+        function generateRecommendations() {
+            if (!validateMeasurements()) return;
+            
+            showAlert('🤖 Generating AI recommendations...', 'info');
+            
+            // Simulate API calls to both SQL and AI services
+            setTimeout(() => {
+                // Simulate SQL recommendation (fn_best_size_id)
+                recommendedSize = calculateSQLSize();
+                
+                // Simulate AI recommendation
+                aiRecommendation = calculateAISize();
+                
+                // Update recommendation panel
+                updateRecommendationPanel();
+                
+                // Show success and proceed
+                showAlert('✅ Recommendations generated! Review and proceed to garment selection.', 'success');
+                nextStep();
+                
+            }, 2000);
+        }
+
+        function calculateSQLSize() {
+            // Simulate SQL size calculation logic with gender-specific measurements
+            const { height, weight, age, gender, genderSpecificMeasurements } = studentData;
+            const bmi = calculateBMI(height, weight);
+            
+            let sizeCode = 'medium';
+            let confidence = 0.85;
+            
+            // Enhanced size logic based on height, weight, and gender-specific measurements
+            if (gender === 'M') {
+                if (height < 130) sizeCode = 'small';
+                else if (height < 150) sizeCode = 'medium';
+                else if (height < 170) sizeCode = 'large';
+                else sizeCode = 'large+';
+                
+                // Adjust based on chest measurement if available
+                if (genderSpecificMeasurements.maleChest) {
+                    const chest = genderSpecificMeasurements.maleChest;
+                    if (chest > 90) {
+                        const sizes = ['small-', 'small', 'small+', 'medium', 'medium+', 'large', 'large+'];
+                        const currentIndex = sizes.indexOf(sizeCode);
+                        if (currentIndex < sizes.length - 1) {
+                            sizeCode = sizes[currentIndex + 1];
+                        }
+                    }
+                    confidence = 0.92; // Higher confidence with specific measurements
+                }
+            } else {
+                if (height < 125) sizeCode = 'small';
+                else if (height < 145) sizeCode = 'medium';
+                else if (height < 165) sizeCode = 'large';
+                else sizeCode = 'large+';
+                
+                // Adjust based on bust/waist/hip measurements
+                if (genderSpecificMeasurements.femaleBust && genderSpecificMeasurements.femaleWaist && genderSpecificMeasurements.femaleHip) {
+                    const bust = genderSpecificMeasurements.femaleBust;
+                    const waist = genderSpecificMeasurements.femaleWaist;
+                    const hip = genderSpecificMeasurements.femaleHip;
+                    
+                    // Use the largest measurement for sizing
+                    const maxMeasurement = Math.max(bust, waist, hip);
+                    if (maxMeasurement > 85) {
+                        const sizes = ['small-', 'small', 'small+', 'medium', 'medium+', 'large', 'large+'];
+                        const currentIndex = sizes.indexOf(sizeCode);
+                        if (currentIndex < sizes.length - 1) {
+                            sizeCode = sizes[currentIndex + 1];
+                        }
+                    }
+                    confidence = 0.95; // Very high confidence with all measurements
+                }
+            }
+            
+            // Adjust for weight/BMI
+            if (bmi > 25) {
+                const sizes = ['small-', 'small', 'small+', 'medium', 'medium+', 'large', 'large+'];
+                const currentIndex = sizes.indexOf(sizeCode);
+                if (currentIndex < sizes.length - 1) {
+                    sizeCode = sizes[currentIndex + 1];
+                }
+            }
+            
+            return {
+                sizeCode,
+                confidence,
+                method: 'Enhanced SQL Rule-based',
+                reasoning: `Based on height ${height}cm, weight ${weight}kg, age ${age} years${Object.keys(genderSpecificMeasurements).length > 0 ? ', and optional body measurements' : ''}`
+            };
+        }
+
+        function calculateAISize() {
+            // Simulate AI prediction with enhanced logic including gender-specific measurements
+            const { height, weight, age, gender, bodyShapes, fitPreference, genderSpecificMeasurements } = studentData;
+            
+            let sizeCode = recommendedSize.sizeCode;
+            let confidence = 0.92;
+            
+            // AI considers gender-specific measurements more heavily if available
+            if (gender === 'F' && Object.keys(genderSpecificMeasurements).length > 0) {
+                // Female with any measurements - AI can provide better recommendations
+                confidence = Math.min(0.96, 0.85 + (Object.keys(genderSpecificMeasurements).length * 0.02));
+                
+                if (genderSpecificMeasurements.femaleBust && genderSpecificMeasurements.femaleWaist && genderSpecificMeasurements.femaleHip) {
+                    const bust = genderSpecificMeasurements.femaleBust;
+                    const waist = genderSpecificMeasurements.femaleWaist;
+                    const hip = genderSpecificMeasurements.femaleHip;
+                    
+                    // AI uses pattern recognition on body proportions
+                    const bustWaistRatio = bust / waist;
+                    const hipWaistRatio = hip / waist;
+                    
+                    if (bustWaistRatio > 1.3 || hipWaistRatio > 1.4) {
+                        // Curvier figure - might need different sizing
+                        const sizes = ['small-', 'small', 'small+', 'medium', 'medium+', 'large', 'large+'];
+                        const currentIndex = sizes.indexOf(sizeCode);
+                        if (currentIndex < sizes.length - 1) {
+                            sizeCode = sizes[currentIndex + 1];
+                        }
+                    }
+                }
+            } else if (gender === 'M' && Object.keys(genderSpecificMeasurements).length > 0) {
+                // Male with any measurements
+                confidence = Math.min(0.93, 0.85 + (Object.keys(genderSpecificMeasurements).length * 0.02));
+                
+                if (genderSpecificMeasurements.maleChest) {
+                    const chest = genderSpecificMeasurements.maleChest;
+                    const heightChestRatio = height / chest;
+                    
+                    if (heightChestRatio < 1.9) {
+                        // Broader chest relative to height
+                        const sizes = ['small-', 'small', 'small+', 'medium', 'medium+', 'large', 'large+'];
+                        const currentIndex = sizes.indexOf(sizeCode);
+                        if (currentIndex < sizes.length - 1) {
+                            sizeCode = sizes[currentIndex + 1];
+                        }
+                    }
+                }
+            }
+            
+            // AI might suggest different size based on additional factors
+            if (bodyShapes.includes('slim') && Math.random() > 0.5) {
+                const sizes = ['small-', 'small', 'small+', 'medium', 'medium+', 'large', 'large+'];
+                const currentIndex = sizes.indexOf(sizeCode);
+                if (currentIndex > 0) {
+                    sizeCode = sizes[currentIndex - 1];
+                    confidence = 0.88;
+                }
+            }
+            
+            if (fitPreference === 'loose') {
+                const sizes = ['small-', 'small', 'small+', 'medium', 'medium+', 'large', 'large+'];
+                const currentIndex = sizes.indexOf(sizeCode);
+                if (currentIndex < sizes.length - 1) {
+                    sizeCode = sizes[currentIndex + 1];
+                }
+            }
+            
+            return {
+                sizeCode,
+                confidence,
+                method: 'AI Machine Learning with Gender Analysis',
+                reasoning: `Advanced pattern recognition considering ${gender === 'F' ? 'female body proportions' : 'male physique'}, body shape, and fit preferences`
+            };
+        }
+
+        function updateRecommendationPanel() {
+            // Update main recommendation
+            document.getElementById('recommendedSize').textContent = recommendedSize.sizeCode.toUpperCase();
+            document.getElementById('confidenceFill').style.width = `${recommendedSize.confidence * 100}%`;
+            document.getElementById('confidenceText').textContent = `${(recommendedSize.confidence * 100).toFixed(0)}% confidence`;
+            
+            // Show AI comparison if different
+            const aiComparison = document.getElementById('aiComparison');
+            if (aiRecommendation.sizeCode !== recommendedSize.sizeCode) {
+                document.getElementById('aiSuggestion').textContent = aiRecommendation.sizeCode.toUpperCase();
+                document.getElementById('aiReasoning').textContent = `${(aiRecommendation.confidence * 100).toFixed(0)}% confidence - ${aiRecommendation.reasoning}`;
+                aiComparison.style.display = 'block';
+            } else {
+                aiComparison.style.display = 'none';
+            }
+            
+            // Update size hints
+            updateSizeHints();
+        }
+
+        function updateSizeHints() {
+            const hints = [];
+            const { age, height, weight, gender, genderSpecificMeasurements } = studentData;
+            const sizes = ['small-', 'small', 'small+', 'medium', 'medium+', 'large', 'large+'];
+            const currentIndex = sizes.indexOf(recommendedSize.sizeCode);
+            
+            // Enhanced hints with gender-specific information
+            if (gender === 'F' && Object.keys(genderSpecificMeasurements).length > 0) {
+                hints.push('✨ Female-specific measurements used for enhanced accuracy');
+            } else if (gender === 'M' && Object.keys(genderSpecificMeasurements).length > 0) {
+                hints.push('✨ Male-specific measurements included for better fit');
+            } else {
+                hints.push('💡 Add optional measurements for enhanced sizing accuracy');
+            }
+            
+            // Growth buffer for kids
+            if (age <= 12) {
+                hints.push('🔄 Added growth allowance for growing children');
+            }
+            
+            // Size boundary warnings
+            if (currentIndex === 0) {
+                hints.push('⚠️ You\'re at the smallest size available');
+            } else if (currentIndex === sizes.length - 1) {
+                hints.push('⚠️ You\'re at the largest size available');
+            } else if (currentIndex >= sizes.length - 2) {
+                hints.push('📏 Consider custom sizing if standard doesn\'t fit well');
+            }
+            
+            // Fit preference hints
+            const fitPref = studentData.fitPreference;
+            if (fitPref === 'loose') {
+                hints.push('👕 Adjusted for loose fit preference');
+            } else if (fitPref === 'snug') {
+                hints.push('🎯 Adjusted for snug fit preference');
+            }
+            
+            document.getElementById('sizeHints').innerHTML = hints.length > 0 ? hints.join('<br>') : 'Standard sizing applied';
+        }
+
+        // Step 3: Garments (Enhanced)
+        function loadGarments() {
+            const container = document.getElementById('garmentsGrid');
+            container.innerHTML = '';
+            
+            const gender = studentData.gender;
+            const includesSports = selectedOptions.has('sports');
+            const includesAccessories = selectedOptions.has('accessories');
+            
+            let garments = [];
+            
+            // Add formal garments
+            if (gender === 'M') {
+                garments = [...garmentDatabase.formal.male];
+            } else {
+                garments = [...garmentDatabase.formal.female];
+            }
+            
+            // Add sports garments if selected
+            if (includesSports) {
+                if (gender === 'M') {
+                    garments = [...garments, ...garmentDatabase.sports.male];
+                } else {
+                    garments = [...garments, ...garmentDatabase.sports.female];
+                }
+            }
+            
+            // Add accessories if selected
+            if (includesAccessories) {
+                garments = [...garments, ...garmentDatabase.accessories.unisex];
+            }
+            
+            // Render garments
+            garments.forEach(garment => {
+                const card = createGarmentCard(garment);
+                container.appendChild(card);
+            });
+            
+            // Auto-select essential garments
+            autoSelectEssentialGarments(garments);
+            
+            updateSelectedCount();
+        }
+
+        function createGarmentCard(garment) {
+            const card = document.createElement('div');
+            card.className = 'garment-card';
+            card.dataset.garmentId = garment.id;
+            card.dataset.category = garment.category;
+            
+            // Generate measurements with gender-specific considerations
+            const measurements = generateEnhancedMeasurements(garment);
+            
+            // Default dummy image URL
+            const dummyImageUrl = `https://via.placeholder.com/280x200/f1f5f9/6b7280?text=${encodeURIComponent(garment.name)}`;
+            
+            card.innerHTML = `
+                <div class="garment-image">
+                    <img src="${dummyImageUrl}" alt="${garment.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div class="emoji-fallback" style="display: none;">${garment.emoji}</div>
+                    <div class="garment-badge">${garment.category}</div>
+                </div>
+                <div class="garment-info">
+                    <div class="garment-name">${garment.name}</div>
+                    <div class="garment-measures">
+                        ${measurements.map(measure => `
+                            <div class="measure-item" data-measure="${measure.name}" data-garment-id="${garment.id}">
+                                <span>${measure.name}</span>
+                                <div>
+                                    <span class="measure-value" onclick="editMeasurement('${garment.id}', '${measure.name}', ${measure.value})" title="Click to edit">
+                                        <span class="measure-value-text">${measure.value}cm</span>
+                                        <span class="measure-edit-icon">✏️</span>
+                                    </span>
+                                    <span class="measure-badge ${measure.method}">${measure.method}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div style="margin-top: 15px; text-align: center;">
+                        <button class="btn btn-outline" onclick="toggleGarment('${garment.id}')" id="btn-${garment.id}">
+                            Select
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        function generateEnhancedMeasurements(garment) {
+            const { height, weight, gender, genderSpecificMeasurements } = studentData;
+            const measurements = [];
+            
+            // Generate realistic measurements based on height/weight and gender-specific data
+            garment.measures.forEach(measureName => {
+                let value = 0;
+                let method = 'auto';
+                
+                // Check if we have specific measurements from the form
+                if (gender === 'F') {
+                    switch (measureName) {
+                        case 'chest':
+                            if (genderSpecificMeasurements.femaleBust) {
+                                value = genderSpecificMeasurements.femaleBust;
+                                method = 'manual';
+                            } else {
+                                value = Math.round((height * 0.52) + (weight * 0.4) + Math.random() * 4 - 2);
+                            }
+                            break;
+                        case 'waist':
+                            if (genderSpecificMeasurements.femaleWaist) {
+                                value = genderSpecificMeasurements.femaleWaist;
+                                method = 'manual';
+                            } else {
+                                value = Math.round((height * 0.42) + (weight * 0.3) + Math.random() * 4 - 2);
+                            }
+                            break;
+                        case 'hip':
+                            if (genderSpecificMeasurements.femaleHip) {
+                                value = genderSpecificMeasurements.femaleHip;
+                                method = 'manual';
+                            } else {
+                                value = Math.round((height * 0.54) + (weight * 0.35) + Math.random() * 4 - 2);
+                            }
+                            break;
+                        case 'shoulder':
+                            if (genderSpecificMeasurements.femaleShoulder) {
+                                value = genderSpecificMeasurements.femaleShoulder;
+                                method = 'manual';
+                            } else {
+                                value = Math.round((height * 0.24) + Math.random() * 3 - 1.5);
+                            }
+                            break;
+                        case 'sleeve_length':
+                            if (genderSpecificMeasurements.femaleSleeveLength) {
+                                value = genderSpecificMeasurements.femaleSleeveLength;
+                                method = 'manual';
+                            } else {
+                                value = Math.round((height * 0.30) + Math.random() * 3 - 1.5);
+                            }
+                            break;
+                        case 'length':
+                            if (genderSpecificMeasurements.femaleTopLength) {
+                                value = genderSpecificMeasurements.femaleTopLength;
+                                method = 'manual';
+                            } else {
+                                value = Math.round((height * 0.33) + Math.random() * 4 - 2);
+                            }
+                            break;
+                    }
+                } else if (gender === 'M') {
+                    switch (measureName) {
+                        case 'chest':
+                            if (genderSpecificMeasurements.maleChest) {
+                                value = genderSpecificMeasurements.maleChest;
+                                method = 'manual';
+                            } else {
+                                value = Math.round((height * 0.54) + (weight * 0.4) + Math.random() * 4 - 2);
+                            }
+                            break;
+                        case 'waist':
+                            if (genderSpecificMeasurements.maleWaist) {
+                                value = genderSpecificMeasurements.maleWaist;
+                                method = 'manual';
+                            } else {
+                                value = Math.round((height * 0.44) + (weight * 0.3) + Math.random() * 4 - 2);
+                            }
+                            break;
+                        case 'hip':
+                            if (genderSpecificMeasurements.maleHip) {
+                                value = genderSpecificMeasurements.maleHip;
+                                method = 'manual';
+                            } else {
+                                value = Math.round((height * 0.52) + (weight * 0.35) + Math.random() * 4 - 2);
+                            }
+                            break;
+                        case 'shoulder':
+                            if (genderSpecificMeasurements.maleShoulder) {
+                                value = genderSpecificMeasurements.maleShoulder;
+                                method = 'manual';
+                            } else {
+                                value = Math.round((height * 0.26) + Math.random() * 3 - 1.5);
+                            }
+                            break;
+                        case 'sleeve_length':
+                            if (genderSpecificMeasurements.maleSleeveLength) {
+                                value = genderSpecificMeasurements.maleSleeveLength;
+                                method = 'manual';
+                            } else {
+                                value = Math.round((height * 0.32) + Math.random() * 3 - 1.5);
+                            }
+                            break;
+                        case 'length':
+                            if (genderSpecificMeasurements.maleTopLength) {
+                                value = genderSpecificMeasurements.maleTopLength;
+                                method = 'manual';
+                            } else {
+                                value = Math.round((height * 0.35) + Math.random() * 4 - 2);
+                            }
+                            break;
+                    }
+                }
+                
+                // Fallback calculations for measures not covered above
+                if (value === 0) {
+                    switch (measureName) {
+                        case 'inseam':
+                            value = Math.round((height * 0.45) + Math.random() * 4 - 2);
+                            break;
+                        case 'outseam':
+                            value = Math.round((height * 0.58) + Math.random() * 4 - 2);
+                            break;
+                        default:
+                            value = Math.round(height * 0.3 + Math.random() * 5);
+                    }
+                }
+                
+                measurements.push({
+                    name: measureName.replace('_', ' '),
+                    value: Math.max(value, 20), // Minimum 20cm
+                    method
+                });
+            });
+            
+            return measurements;
+        }
+
+        // Enhanced measurement editing
+        function editMeasurement(garmentId, measureName, currentValue) {
+            const measureItem = document.querySelector(`[data-garment-id="${garmentId}"][data-measure="${measureName}"]`);
+            const valueElement = measureItem.querySelector('.measure-value');
+            const badgeElement = measureItem.querySelector('.measure-badge');
+            
+            // Create inline edit interface
+            valueElement.innerHTML = `
+                <input type="number" class="measure-edit-input" value="${currentValue}" min="10" max="200" step="0.1" id="edit-${garmentId}-${measureName}">
+                <div class="measure-edit-buttons">
+                    <button type="button" class="measure-edit-btn save" title="Save">✓</button>
+                    <button type="button" class="measure-edit-btn cancel" title="Cancel">✕</button>
+                </div>
+            `;
+            
+            // Focus on input
+            const input = valueElement.querySelector('.measure-edit-input');
+            input.focus();
+            input.select();
+            
+            // Get buttons
+            const saveBtn = valueElement.querySelector('.save');
+            const cancelBtn = valueElement.querySelector('.cancel');
+            
+            // Add event listeners to buttons
+            saveBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                saveMeasurement(garmentId, measureName);
+            });
+            
+            cancelBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                cancelMeasurementEdit(garmentId, measureName, currentValue);
+            });
+            
+            // Handle Enter key to save
+            input.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    saveMeasurement(garmentId, measureName);
+                }
+            });
+            
+            // Handle Escape key to cancel
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    cancelMeasurementEdit(garmentId, measureName, currentValue);
+                }
+            });
+            
+            showAlert(`✏️ Editing ${measureName} for ${garmentId.replace(/_/g, ' ')}`, 'info');
+        }
+
+        function saveMeasurement(garmentId, measureName) {
+            const measureItem = document.querySelector(`[data-garment-id="${garmentId}"][data-measure="${measureName}"]`);
+            const input = measureItem.querySelector('.measure-edit-input');
+            const newValue = parseFloat(input.value);
+            
+            // Validate input
+            if (isNaN(newValue) || newValue < 10 || newValue > 200) {
+                showAlert('Please enter a valid measurement between 10-200 cm', 'error');
+                input.focus();
+                return;
+            }
+            
+            // Update the display
+            const valueElement = measureItem.querySelector('.measure-value');
+            const badgeElement = measureItem.querySelector('.measure-badge');
+            
+            valueElement.innerHTML = `
+                <span class="measure-value-text">${newValue}cm</span>
+                <span class="measure-edit-icon">✏️</span>
+            `;
+            
+            // Update badge to manual
+            badgeElement.textContent = 'manual';
+            badgeElement.className = 'measure-badge manual';
+            
+            // Restore click handler
+            valueElement.onclick = () => editMeasurement(garmentId, measureName, newValue);
+            valueElement.title = 'Click to edit';
+            
+            // Store the change
+            storeMeasurementChange(garmentId, measureName, newValue);
+            
+            showAlert(`✅ ${measureName} updated to ${newValue}cm`, 'success');
+        }
+
+        function cancelMeasurementEdit(garmentId, measureName, originalValue) {
+            const measureItem = document.querySelector(`[data-garment-id="${garmentId}"][data-measure="${measureName}"]`);
+            const valueElement = measureItem.querySelector('.measure-value');
+            
+            // Restore original display
+            valueElement.innerHTML = `
+                <span class="measure-value-text">${originalValue}cm</span>
+                <span class="measure-edit-icon">✏️</span>
+            `;
+            
+            // Restore click handler
+            valueElement.onclick = () => editMeasurement(garmentId, measureName, originalValue);
+            valueElement.title = 'Click to edit';
+            
+            showAlert('Edit cancelled', 'info');
+        }
+
+        function storeMeasurementChange(garmentId, measureName, newValue) {
+            // Store measurement changes in memory
+            if (!window.measurementChanges) {
+                window.measurementChanges = {};
+            }
+            
+            if (!window.measurementChanges[garmentId]) {
+                window.measurementChanges[garmentId] = {};
+            }
+            
+            window.measurementChanges[garmentId][measureName] = {
+                value: newValue,
+                method: 'manual',
+                changedAt: new Date().toISOString()
+            };
+        }
+
+        function autoSelectEssentialGarments(garments) {
+            // Auto-select essential garments
+            const essential = ['formal_shirt', 'formal_pants', 'skirt', 'pinafore'];
+            
+            garments.forEach(garment => {
+                const isEssential = essential.some(keyword => garment.id.includes(keyword));
+                if (isEssential) {
+                    toggleGarment(garment.id, true);
+                }
+            });
+        }
+
+        function toggleGarment(garmentId, forceSelect = false) {
+            const card = document.querySelector(`[data-garment-id="${garmentId}"]`);
+            const button = document.getElementById(`btn-${garmentId}`);
+            
+            if (selectedGarments.has(garmentId) && !forceSelect) {
+                selectedGarments.delete(garmentId);
+                card.classList.remove('selected');
+                button.textContent = 'Select';
+                button.classList.remove('btn-success');
+                button.classList.add('btn-outline');
+            } else {
+                selectedGarments.add(garmentId);
+                card.classList.add('selected');
+                button.textContent = '✓ Selected';
+                button.classList.remove('btn-outline');
+                button.classList.add('btn-success');
+            }
+            
+            updateSelectedCount();
+            updateStep3Validation();
+        }
+
+        function updateSelectedCount() {
+            document.getElementById('selectedCount').textContent = selectedGarments.size;
+        }
+
+        function filterGarments() {
+            const filter = document.getElementById('categoryFilter').value;
+            const cards = document.querySelectorAll('.garment-card');
+            
+            cards.forEach(card => {
+                if (!filter || card.dataset.category === filter) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function toggleAllGarments() {
+            const visibleCards = document.querySelectorAll('.garment-card:not([style*="display: none"])');
+            const button = event.target;
+            
+            if (button.textContent.includes('Select All')) {
+                visibleCards.forEach(card => {
+                    const garmentId = card.dataset.garmentId;
+                    if (!selectedGarments.has(garmentId)) {
+                        toggleGarment(garmentId, true);
+                    }
+                });
+                button.textContent = 'Deselect All';
+            } else {
+                visibleCards.forEach(card => {
+                    const garmentId = card.dataset.garmentId;
+                    if (selectedGarments.has(garmentId)) {
+                        toggleGarment(garmentId, false);
+                    }
+                });
+                button.textContent = 'Select All';
+            }
+        }
+
+        function validateGarmentSelection() {
+            updateStep3Validation();
+            return formValidation.step3.valid;
+        }
+
+        // Step 4: Enhanced Review & Summary
+        function generateOrderSummary() {
+            const container = document.getElementById('orderSummary');
+            
+            // Enhanced summary with gender-specific measurements
+            const genderSpecificSummary = generateGenderSpecificSummary();
+            
+            const summary = `
+                <div class="summary-section">
+                    <h4>👤 Student Information</h4>
+                    <div class="summary-item">
+                        <span class="summary-label">Name:</span>
+                        <span class="summary-value">${studentData.studentName}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Roll Number:</span>
+                        <span class="summary-value">${studentData.rollNumber}</span>
+                    </div>
+                    ${studentData.registerNumber ? `
+                    <div class="summary-item">
+                        <span class="summary-label">Register Number:</span>
+                        <span class="summary-value">${studentData.registerNumber}</span>
+                    </div>
+                    ` : ''}
+                    <div class="summary-item">
+                        <span class="summary-label">Class:</span>
+                        <span class="summary-value">${studentData.class}-${studentData.division}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Age:</span>
+                        <span class="summary-value">${studentData.age} years</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Gender:</span>
+                        <span class="summary-value">${studentData.gender === 'M' ? 'Male' : 'Female'}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Squad:</span>
+                        <span class="summary-value">${studentData.squadColor.toUpperCase()}</span>
+                    </div>
+                </div>
+
+                <div class="summary-section" style="margin-top: 30px;">
+                    <h4>📏 Basic Measurements</h4>
+                    <div class="summary-item">
+                        <span class="summary-label">Height:</span>
+                        <span class="summary-value">${studentData.height} cm</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Weight:</span>
+                        <span class="summary-value">${studentData.weight} kg</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">BMI:</span>
+                        <span class="summary-value">${calculateBMI(studentData.height, studentData.weight).toFixed(1)}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Fit Preference:</span>
+                        <span class="summary-value">${studentData.fitPreference || 'Standard'}</span>
+                    </div>
+                </div>
+
+                ${genderSpecificSummary}
+
+                <div class="summary-section" style="margin-top: 30px;">
+                    <h4>🎯 Size Recommendation</h4>
+                    <div class="summary-item">
+                        <span class="summary-label">Recommended Size:</span>
+                        <span class="summary-value">${recommendedSize.sizeCode.toUpperCase()}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Confidence:</span>
+                        <span class="summary-value">${(recommendedSize.confidence * 100).toFixed(0)}%</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Method:</span>
+                        <span class="summary-value">${recommendedSize.method}</span>
+                    </div>
+                    ${aiRecommendation.sizeCode !== recommendedSize.sizeCode ? `
+                    <div class="summary-item">
+                        <span class="summary-label">AI Alternative:</span>
+                        <span class="summary-value">${aiRecommendation.sizeCode.toUpperCase()} (${(aiRecommendation.confidence * 100).toFixed(0)}%)</span>
+                    </div>
+                    ` : ''}
+                </div>
+
+                <div class="summary-section" style="margin-top: 30px;">
+                    <h4>👕 Selected Garments (${selectedGarments.size})</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                        ${Array.from(selectedGarments).map(garmentId => {
+                            const garment = findGarmentById(garmentId);
+                            return `
+                                <div style="background: var(--light-bg); padding: 15px; border-radius: 8px; text-align: center;">
+                                    <div style="font-size: 2rem;">${garment.emoji}</div>
+                                    <div style="font-weight: 600; margin-top: 8px;">${garment.name}</div>
+                                    <div style="font-size: 0.9rem; color: var(--text-secondary);">${garment.category}</div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+
+                <div class="summary-section" style="margin-top: 30px;">
+                    <h4>📊 Order Statistics</h4>
+                    <div class="summary-item">
+                        <span class="summary-label">Total Garments:</span>
+                        <span class="summary-value">${selectedGarments.size}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Formal Items:</span>
+                        <span class="summary-value">${countGarmentsByCategory('formal')}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Sports Items:</span>
+                        <span class="summary-value">${countGarmentsByCategory('sports')}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Accessories:</span>
+                        <span class="summary-value">${countGarmentsByCategory('accessories')}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Manual Edits:</span>
+                        <span class="summary-value">${window.measurementChanges ? Object.keys(window.measurementChanges).length : 0}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Measurement Quality:</span>
+                        <span class="summary-value">${Object.keys(genderSpecificMeasurements).length > 0 ? 'Enhanced' : 'Standard'}</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Est. Delivery:</span>
+                        <span class="summary-value">7-10 business days</span>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = summary;
+        }
+
+        function generateGenderSpecificSummary() {
+            if (Object.keys(genderSpecificMeasurements).length === 0) {
+                return '';
+            }
+
+            const gender = studentData.gender;
+            const measurements = genderSpecificMeasurements;
+            
+            let summaryHTML = `
+                <div class="summary-section" style="margin-top: 30px;">
+                    <h4>${gender === 'F' ? '👩' : '👨'} ${gender === 'F' ? 'Female' : 'Male'}-Specific Measurements</h4>
+            `;
+
+            Object.keys(measurements).forEach(key => {
+                const displayName = key.replace(/^(male|female)/, '').replace(/([A-Z])/g, ' $1').trim();
+                const capitalizedName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
+                
+                summaryHTML += `
+                    <div class="summary-item">
+                        <span class="summary-label">${capitalizedName}:</span>
+                        <span class="summary-value">${measurements[key]} cm</span>
+                    </div>
+                `;
+            });
+
+            summaryHTML += '</div>';
+            return summaryHTML;
+        }
+
+        function findGarmentById(garmentId) {
+            // Search through all garment categories
+            for (const category in garmentDatabase) {
+                for (const gender in garmentDatabase[category]) {
+                    const garment = garmentDatabase[category][gender].find(g => g.id === garmentId);
+                    if (garment) return garment;
+                }
+            }
+            return null;
+        }
+
+        function countGarmentsByCategory(category) {
+            let count = 0;
+            selectedGarments.forEach(garmentId => {
+                const garment = findGarmentById(garmentId);
+                if (garment && garment.category === category) count++;
+            });
+            return count;
+        }
+
+        // Export and Submit
+        function exportSummary(format) {
+            showAlert(`📄 Exporting order summary as ${format.toUpperCase()}...`, 'info');
+            
+            setTimeout(() => {
+                // Simulate export
+                const filename = `${studentData.studentName}_${studentData.rollNumber}_uniform_order.${format}`;
+                showAlert(`✅ ${filename} downloaded successfully!`, 'success');
+            }, 1500);
+        }
+
+        function submitOrder() {
+            showAlert('🚀 Submitting your uniform order...', 'info');
+            
+            // Simulate API submission
+            setTimeout(() => {
+                // Store order data with enhanced information
+                const orderData = {
+                    ...studentData,
+                    recommendedSize,
+                    aiRecommendation,
+                    selectedGarments: Array.from(selectedGarments),
+                    measurementChanges: window.measurementChanges || {},
+                    genderSpecificMeasurements,
+                    orderDate: new Date().toISOString(),
+                    orderId: 'ORD-' + Date.now()
+                };
+                
+                localStorage.setItem('lastOrder', JSON.stringify(orderData));
+                
+                // Move to completion step
+                nextStep();
+                
+                // Show feedback modal after 3 seconds
+                setTimeout(() => {
+                    showModal('feedbackModal');
+                }, 3000);
+                
+            }, 2000);
+        }
+
+        // Step 5: Completion
+        function startNewOrder() {
+            if (confirm('Are you sure you want to start a new order? Current progress will be lost.')) {
+                location.reload();
+            }
+        }
+
+        function trackOrder() {
+            const orderData = JSON.parse(localStorage.getItem('lastOrder') || '{}');
+            if (orderData.orderId) {
+                showAlert(`🔍 Order ID: ${orderData.orderId} - Status: In Production`, 'info');
+            } else {
+                showAlert('No recent orders found', 'warning');
+            }
+        }
+
+        // Enhanced functions for added features
+
+        // Custom class and division functions
+        function toggleCustomClass() {
+            const classSelect = document.getElementById('class');
+            const customClassInput = document.getElementById('customClass');
+            
+            if (classSelect.value === 'custom') {
+                customClassInput.style.display = 'block';
+                customClassInput.required = true;
+                customClassInput.focus();
+            } else {
+                customClassInput.style.display = 'none';
+                customClassInput.required = false;
+                customClassInput.value = '';
+            }
+            updateStep1Validation();
+        }
+
+        function toggleCustomDivision() {
+            const divisionSelect = document.getElementById('division');
+            const customDivisionInput = document.getElementById('customDivision');
+            
+            if (divisionSelect.value === 'custom') {
+                customDivisionInput.style.display = 'block';
+                customDivisionInput.required = true;
+                customDivisionInput.focus();
+            } else {
+                customDivisionInput.style.display = 'none';
+                customDivisionInput.required = false;
+                customDivisionInput.value = '';
+            }
+            updateStep1Validation();
+        }
+
+        // Manual measurement editing
+        function enableManualEdit(fieldType) {
+            const field = document.getElementById(fieldType);
+            const currentValue = field.value;
+            
+            showAlert(`📏 Manual edit enabled for ${fieldType}. Current value: ${currentValue}`, 'info');
+            
+            // Add visual indicator for manual editing
+            field.style.borderColor = '#f59e0b';
+            field.style.background = '#fffbeb';
+            field.placeholder = `Enter ${fieldType} manually`;
+            
+            // Add note about manual entry
+            const helper = document.getElementById(`${fieldType}Helper`);
+            helper.innerHTML = `⚠️ Manual entry mode. Value: ${currentValue || 'Not set'} | <button onclick="resetToAuto('${fieldType}')" style="background: none; border: none; color: var(--primary-color); cursor: pointer; text-decoration: underline;">Reset to Auto</button>`;
+            helper.className = 'form-helper warning';
+        }
+
+        function resetToAuto(fieldType) {
+            const field = document.getElementById(fieldType);
+            field.style.borderColor = '';
+            field.style.background = '';
+            field.placeholder = fieldType === 'height' ? 'e.g., 165' : 'e.g., 55.5';
+            
+            showAlert(`🔄 ${fieldType} reset to automatic mode`, 'success');
+            validateMeasurements();
+        }
+
+        // Enhanced measurement guide with gender and age specific content
+        function updateMeasurementGuide() {
+            const gender = document.getElementById('measurementGenderSelect').value;
+            const ageGroup = document.getElementById('measurementAgeSelect').value;
+            const content = document.getElementById('measurementGuideContent');
+            
+            // Base64 encoded placeholder image (simple measurement diagram)
+            const measurementImageData = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjM2MCIgdmlld0JveD0iMCAwIDIwMCAzNjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxwYXRoIGQ9Ik0xMDAgMjBDMTEwIDIwIDEyMCAzMCAxMjAgNDBWNjBDMTIwIDcwIDExMCA4MCAxMDAgODBDOTAgODAgODAgNzAgODAgNjBWNDBDODAgMzAgOTAgMjAgMTAwIDIwWiIgZmlsbD0iI0Y0RjRGNCIgc3Ryb2tlPSIjNDc0NzQ3IiBzdHJva2Utd2lkdGg9IjIiLz4KPHBhdGggZD0iTTEwMCA4MEMxMTAgODAgMTIwIDkwIDEyMCAxMDBWMjQwQzEyMCAyNTAgMTEwIDI2MCAxMDAgMjYwQzkwIDI2MCA4MCAyNTAgODAgMjQwVjEwMEM4MCA5MCA5MCA4MCAxMDAgODBaIiBmaWxsPSIjRjRGNEY0IiBzdHJva2U9IiM0NzQ3NDciIHN0cm9rZS13aWR0aD0iMiIvPgo8cGF0aCBkPSJNMTAwIDI2MEMxMTAgMjYwIDEyMCAyNzAgMTIwIDI4MFYzMjBDMTIwIDMzMCAxMTAgMzQwIDEwMCAzNDBDOTAgMzQwIDgwIDMzMCA4MCAzMjBWMjgwQzgwIDI3MCA5MCAyNjAgMTAwIDI2MFoiIGZpbGw9IiNGNEY0RjQiIHN0cm9rZT0iIzQ3NDc0NyIgc3Ryb2tlLXdpZHRoPSIyIi8+CjxsaW5lIHgxPSIyMCIgeTE9IjEyMCIgeDI9IjE4MCIgeTI9IjEyMCIgc3Ryb2tlPSIjRUY0NDQ0IiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1kYXNoYXJyYXk9IjUgNSIvPgo8bGluZSB4MT0iMjAiIHkxPSIxODAiIHgyPSIxODAiIHkyPSIxODAiIHN0cm9rZT0iI0VGNDQ0NCIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtZGFzaGFycmF5PSI1IDUiLz4KPHR4dCB4PSIxOTAiIHk9IjEyNSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIiBmaWxsPSIjMzc0MTUxIj5DaGVzdDwvdHh0Pgo8dHh0IHg9IjE5MCIgeT0iMTg1IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiMzNzQxNTEiPldhaXN0PC90eHQ+Cjx0ZXh0IHg9IjE5MCIgeT0iMjI1IiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiMzNzQxNTEiPkhpcHM8L3RleHQ+Cjwvc3ZnPg==";
+            
+            let guideContent = `
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
+                    <div style="text-align: center;">
+                        <img src="${measurementImageData}" alt="Measurement Guide" style="width: 100%; max-width: 200px; border: 1px solid #e5e7eb; border-radius: 8px;">
+                        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 10px;">Basic measurement points</p>
+                    </div>
+                    <div>
+                        <h5 style="margin-bottom: 15px;">📏 General Tips:</h5>
+                        <ul style="font-size: 0.9rem; line-height: 1.6; color: var(--text-secondary);">
+                            <li>Stand straight and relaxed</li>
+                            <li>Wear light, fitted clothing</li>
+                            <li>Use a flexible measuring tape</li>
+                            <li>Take measurements in the morning</li>
+                            <li>Have someone help you measure</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+
+            // Gender-specific guidance with enhanced details
+            if (gender === 'male') {
+                guideContent += `
+                    <div style="background: #f0f9ff; border-left: 4px solid #3b82f6; padding: 20px; margin: 20px 0; border-radius: 8px;">
+                        <h5 style="color: #1e40af; margin-bottom: 10px;">👦 Male-Specific Guidelines:</h5>
+                        <ul style="color: #1e40af; font-size: 0.9rem; line-height: 1.6;">
+                            <li><strong>Chest:</strong> Measure around the fullest part of the chest, keep tape level</li>
+                            <li><strong>Shoulder:</strong> Measure from shoulder point to shoulder point across the back</li>
+                            <li><strong>Sleeve:</strong> Measure from shoulder to wrist with arm slightly bent</li>
+                            <li><strong>Waist:</strong> Measure at natural waistline, typically above hip bones</li>
+                            <li><strong>Hip:</strong> Measure around the fullest part of the hips</li>
+                            <li><strong>Length:</strong> For shirts, measure from shoulder to desired hem</li>
+                        </ul>
+                    </div>
+                `;
+            } else if (gender === 'female') {
+                guideContent += `
+                    <div style="background: #fdf2f8; border-left: 4px solid #ec4899; padding: 20px; margin: 20px 0; border-radius: 8px;">
+                        <h5 style="color: #be185d; margin-bottom: 10px;">👧 Female-Specific Guidelines:</h5>
+                        <ul style="color: #be185d; font-size: 0.9rem; line-height: 1.6;">
+                            <li><strong>Bust (Optional):</strong> Measure around the fullest part of the bust, keep tape parallel to floor</li>
+                            <li><strong>Waist (Optional):</strong> Measure at the narrowest part of the torso</li>
+                            <li><strong>Hip (Optional):</strong> Measure around the fullest part of the hips</li>
+                            <li><strong>Shoulder:</strong> Measure from shoulder point to shoulder point</li>
+                            <li><strong>Sleeve Length:</strong> From shoulder to wrist with arm slightly bent</li>
+                            <li><strong>Top/Skirt Length:</strong> For dresses/skirts, measure from waist to desired length</li>
+                        </ul>
+                        <div style="margin-top: 15px; padding: 10px; background: rgba(236, 72, 153, 0.1); border-radius: 6px;">
+                            <strong>Note:</strong> All measurements are optional but provide enhanced sizing accuracy. Basic sizing uses height and weight only.
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Age-specific guidance
+            if (ageGroup === 'child') {
+                guideContent += `
+                    <div style="background: #f0fdf4; border-left: 4px solid #22c55e; padding: 20px; margin: 20px 0; border-radius: 8px;">
+                        <h5 style="color: #166534; margin-bottom: 10px;">🧒 Child (5-10 years) Considerations:</h5>
+                        <ul style="color: #166534; font-size: 0.9rem; line-height: 1.6;">
+                            <li>Add 2-3cm extra for growth and comfort</li>
+                            <li>Measure when child is calm and still</li>
+                            <li>Consider elastic waists for comfort</li>
+                            <li>Allow room for layering in cold weather</li>
+                            <li>Choose adjustable features when possible</li>
+                            <li>Take measurements over light clothing</li>
+                        </ul>
+                    </div>
+                `;
+            } else if (ageGroup === 'teen') {
+                guideContent += `
+                    <div style="background: #fefce8; border-left: 4px solid #eab308; padding: 20px; margin: 20px 0; border-radius: 8px;">
+                        <h5 style="color: #a16207; margin-bottom: 10px;">🧑‍🎓 Teen (11-15 years) Considerations:</h5>
+                        <ul style="color: #a16207; font-size: 0.9rem; line-height: 1.6;">
+                            <li>Growth spurts common - add 1-2cm for height-related measurements</li>
+                            <li>Body shape may be changing rapidly</li>
+                            <li>Consider style preferences while maintaining school standards</li>
+                            <li>Regular fit checks recommended every 6 months</li>
+                            <li>Athletic activities may require looser fits</li>
+                            <li>Gender-specific measurements become more important</li>
+                        </ul>
+                    </div>
+                `;
+            } else if (ageGroup === 'senior') {
+                guideContent += `
+                    <div style="background: #f8fafc; border-left: 4px solid #64748b; padding: 20px; margin: 20px 0; border-radius: 8px;">
+                        <h5 style="color: #334155; margin-bottom: 10px;">🎓 Senior (16+ years) Considerations:</h5>
+                        <ul style="color: #334155; font-size: 0.9rem; line-height: 1.6;">
+                            <li>Body measurements typically stable</li>
+                            <li>Focus on professional appearance</li>
+                            <li>Standard ease allowances sufficient</li>
+                            <li>Consider formal events and presentations</li>
+                            <li>Durability important for extended wear</li>
+                            <li>Precise measurements ensure perfect fit</li>
+                        </ul>
+                    </div>
+                `;
+            }
+
+            content.innerHTML = guideContent;
+        }
+
+        // Initialize measurement guide on modal open
+        function showHelp() {
+            showModal('measurementGuideModal');
+            updateMeasurementGuide();
+        }
+
+        function showMeasurementGuideModal() {
+            showHelp();
+        }
+
+        // Modal Management
+        function showModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.style.display = 'block';
+            setTimeout(() => modal.classList.add('show'), 10);
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('show');
+            setTimeout(() => modal.style.display = 'none', 300);
+        }
+
+        // Feedback System
+        function setStarRating(rating) {
+            document.querySelectorAll('.star').forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+
+        function submitFeedback() {
+            const rating = document.querySelectorAll('.star.active').length;
+            const fitRating = document.getElementById('fitRating').value;
+            const notes = document.getElementById('feedbackNotes').value;
+            
+            if (rating === 0) {
+                showAlert('Please provide a star rating', 'warning');
+                return;
+            }
+            
+            showAlert('📝 Submitting feedback...', 'info');
+            
+            setTimeout(() => {
+                // Simulate feedback submission
+                const feedbackData = {
+                    rating,
+                    fitRating,
+                    notes,
+                    submittedAt: new Date().toISOString()
+                };
+                
+                console.log('Feedback submitted:', feedbackData);
+                
+                closeModal('feedbackModal');
+                showAlert('✅ Thank you for your feedback! This helps us improve our recommendations.', 'success');
+            }, 1000);
+        }
+
+        // Size Comparison
+        function showSizeComparison() {
+            const content = `
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h4>🤖 AI vs Traditional Sizing</h4>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
+                    <div style="text-align: center; padding: 20px; background: var(--light-bg); border-radius: 12px;">
+                        <h5>📊 Traditional Method</h5>
+                        <div style="font-size: 2rem; font-weight: bold; color: var(--primary-color); margin: 15px 0;">
+                            ${recommendedSize.sizeCode.toUpperCase()}
+                        </div>
+                        <div style="font-size: 0.9rem; color: var(--text-secondary);">
+                            ${recommendedSize.reasoning}
+                        </div>
+                        <div style="margin-top: 10px;">
+                            <strong>Confidence:</strong> ${(recommendedSize.confidence * 100).toFixed(0)}%
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; padding: 20px; background: linear-gradient(135deg, #f0f9ff, #e0f2fe); border-radius: 12px;">
+                        <h5>🤖 AI Method</h5>
+                        <div style="font-size: 2rem; font-weight: bold; color: #0ea5e9; margin: 15px 0;">
+                            ${aiRecommendation.sizeCode.toUpperCase()}
+                        </div>
+                        <div style="font-size: 0.9rem; color: var(--text-secondary);">
+                            ${aiRecommendation.reasoning}
+                        </div>
+                        <div style="margin-top: 10px;">
+                            <strong>Confidence:</strong> ${(aiRecommendation.confidence * 100).toFixed(0)}%
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background: #fffbeb; border: 1px solid #f59e0b; border-radius: 8px; padding: 20px;">
+                    <h5 style="color: #92400e; margin-bottom: 10px;">🔍 Why the difference?</h5>
+                    <ul style="color: #92400e; font-size: 0.9rem; line-height: 1.6;">
+                        <li><strong>Traditional sizing</strong> uses standard height-weight tables and basic rules</li>
+                        <li><strong>AI sizing</strong> considers ${studentData.gender === 'F' ? 'female body proportions (bust/waist/hip ratios)' : 'male physique characteristics'}, body shape, and patterns from thousands of similar students</li>
+                        <li>AI learns from actual fit feedback to improve recommendations over time</li>
+                        <li>Both methods include appropriate ease and growth allowances</li>
+                        <li>${Object.keys(genderSpecificMeasurements).length > 0 ? 'Your specific measurements provide enhanced accuracy' : 'Additional measurements would improve precision'}</li>
+                    </ul>
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                        💡 <strong>Recommendation:</strong> Both sizes are within normal range. ${Object.keys(genderSpecificMeasurements).length >= 3 ? 'Your detailed measurements provide high confidence in fit.' : 'Consider providing additional measurements for enhanced accuracy.'}
+                    </p>
+                </div>
+            `;
+            
+            document.getElementById('comparisonContent').innerHTML = content;
+            showModal('sizeComparisonModal');
+        }
+
+        // Alert System
+        function showAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertId = 'alert_' + Date.now();
+            
+            const icons = {
+                success: '✅',
+                error: '❌',
+                warning: '⚠️',
+                info: 'ℹ️'
+            };
+            
+            const alert = document.createElement('div');
+            alert.id = alertId;
+            alert.className = `alert alert-${type}`;
+            alert.innerHTML = `
+                <span>${icons[type] || 'ℹ️'}</span>
+                <span>${message}</span>
+                <button onclick="removeAlert('${alertId}')" style="background: none; border: none; color: inherit; font-size: 1.2rem; cursor: pointer; margin-left: auto; min-width: 32px; min-height: 32px;">&times;</button>
+            `;
+            
+            alertContainer.appendChild(alert);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => removeAlert(alertId), 5000);
+        }
+
+        function removeAlert(alertId) {
+            const alert = document.getElementById(alertId);
+            if (alert) {
+                alert.style.opacity = '0';
+                alert.style.transform = 'translateX(100%)';
+                setTimeout(() => alert.remove(), 300);
+            }
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    closeModal(modal.id);
+                }
+            });
+        }
+
+        // Enhanced keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const openModal = document.querySelector('.modal.show, .modal[style*="display: block"]');
+                if (openModal) {
+                    closeModal(openModal.id);
+                }
+            }
+            
+            // Navigation shortcuts
+            if (e.ctrlKey || e.metaKey) {
+                switch (e.key) {
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        if (currentStep < 5 && validateCurrentStep()) {
+                            nextStep();
+                        }
+                        break;
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        if (currentStep > 1) {
+                            prevStep();
+                        }
+                        break;
+                }
+            }
+        });
+
+        // Enhanced auto-save progress with gender-specific measurements
+        setInterval(() => {
+            if (Object.keys(studentData).length > 0) {
+                localStorage.setItem('uniformProgress', JSON.stringify({
+                    currentStep,
+                    studentData,
+                    selectedGender,
+                    selectedSquad,
+                    selectedBodyShapes: Array.from(selectedBodyShapes),
+                    selectedOptions: Array.from(selectedOptions),
+                    selectedGarments: Array.from(selectedGarments),
+                    measurementChanges: window.measurementChanges || {},
+                    genderSpecificMeasurements,
+                    formValidation,
+                    lastSaved: new Date().toISOString()
+                }));
+            }
+        }, 30000); // Save every 30 seconds
+
+        // Enhanced load saved progress
+        window.addEventListener('load', function() {
+            const savedProgress = localStorage.getItem('uniformProgress');
+            if (savedProgress) {
+                const progress = JSON.parse(savedProgress);
+                const lastSaved = new Date(progress.lastSaved);
+                const now = new Date();
+                const hoursSince = (now - lastSaved) / (1000 * 60 * 60);
+                
+                if (hoursSince < 24 && confirm('Found saved progress from earlier. Would you like to continue where you left off?')) {
+                    // Restore progress
+                    currentStep = progress.currentStep;
+                    studentData = progress.studentData;
+                    selectedGender = progress.selectedGender;
+                    selectedSquad = progress.selectedSquad;
+                    selectedBodyShapes = new Set(progress.selectedBodyShapes || []);
+                    selectedOptions = new Set(progress.selectedOptions || []);
+                    selectedGarments = new Set(progress.selectedGarments || []);
+                    window.measurementChanges = progress.measurementChanges || {};
+                    genderSpecificMeasurements = progress.genderSpecificMeasurements || {};
+                    formValidation = progress.formValidation || formValidation;
+                    
+                    // Restore UI state
+                    hideStep(1);
+                    showStep(currentStep);
+                    updateStepper();
+                    
+                    // Restore form values
+                    if (selectedGender) {
+                        selectGender(selectedGender);
+                    }
+                    if (selectedSquad) {
+                        selectSquad(selectedSquad);
+                    }
+                    
+                    updateStepValidation();
+                    
+                    showAlert('✅ Progress restored successfully!', 'success');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
