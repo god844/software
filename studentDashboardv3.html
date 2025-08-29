@@ -1,0 +1,4256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniForm Smart - Student Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --secondary-color: #f59e0b;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #3b82f6;
+            --light-bg: #f8fafc;
+            --white-bg: #ffffff;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.12);
+            --border-radius: 16px;
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-success: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+        }
+
+        [data-theme="dark"] {
+            --light-bg: #0f172a;
+            --white-bg: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --border-color: #334155;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--light-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Enhanced Animations */
+        @keyframes slideInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes bounce {
+            0%, 20%, 53%, 80%, 100% { transform: translate3d(0,0,0); }
+            40%, 43% { transform: translate3d(0, -30px, 0); }
+            70% { transform: translate3d(0, -15px, 0); }
+            90% { transform: translate3d(0, -4px, 0); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        .animate-slideInDown { animation: slideInDown 0.6s ease-out; }
+        .animate-slideInLeft { animation: slideInLeft 0.6s ease-out; }
+        .animate-slideInRight { animation: slideInRight 0.6s ease-out; }
+        .animate-fadeIn { animation: fadeIn 0.8s ease-out; }
+        .animate-bounce { animation: bounce 1s ease-in-out; }
+        .animate-pulse { animation: pulse 2s infinite; }
+        .animate-shake { animation: shake 0.5s ease-in-out; }
+
+        /* Header */
+        .header {
+            background: var(--gradient-primary);
+            color: white;
+            border-radius: var(--border-radius);
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+            animation: slideInDown 0.8s ease-out;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="white" opacity="0.1"/></svg>');
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-title h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header-title .logo {
+            font-size: 3rem;
+            animation: bounce 2s infinite;
+        }
+
+        .header-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-top: 8px;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .theme-toggle, .help-btn, .account-btn, .cart-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+        }
+
+        .theme-toggle:hover, .help-btn:hover, .account-btn:hover, .cart-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px) scale(1.05);
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--danger-color);
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 0.8rem;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            animation: pulse 1.5s infinite;
+        }
+
+        /* Progress Stepper with Enhanced Animation */
+        .progress-stepper {
+            background: var(--white-bg);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 20px;
+            z-index: 100;
+            animation: slideInDown 0.6s ease-out 0.2s both;
+        }
+
+        .stepper-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            flex: 1;
+            min-width: 120px;
+            transition: all 0.4s ease;
+        }
+
+        .step-circle {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            transition: all 0.4s ease;
+            border: 3px solid var(--border-color);
+            background: var(--white-bg);
+            color: var(--text-secondary);
+        }
+
+        .step.active .step-circle {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            transform: scale(1.15);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+            animation: pulse 2s infinite;
+        }
+
+        .step.completed .step-circle {
+            background: var(--success-color);
+            border-color: var(--success-color);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .step-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-align: center;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+        }
+
+        .step.active .step-label,
+        .step.completed .step-label {
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+
+        .step-connector {
+            position: absolute;
+            top: 25px;
+            right: -50%;
+            width: 100%;
+            height: 4px;
+            background: var(--border-color);
+            z-index: -1;
+            transition: all 0.6s ease;
+            border-radius: 2px;
+        }
+
+        .step.completed .step-connector {
+            background: var(--success-color);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+        }
+
+        .step:last-child .step-connector {
+            display: none;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .content-panel {
+            background: var(--white-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            animation: slideInLeft 0.6s ease-out 0.3s both;
+            transition: all 0.3s ease;
+        }
+
+        .content-panel:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .panel-header {
+            padding: 25px 30px;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+
+        .panel-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .panel-body {
+            padding: 30px;
+        }
+
+        /* Step Content */
+        .step-content {
+            display: none;
+        }
+
+        .step-content.active {
+            display: block;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        /* Enhanced Form Styles */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 1rem;
+            background: var(--white-bg);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            font-family: inherit;
+            min-height: 48px;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-group input.error {
+            border-color: var(--danger-color);
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .form-helper {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .form-helper.error { color: var(--danger-color); }
+        .form-helper.warning { color: var(--warning-color); }
+        .form-helper.success { color: var(--success-color); }
+
+        /* Gender Selection Enhanced */
+        .gender-selection {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 8px;
+        }
+
+        .gender-option {
+            padding: 25px;
+            border: 2px solid var(--border-color);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            background: var(--white-bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            min-height: 100px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .gender-option::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(99, 102, 241, 0.1), transparent);
+            transform: rotate(-45deg);
+            transition: all 0.5s ease;
+            opacity: 0;
+        }
+
+        .gender-option:hover::before {
+            opacity: 1;
+            animation: spin 2s linear infinite;
+        }
+
+        .gender-option:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .gender-option.selected {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: var(--shadow-lg);
+            animation: pulse 0.6s ease-out;
+        }
+
+        .gender-icon {
+            font-size: 2.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .gender-option:hover .gender-icon {
+            transform: scale(1.2) rotate(5deg);
+        }
+
+        .gender-label {
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        /* Enhanced Size Recommendation Panel */
+        .recommendation-panel {
+            background: var(--white-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 20px;
+            animation: slideInRight 0.6s ease-out 0.4s both;
+            transition: all 0.3s ease;
+        }
+
+        .recommendation-panel:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .recommendation-header {
+            background: var(--gradient-success);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            position: relative;
+        }
+
+        .recommendation-header::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid #22c55e;
+        }
+
+        .recommendation-header h3 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .recommendation-body {
+            padding: 25px;
+        }
+
+        .size-recommendation {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .size-display {
+            font-size: 3.5rem;
+            font-weight: 900;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            animation: pulse 3s infinite;
+        }
+
+        .size-code-display {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+            font-family: 'Courier New', monospace;
+            background: var(--light-bg);
+            padding: 8px 16px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        .confidence-bar {
+            width: 100%;
+            height: 10px;
+            background: var(--border-color);
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 15px 0;
+            position: relative;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: var(--gradient-success);
+            border-radius: 5px;
+            transition: width 1s ease;
+            position: relative;
+        }
+
+        .confidence-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        /* Enhanced Cart System */
+        .cart-modal .modal-content {
+            max-width: 1000px;
+        }
+
+        .cart-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+
+        .cart-item:hover {
+            background: var(--light-bg);
+            transform: translateX(5px);
+            box-shadow: var(--shadow);
+        }
+
+        .cart-item-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            background: var(--light-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            border: 2px solid var(--border-color);
+        }
+
+        .cart-item-details {
+            flex: 1;
+        }
+
+        .cart-item-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+            color: var(--text-primary);
+        }
+
+        .cart-item-size {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            margin-bottom: 3px;
+        }
+
+        .cart-item-price {
+            font-size: 0.9rem;
+            color: var(--success-color);
+            font-weight: 600;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: var(--light-bg);
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .quantity-btn {
+            width: 35px;
+            height: 35px;
+            border: 1px solid var(--border-color);
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .quantity-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3);
+        }
+
+        .quantity-display {
+            min-width: 50px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--text-primary);
+        }
+
+        /* Enhanced Garment Cards */
+        .garments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+
+        .garment-card {
+            background: var(--white-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            position: relative;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .garment-card:hover {
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-color);
+        }
+
+        .garment-card.in-cart {
+            border-color: var(--success-color);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+            animation: pulse 1s ease-out;
+        }
+
+        .garment-image {
+            height: 220px;
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .garment-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: all 0.5s ease;
+        }
+
+        .garment-card:hover .garment-image::before {
+            left: 100%;
+        }
+
+        .garment-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--primary-color);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .garment-info {
+            padding: 25px;
+        }
+
+        .garment-name {
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .garment-price {
+            color: var(--success-color);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .garment-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--light-bg);
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+
+        .quantity-input {
+            width: 60px;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .quantity-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        /* Enhanced Buttons */
+        .btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 16px 32px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            justify-content: center;
+            min-width: 120px;
+            min-height: 48px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.6s ease;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+            background: #5b5bd6;
+        }
+
+        .btn:active {
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            background: var(--text-secondary);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: var(--text-secondary);
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .btn-success {
+            background: var(--success-color);
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        /* Enhanced Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal-content {
+            background-color: var(--white-bg);
+            margin: 2% auto;
+            padding: 0;
+            border-radius: var(--border-radius);
+            width: 95%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-lg);
+            transform: scale(0.9);
+            transition: all 0.3s ease;
+            animation: slideInDown 0.4s ease-out;
+        }
+
+        .modal.show .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 25px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+        }
+
+        .modal-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        }
+
+        .modal-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            min-width: 44px;
+            min-height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg) scale(1.1);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        /* Enhanced Alerts */
+        .alert {
+            padding: 18px 24px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 600;
+            animation: slideInRight 0.4s ease-out;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .alert::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: currentColor;
+            opacity: 0.7;
+        }
+
+        .alert:hover {
+            transform: translateX(5px);
+            box-shadow: var(--shadow);
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .alert-error {
+            background: linear-gradient(135deg, #fef2f2, #fecaca);
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .alert-warning {
+            background: linear-gradient(135deg, #fffbeb, #fde68a);
+            color: #92400e;
+            border: 1px solid #fcd34d;
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, #eff6ff, #bfdbfe);
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+
+        /* Step Validation Enhanced */
+        .step-validation {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 18px 24px;
+            margin: 20px 0;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .step-validation::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: currentColor;
+        }
+
+        .step-validation.incomplete {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            color: #92400e;
+            border: 2px solid #f59e0b;
+            animation: pulse 2s infinite;
+        }
+
+        .step-validation.complete {
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+            color: #065f46;
+            border: 2px solid #10b981;
+            animation: slideInLeft 0.6s ease-out;
+        }
+
+        .validation-icon {
+            font-size: 1.3rem;
+        }
+
+        /* Account Management Tabs */
+        .account-tabs {
+            display: flex;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 25px;
+            background: var(--light-bg);
+            border-radius: 12px 12px 0 0;
+            overflow: hidden;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 15px 25px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+            flex: 1;
+            position: relative;
+        }
+
+        .tab-btn::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary-color);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .tab-btn.active {
+            color: var(--primary-color);
+            background: var(--white-bg);
+        }
+
+        .tab-btn.active::after {
+            transform: scaleX(1);
+        }
+
+        .tab-btn:hover {
+            color: var(--primary-color);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .account-tab {
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .account-tab.hidden {
+            display: none;
+        }
+
+        /* Order Tracking Enhanced */
+        .tracking-stage {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .tracking-stage:hover {
+            background: var(--light-bg);
+            transform: translateX(5px);
+        }
+
+        .tracking-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .tracking-stage.completed .tracking-icon {
+            background: var(--success-color);
+            color: white;
+            animation: pulse 0.6s ease-out;
+        }
+
+        .tracking-stage.active .tracking-icon {
+            background: var(--warning-color);
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        .tracking-stage.pending .tracking-icon {
+            background: var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .tracking-details h6 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: var(--text-primary);
+        }
+
+        .tracking-date {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* Summary Items Enhanced */
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .summary-item:hover {
+            background: var(--light-bg);
+            padding-left: 10px;
+            padding-right: 10px;
+            border-radius: 8px;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-label {
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .summary-value {
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .summary-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--light-bg);
+            border-radius: 12px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .summary-section h4 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Loading Animation Enhanced */
+        .loading {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(99, 102, 241, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            backdrop-filter: blur(5px);
+        }
+
+        .loading-content {
+            background: var(--white-bg);
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Responsive Design Enhanced */
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .sidebar {
+                position: static;
+                order: -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+
+            .header-title h1 {
+                font-size: 2rem;
+            }
+
+            .header-controls {
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .stepper-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .step {
+                flex-direction: row;
+                justify-content: center;
+                min-width: auto;
+                width: 100%;
+                max-width: 350px;
+            }
+
+            .step-connector {
+                display: none;
+            }
+
+            .garments-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .gender-selection {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .btn-group {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .modal-content {
+                width: 98%;
+                margin: 1% auto;
+            }
+
+            .cart-item {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+
+            .quantity-controls {
+                justify-content: center;
+            }
+        }
+
+        /* Utility Classes */
+        .hidden { display: none !important; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .mt-20 { margin-top: 20px; }
+        .mb-20 { margin-bottom: 20px; }
+        .fw-bold { font-weight: 700; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header with Enhanced Animation -->
+        <div class="header">
+            <div class="header-content">
+                <div class="header-title">
+                    <div class="logo">👕</div>
+                    <div>
+                        <h1>UniForm Smart</h1>
+                        <div class="header-subtitle">AI-Powered Precision Sizing</div>
+                    </div>
+                </div>
+                <div class="header-controls">
+                    <button class="cart-btn" onclick="showCart()">
+                        🛒 Cart
+                        <span class="cart-count" id="cartCount">0</span>
+                    </button>
+                    <button class="account-btn" onclick="showAccount()">
+                        👤 Account
+                    </button>
+                    <button class="help-btn" onclick="showHelp()">
+                        ❓ Help
+                    </button>
+                    <button class="theme-toggle" onclick="toggleTheme()">
+                        🌙 Dark Mode
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Stepper -->
+        <div class="progress-stepper">
+            <div class="stepper-container">
+                <div class="step active" id="step-1">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Student Info</div>
+                    <div class="step-connector"></div>
+                </div>
+                <div class="step" id="step-2">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Measurements</div>
+                    <div class="step-connector"></div>
+                </div>
+                <div class="step" id="step-3">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Garments</div>
+                    <div class="step-connector"></div>
+                </div>
+                <div class="step" id="step-4">
+                    <div class="step-circle">4</div>
+                    <div class="step-label">Review</div>
+                    <div class="step-connector"></div>
+                </div>
+                <div class="step" id="step-5">
+                    <div class="step-circle">✓</div>
+                    <div class="step-label">Complete</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <main id="main-content">
+            <div class="main-content">
+                <!-- Main Panel -->
+                <div class="content-panel">
+                    <!-- Step 1: Student Information -->
+                    <div class="step-content active" id="content-step-1">
+                        <div class="panel-header">
+                            <h2 class="panel-title">
+                                <span>👤</span>
+                                Student Information
+                            </h2>
+                        </div>
+                        <div class="panel-body">
+                            <div class="step-validation incomplete" id="step1-validation">
+                                <span class="validation-icon">⚠️</span>
+                                <span>Please complete all required fields to proceed</span>
+                            </div>
+
+                            <form id="studentInfoForm">
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="studentName">Full Name *</label>
+                                        <input type="text" id="studentName" name="studentName" placeholder="Enter student's full name" required>
+                                        <div class="form-helper">This will appear on the uniform labels</div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="rollNumber">Roll Number *</label>
+                                        <input type="text" id="rollNumber" name="rollNumber" placeholder="e.g., 2024001" required>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="registerNumber">Register Number</label>
+                                        <input type="text" id="registerNumber" name="registerNumber" placeholder="e.g., REG2024001">
+                                        <div class="form-helper">Optional registration number</div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="class">Class *</label>
+                                        <select id="class" name="class" required>
+                                            <option value="">Select Class</option>
+                                            <option value="1">Class 1</option>
+                                            <option value="2">Class 2</option>
+                                            <option value="3">Class 3</option>
+                                            <option value="4">Class 4</option>
+                                            <option value="5">Class 5</option>
+                                            <option value="6">Class 6</option>
+                                            <option value="7">Class 7</option>
+                                            <option value="8">Class 8</option>
+                                            <option value="9">Class 9</option>
+                                            <option value="10">Class 10</option>
+                                            <option value="11">Class 11</option>
+                                            <option value="12">Class 12</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="division">Division *</label>
+                                        <select id="division" name="division" required>
+                                            <option value="">Select Division</option>
+                                            <option value="A">Division A</option>
+                                            <option value="B">Division B</option>
+                                            <option value="C">Division C</option>
+                                            <option value="D">Division D</option>
+                                            <option value="E">Division E</option>
+                                            <option value="F">Division F</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="dateOfBirth">Date of Birth *</label>
+                                        <input type="date" id="dateOfBirth" name="dateOfBirth" onchange="calculateAge()" required>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="age">Age (Auto-calculated)</label>
+                                        <input type="number" id="age" name="age" readonly style="background: var(--light-bg);">
+                                        <div class="form-helper" id="ageHelper"></div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Gender *</label>
+                                    <div class="gender-selection">
+                                        <div class="gender-option" onclick="selectGender('M')" data-gender="M">
+                                            <div class="gender-icon">👦</div>
+                                            <div class="gender-label">Male</div>
+                                        </div>
+                                        <div class="gender-option" onclick="selectGender('F')" data-gender="F">
+                                            <div class="gender-icon">👧</div>
+                                            <div class="gender-label">Female</div>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" id="gender" name="gender" required>
+                                </div>
+
+                                <div class="btn-group">
+                                    <button type="button" class="btn" onclick="nextStep()" id="step1NextBtn" disabled>
+                                        Next: Measurements →
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Measurements -->
+                    <div class="step-content" id="content-step-2">
+                        <div class="panel-header">
+                            <h2 class="panel-title">
+                                <span>📏</span>
+                                Physical Measurements
+                            </h2>
+                        </div>
+                        <div class="panel-body">
+                            <div class="step-validation incomplete" id="step2-validation">
+                                <span class="validation-icon">⚠️</span>
+                                <span>Please enter height and weight to proceed</span>
+                            </div>
+
+                            <div class="alert alert-info">
+                                <span>💡</span>
+                                <span>Height and weight are required. Additional measurements improve accuracy by up to 25%!</span>
+                            </div>
+
+                            <form id="measurementsForm">
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="height">Height (cm) *</label>
+                                        <input type="number" id="height" name="height" placeholder="e.g., 165" 
+                                               step="0.1" min="80" max="250" required onchange="validateMeasurements()">
+                                        <div class="form-helper" id="heightHelper">Stand straight against a wall</div>
+                                    </div>
+                                    
+                                    <div class="form-group">
+                                        <label for="weight">Weight (kg) *</label>
+                                        <input type="number" id="weight" name="weight" placeholder="e.g., 55.5" 
+                                               step="0.1" min="10" max="200" required onchange="validateMeasurements()">
+                                        <div class="form-helper" id="weightHelper">Weigh in light clothing</div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="chest">Chest/Bust (cm)</label>
+                                        <input type="number" id="chest" name="chest" placeholder="e.g., 85" 
+                                               step="0.1" min="30" max="200" onchange="updateAccuracy()">
+                                        <div class="form-helper">Around fullest part - improves accuracy</div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="waist">Waist (cm)</label>
+                                        <input type="number" id="waist" name="waist" placeholder="e.g., 75" 
+                                               step="0.1" min="30" max="200" onchange="updateAccuracy()">
+                                        <div class="form-helper">Natural waistline - improves fit</div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="shoulder">Shoulder (cm)</label>
+                                        <input type="number" id="shoulder" name="shoulder" placeholder="e.g., 38" 
+                                               step="0.1" min="20" max="80" onchange="updateAccuracy()">
+                                        <div class="form-helper">Shoulder point to point across back</div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="sleeveLength">Sleeve Length (cm)</label>
+                                        <input type="number" id="sleeveLength" name="sleeveLength" placeholder="e.g., 60" 
+                                               step="0.1" min="30" max="100" onchange="updateAccuracy()">
+                                        <div class="form-helper">Shoulder to wrist with bent arm</div>
+                                    </div>
+                                </div>
+
+                                <div id="accuracyIndicator" class="alert alert-info" style="display: none;">
+                                    <span>🎯</span>
+                                    <span id="accuracyText">Accuracy improved! Additional measurements boost sizing precision.</span>
+                                </div>
+
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-secondary" onclick="prevStep()">
+                                        ← Previous
+                                    </button>
+                                    <button type="button" class="btn" onclick="generateRecommendations()" id="step2NextBtn" disabled>
+                                        Generate AI Recommendations →
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Garments -->
+                    <div class="step-content" id="content-step-3">
+                        <div class="panel-header">
+                            <h2 class="panel-title">
+                                <span>👕</span>
+                                Garment Selection
+                            </h2>
+                        </div>
+                        <div class="panel-body">
+                            <div class="step-validation incomplete" id="step3-validation">
+                                <span class="validation-icon">⚠️</span>
+                                <span>Please add at least one garment to cart to proceed</span>
+                            </div>
+
+                            <div class="alert alert-info">
+                                <span>🛒</span>
+                                <span>Select quantities and add items to your cart. All items will use your recommended size: <strong id="selectedSize">-</strong></span>
+                            </div>
+
+                            <div class="garments-grid" id="garmentsGrid">
+                                <!-- Garments will be loaded here -->
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-secondary" onclick="prevStep()">
+                                    ← Previous
+                                </button>
+                                <button type="button" class="btn" onclick="nextStep()" id="step3NextBtn" disabled>
+                                    Review Order →
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Review -->
+                    <div class="step-content" id="content-step-4">
+                        <div class="panel-header">
+                            <h2 class="panel-title">
+                                <span>✅</span>
+                                Order Review & Confirmation
+                            </h2>
+                        </div>
+                        <div class="panel-body">
+                            <div class="alert alert-info">
+                                <span>👀</span>
+                                <span>Please review your order carefully. You can go back to make changes if needed.</span>
+                            </div>
+
+                            <div id="orderSummary">
+                                <!-- Order summary will be loaded here -->
+                            </div>
+
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-secondary" onclick="prevStep()">
+                                    ← Previous
+                                </button>
+                                <button type="button" class="btn btn-outline" onclick="exportToPDF()">
+                                    📄 Export PDF
+                                </button>
+                                <button type="button" class="btn btn-success" onclick="submitOrder()">
+                                    🎯 Confirm Order
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 5: Complete -->
+                    <div class="step-content" id="content-step-5">
+                        <div class="panel-header">
+                            <h2 class="panel-title">
+                                <span>🎉</span>
+                                Order Submitted Successfully!
+                            </h2>
+                        </div>
+                        <div class="panel-body">
+                            <div class="text-center">
+                                <div style="font-size: 5rem; margin-bottom: 20px;" class="animate-bounce">✅</div>
+                                <h3 style="margin-bottom: 15px;">Thank you!</h3>
+                                <p style="font-size: 1.1rem; color: var(--text-secondary);">Your uniform order has been submitted successfully.</p>
+                                
+                                <div id="orderConfirmation" style="background: var(--light-bg); padding: 25px; border-radius: 16px; margin: 30px 0; text-align: left;">
+                                    <!-- Order details will be populated here -->
+                                </div>
+
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-outline" onclick="startNewOrder()">
+                                        ➕ New Order
+                                    </button>
+                                    <button type="button" class="btn" onclick="trackOrder()">
+                                        📍 Track Order
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Enhanced Sidebar -->
+                <div class="sidebar">
+                    <!-- Size Recommendation Panel -->
+                    <div class="recommendation-panel" id="sizePanel">
+                        <div class="recommendation-header">
+                            <h3>🎯 AI Size Recommendation</h3>
+                            <div>Precision Sizing Technology</div>
+                        </div>
+                        <div class="recommendation-body">
+                            <div class="size-recommendation">
+                                <div class="size-display" id="recommendedSize">-</div>
+                                <div class="size-code-display" id="sizeCode">Code: ----</div>
+                                <div style="font-weight: 600; margin-bottom: 15px;">Recommended Size</div>
+                                <div class="confidence-bar">
+                                    <div class="confidence-fill" id="confidenceFill" style="width: 0%;"></div>
+                                </div>
+                                <div id="confidenceText">Complete measurements for recommendation</div>
+                            </div>
+
+                            <div style="margin-top: 25px;">
+                                <h5>💡 Sizing Intelligence</h5>
+                                <div id="sizeHints" style="font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6;">
+                                    Our AI considers your measurements, age, and body type for perfect fit recommendations.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stats Panel -->
+                    <div class="recommendation-panel">
+                        <div class="recommendation-header">
+                            <h3>📊 Order Summary</h3>
+                        </div>
+                        <div class="recommendation-body">
+                            <div class="summary-item">
+                                <div class="summary-label">BMI</div>
+                                <div class="summary-value" id="bmiValue">-</div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-label">Cart Items</div>
+                                <div class="summary-value" id="cartItemsCount">0</div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-label">Total Pieces</div>
+                                <div class="summary-value" id="totalQuantity">0</div>
+                            </div>
+                            <div class="summary-item">
+                                <div class="summary-label">Estimated Total</div>
+                                <div class="summary-value" id="estimatedTotal">₹0</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Help Quick Access -->
+                    <div class="recommendation-panel">
+                        <div class="recommendation-header">
+                            <h3>🆘 Quick Help</h3>
+                        </div>
+                        <div class="recommendation-body">
+                            <button class="btn btn-outline" style="width: 100%; margin-bottom: 10px;" onclick="showMeasurementTips()">
+                                📏 Measurement Guide
+                            </button>
+                            <button class="btn btn-outline" style="width: 100%; margin-bottom: 10px;" onclick="showSizeChart()">
+                                📋 Size Chart
+                            </button>
+                            <button class="btn btn-outline" style="width: 100%;" onclick="contactSupport()">
+                                📞 Contact Support
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Enhanced Modals -->
+
+    <!-- Cart Modal -->
+    <div id="cartModal" class="modal cart-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">🛒 Shopping Cart</h2>
+                <button class="modal-close" onclick="closeModal('cartModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="cartItems">
+                    <div class="text-center" style="padding: 60px;">
+                        <div style="font-size: 4rem; margin-bottom: 20px;">🛒</div>
+                        <h4>Your cart is empty</h4>
+                        <p style="color: var(--text-secondary); margin-top: 10px;">Add some garments to get started!</p>
+                    </div>
+                </div>
+                <div class="text-center mt-20">
+                    <button class="btn btn-outline" onclick="clearCart()" style="display: none;" id="clearCartBtn">Clear Cart</button>
+                    <button class="btn btn-success" onclick="proceedToCheckout()" style="margin-left: 10px; display: none;" id="checkoutBtn">Proceed to Checkout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Modal -->
+    <div id="accountModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">👤 Account Management</h2>
+                <button class="modal-close" onclick="closeModal('accountModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="account-tabs">
+                    <button class="tab-btn active" onclick="showAccountTab('profile')">Profile</button>
+                    <button class="tab-btn" onclick="showAccountTab('orders')">Orders</button>
+                    <button class="tab-btn" onclick="showAccountTab('settings')">Settings</button>
+                </div>
+                
+                <div id="profileTab" class="account-tab">
+                    <h4>Edit Profile</h4>
+                    <form id="profileForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="userEmail" placeholder="student@school.com">
+                            </div>
+                            <div class="form-group">
+                                <label>Phone</label>
+                                <input type="tel" id="userPhone" placeholder="+91-9876543210">
+                            </div>
+                            <div class="form-group">
+                                <label>Address</label>
+                                <textarea id="userAddress" rows="3" placeholder="Enter address"></textarea>
+                            </div>
+                        </div>
+                        <button type="button" class="btn" onclick="saveProfile()">Save Profile</button>
+                    </form>
+                </div>
+
+                <div id="ordersTab" class="account-tab hidden">
+                    <h4>Order History</h4>
+                    <div id="orderHistory">
+                        <div class="text-center" style="padding: 40px;">
+                            <div style="font-size: 3rem; margin-bottom: 15px;">📦</div>
+                            <h4>No orders yet</h4>
+                            <p style="color: var(--text-secondary);">Your order history will appear here</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="settingsTab" class="account-tab hidden">
+                    <h4>Settings</h4>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="emailNotifications" checked> 
+                            Email Notifications
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="smsNotifications" checked> 
+                            SMS Notifications
+                        </label>
+                    </div>
+                    <button type="button" class="btn" onclick="saveSettings()">Save Settings</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="helpModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">📚 Help Center</h2>
+                <button class="modal-close" onclick="closeModal('helpModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 30px;">
+                    <h4>🎯 Reduce Size Issues & Returns</h4>
+                    <div class="alert alert-info">
+                        <span>💡</span>
+                        <span>Follow these tips for 95% sizing accuracy and minimal returns:</span>
+                    </div>
+                    <ul style="line-height: 1.8; color: var(--text-secondary); padding-left: 20px;">
+                        <li><strong>Measure twice:</strong> Always double-check measurements for accuracy</li>
+                        <li><strong>Morning measurements:</strong> Take measurements when body is stable (morning)</li>
+                        <li><strong>Fitted clothing:</strong> Wear light, non-bulky clothes during measurement</li>
+                        <li><strong>Natural posture:</strong> Stand naturally, don't alter posture</li>
+                        <li><strong>Professional tape:</strong> Use fabric measuring tape, not metal ruler</li>
+                        <li><strong>Assistant help:</strong> Have someone help take measurements when possible</li>
+                        <li><strong>Additional measurements:</strong> Provide chest/waist/shoulder for 25% better accuracy</li>
+                        <li><strong>Age consideration:</strong> Our AI adds growth allowance for children automatically</li>
+                    </ul>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <h4>📏 Precise Measurement Guide</h4>
+                    <div style="background: var(--light-bg); padding: 20px; border-radius: 12px; border-left: 4px solid var(--primary-color);">
+                        <div style="margin-bottom: 15px;">
+                            <strong>Height:</strong> Stand against wall, heels together, look straight ahead. Mark top of head, measure to floor.
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <strong>Weight:</strong> Weigh in light clothing, preferably same time daily (morning recommended).
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <strong>Chest/Bust:</strong> Around fullest part of chest/bust, tape parallel to floor, breathe normally.
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <strong>Waist:</strong> Natural waistline (narrowest part), usually above hip bones.
+                        </div>
+                        <div>
+                            <strong>Shoulder:</strong> From shoulder point to shoulder point across back.
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 30px;">
+                    <h4>🔧 Size Accuracy Features</h4>
+                    <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 20px; border-radius: 12px;">
+                        <div style="margin-bottom: 10px;">
+                            <strong>AI Learning:</strong> Our system learns from fit feedback to improve recommendations continuously.
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <strong>Growth Allowance:</strong> Automatic size adjustment for growing children (ages 5-15).
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <strong>Body Type Analysis:</strong> Considers individual proportions and build variations.
+                        </div>
+                        <div>
+                            <strong>Quality Assurance:</strong> Each order reviewed by experienced tailors before production.
+                        </div>
+                    </div>
+                </div>
+
+                <div style="text-center; background: var(--light-bg); padding: 20px; border-radius: 12px;">
+                    <h5>📞 Still Need Help?</h5>
+                    <p><strong>WhatsApp:</strong> +91-9876543210</p>
+                    <p><strong>Email:</strong> support@uniform.school</p>
+                    <p><strong>Hours:</strong> Mon-Fri: 9 AM - 6 PM | Sat: 9 AM - 2 PM</p>
+                    <div style="margin-top: 15px;">
+                        <button class="btn btn-outline" onclick="contactSupport()">Contact Support</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Track Order Modal -->
+    <div id="trackOrderModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">📍 Track Your Order</h2>
+                <button class="modal-close" onclick="closeModal('trackOrderModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="trackingInfo">
+                    <!-- Tracking information will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Measurement Tips Modal -->
+    <div id="measurementTipsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">📏 Professional Measurement Guide</h2>
+                <button class="modal-close" onclick="closeModal('measurementTipsModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="measurementGuideContent">
+                    <!-- Content will be loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Size Chart Modal -->
+    <div id="sizeChartModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">📋 Size Chart Reference</h2>
+                <button class="modal-close" onclick="closeModal('sizeChartModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="sizeChartContent">
+                    <!-- Size chart will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Container -->
+    <div id="alertContainer" style="position: fixed; top: 20px; right: 20px; z-index: 2000; max-width: 400px;"></div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <div class="loading"></div>
+            <div style="margin-top: 15px; font-weight: 600;" id="loadingMessage">Processing...</div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced Global State for AWS RDS MySQL integration
+        let currentStep = 1;
+        let studentData = {};
+        let selectedGender = '';
+        let cart = [];
+        let recommendedSize = null;
+        let currentTheme = 'light';
+        let userProfile = {};
+        let orderHistory = [];
+        let accuracyLevel = 'basic';
+
+        // AWS Configuration (Ready for production)
+        const AWS_CONFIG = {
+            region: 'us-east-1',
+            apiGatewayUrl: 'https://api.uniform-smart.com/v1', // Replace with actual API Gateway URL
+            cognitoUserPoolId: 'us-east-1_XXXXXXXXX', // Replace with actual Cognito User Pool ID
+            cognitoClientId: 'XXXXXXXXXXXXXXXXXXXXXXXXXX' // Replace with actual Cognito Client ID
+        };
+
+        // Enhanced Garment Database with accurate pricing
+        const garmentDatabase = [
+            { 
+                id: 'formal_shirt_male', 
+                name: 'Formal Shirt (Male)', 
+                emoji: '👔', 
+                category: 'formal', 
+                gender: 'M',
+                basePrice: 450,
+                description: 'Premium cotton blend formal shirt'
+            },
+            { 
+                id: 'formal_shirt_female', 
+                name: 'Formal Shirt (Female)', 
+                emoji: '👚', 
+                category: 'formal', 
+                gender: 'F',
+                basePrice: 420,
+                description: 'Elegant cotton formal shirt for girls'
+            },
+            { 
+                id: 'formal_pants_male', 
+                name: 'Formal Pants (Male)', 
+                emoji: '👖', 
+                category: 'formal', 
+                gender: 'M',
+                basePrice: 650,
+                description: 'Comfortable formal trousers'
+            },
+            { 
+                id: 'formal_skirt_female', 
+                name: 'School Skirt', 
+                emoji: '👗', 
+                category: 'formal', 
+                gender: 'F',
+                basePrice: 380,
+                description: 'Pleated school skirt'
+            },
+            { 
+                id: 'sports_tshirt', 
+                name: 'Sports T-Shirt', 
+                emoji: '👕', 
+                category: 'sports', 
+                gender: 'unisex',
+                basePrice: 320,
+                description: 'Breathable sports t-shirt'
+            },
+            { 
+                id: 'sports_shorts', 
+                name: 'Sports Shorts', 
+                emoji: '🩳', 
+                category: 'sports', 
+                gender: 'unisex',
+                basePrice: 280,
+                description: 'Comfortable sports shorts'
+            },
+            { 
+                id: 'school_tie', 
+                name: 'School Tie', 
+                emoji: '🎗️', 
+                category: 'accessories', 
+                gender: 'unisex',
+                basePrice: 150,
+                description: 'Official school tie'
+            },
+            { 
+                id: 'school_belt', 
+                name: 'Leather Belt', 
+                emoji: '🔗', 
+                category: 'accessories', 
+                gender: 'unisex',
+                basePrice: 200,
+                description: 'Genuine leather belt'
+            }
+        ];
+
+        // Enhanced Size mapping with 4-digit codes and detailed info
+        const sizeMapping = {
+            'XS': { code: '1001', label: 'XS (Extra Small)', heightRange: '100-120cm', ageRange: '5-8 years' },
+            'S': { code: '1002', label: 'S (Small)', heightRange: '120-140cm', ageRange: '8-11 years' },
+            'M': { code: '1003', label: 'M (Medium)', heightRange: '140-160cm', ageRange: '11-14 years' },
+            'L': { code: '1004', label: 'L (Large)', heightRange: '160-175cm', ageRange: '14-16 years' },
+            'XL': { code: '1005', label: 'XL (Extra Large)', heightRange: '175-190cm', ageRange: '16+ years' },
+            'XXL': { code: '1006', label: 'XXL (Double XL)', heightRange: '190cm+', ageRange: 'Adult' }
+        };
+
+        // Complete implementation initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize all systems
+            initializeApp();
+            initializeSizeRecommendationSystem();
+            initializeHelpSystem();
+            setupAdvancedEventListeners();
+            startPerformanceMonitoring();
+        });
+
+        function initializeSizeRecommendationSystem() {
+            // Advanced size recommendation with machine learning simulation
+            window.sizeMLModel = {
+                predict: function(measurements, demographics) {
+                    // Simulate ML prediction
+                    const features = [
+                        measurements.height / 100,
+                        measurements.weight / 50,
+                        demographics.age / 20,
+                        demographics.gender === 'M' ? 1 : 0,
+                        (measurements.chest || measurements.height * 0.5) / 100,
+                        (measurements.waist || measurements.height * 0.45) / 100
+                    ];
+                    
+                    // Simulate neural network computation
+                    let prediction = features.reduce((sum, feature, index) => {
+                        const weights = [0.4, 0.3, 0.1, 0.05, 0.1, 0.05];
+                        return sum + (feature * weights[index]);
+                    }, 0);
+                    
+                    // Convert to size
+                    if (prediction < 0.3) return { size: 'XS', confidence: 0.92 };
+                    if (prediction < 0.5) return { size: 'S', confidence: 0.94 };
+                    if (prediction < 0.7) return { size: 'M', confidence: 0.96 };
+                    if (prediction < 0.9) return { size: 'L', confidence: 0.94 };
+                    if (prediction < 1.1) return { size: 'XL', confidence: 0.92 };
+                    return { size: 'XXL', confidence: 0.90 };
+                }
+            };
+        }
+
+        function initializeHelpSystem() {
+            // Initialize contextual help system
+            window.helpSystem = {
+                showContextualHelp: function(step) {
+                    const helpTexts = {
+                        1: "Enter accurate student information. This data is used for order tracking and delivery.",
+                        2: "Height and weight are required. Additional measurements improve accuracy by up to 25%.",
+                        3: "Select garments and quantities. All items will be made in your recommended size.",
+                        4: "Review your order carefully. You can make changes by going back to previous steps.",
+                        5: "Order completed! You'll receive email confirmation and tracking information."
+                    };
+                    
+                    const helpDiv = document.createElement('div');
+                    helpDiv.className = 'contextual-help';
+                    helpDiv.innerHTML = `
+                        <div style="background: #e0f2fe; border-left: 4px solid #0ea5e9; padding: 12px; margin: 10px 0; border-radius: 8px;">
+                            <div style="font-weight: 600; color: #0c4a6e; margin-bottom: 5px;">Step ${step} Help</div>
+                            <div style="color: #075985; font-size: 0.9rem;">${helpTexts[step]}</div>
+                        </div>
+                    `;
+                    
+                    // Insert help at top of current step
+                    const currentStepContent = document.getElementById(`content-step-${step}`);
+                    const panelBody = currentStepContent.querySelector('.panel-body');
+                    
+                    // Remove existing help
+                    const existingHelp = panelBody.querySelector('.contextual-help');
+                    if (existingHelp) existingHelp.remove();
+                    
+                    // Add new help
+                    panelBody.insertBefore(helpDiv, panelBody.firstChild);
+                }
+            };
+        }
+
+        function setupAdvancedEventListeners() {
+            // Real-time validation for all inputs
+            document.querySelectorAll('input, select, textarea').forEach(element => {
+                element.addEventListener('input', debounce(function() {
+                    validateFieldRealTime(this);
+                }, 300));
+                
+                element.addEventListener('focus', function() {
+                    this.style.borderColor = 'var(--primary-color)';
+                    this.style.boxShadow = '0 0 0 3px rgba(99, 102, 241, 0.1)';
+                });
+                
+                element.addEventListener('blur', function() {
+                    validateFieldRealTime(this);
+                    this.style.borderColor = '';
+                    this.style.boxShadow = '';
+                });
+            });
+
+            // Keyboard shortcuts for power users
+            document.addEventListener('keydown', function(e) {
+                if (e.altKey) {
+                    switch (e.key) {
+                        case 'n':
+                            e.preventDefault();
+                            if (currentStep < 5 && validateCurrentStep()) nextStep();
+                            break;
+                        case 'p':
+                            e.preventDefault();
+                            if (currentStep > 1) prevStep();
+                            break;
+                        case 'h':
+                            e.preventDefault();
+                            window.helpSystem.showContextualHelp(currentStep);
+                            break;
+                        case 'c':
+                            e.preventDefault();
+                            showCart();
+                            break;
+                        case 's':
+                            e.preventDefault();
+                            saveProgress();
+                            break;
+                    }
+                }
+            });
+
+            // Scroll-based step highlighting
+            window.addEventListener('scroll', debounce(function() {
+                updateActiveStepOnScroll();
+            }, 100));
+        }
+
+        function validateFieldRealTime(field) {
+            const value = field.value.trim();
+            const fieldName = field.name || field.id;
+            
+            // Remove existing validation classes
+            field.classList.remove('error', 'success');
+            
+            // Basic required field check
+            if (field.hasAttribute('required') && !value) {
+                field.classList.add('error');
+                showFieldError(field, 'This field is required');
+                return false;
+            }
+            
+            // Type-specific validation
+            switch (field.type) {
+                case 'email':
+                    if (value && !isValidEmail(value)) {
+                        field.classList.add('error');
+                        showFieldError(field, 'Please enter a valid email address');
+                        return false;
+                    }
+                    break;
+                    
+                case 'tel':
+                    if (value && !isValidPhone(value)) {
+                        field.classList.add('error');
+                        showFieldError(field, 'Please enter a valid phone number');
+                        return false;
+                    }
+                    break;
+                    
+                case 'number':
+                    const numValue = parseFloat(value);
+                    const min = parseFloat(field.min);
+                    const max = parseFloat(field.max);
+                    
+                    if (value && (isNaN(numValue) || numValue < min || numValue > max)) {
+                        field.classList.add('error');
+                        showFieldError(field, `Value must be between ${min} and ${max}`);
+                        return false;
+                    }
+                    break;
+            }
+            
+            // Name validation
+            if (fieldName === 'studentName' && value) {
+                if (!/^[a-zA-Z\s]+$/.test(value)) {
+                    field.classList.add('error');
+                    showFieldError(field, 'Name should contain only letters and spaces');
+                    return false;
+                }
+            }
+            
+            // Roll number validation
+            if (fieldName === 'rollNumber' && value) {
+                if (!/^[a-zA-Z0-9]+$/.test(value)) {
+                    field.classList.add('error');
+                    showFieldError(field, 'Roll number should contain only letters and numbers');
+                    return false;
+                }
+            }
+            
+            // If validation passes, mark as success
+            if (value || !field.hasAttribute('required')) {
+                field.classList.add('success');
+                hideFieldError(field);
+                return true;
+            }
+            
+            return true;
+        }
+
+        function isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        }
+
+        function isValidPhone(phone) {
+            return /^[\+]?[1-9][\d]{0,15}$/.test(phone.replace(/[\s\-\(\)]/g, ''));
+        }
+
+        function showFieldError(field, message) {
+            hideFieldError(field);
+            
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'field-error';
+            errorDiv.style.cssText = `
+                color: var(--danger-color);
+                font-size: 0.8rem;
+                margin-top: 5px;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                animation: slideInDown 0.3s ease;
+            `;
+            errorDiv.innerHTML = `<span>⚠</span><span>${message}</span>`;
+            
+            field.parentElement.appendChild(errorDiv);
+        }
+
+        function hideFieldError(field) {
+            const existingError = field.parentElement.querySelector('.field-error');
+            if (existingError) {
+                existingError.remove();
+            }
+        }
+
+        function updateActiveStepOnScroll() {
+            const stepElements = document.querySelectorAll('.step-content.active');
+            if (stepElements.length === 0) return;
+            
+            const scrollPosition = window.scrollY + window.innerHeight / 2;
+            
+            stepElements.forEach((element, index) => {
+                const rect = element.getBoundingClientRect();
+                const elementTop = rect.top + window.scrollY;
+                const elementBottom = elementTop + rect.height;
+                
+                if (scrollPosition >= elementTop && scrollPosition <= elementBottom) {
+                    // Highlight current step in progress stepper
+                    document.querySelectorAll('.step').forEach(step => step.classList.remove('viewing'));
+                    document.getElementById(`step-${currentStep}`).classList.add('viewing');
+                }
+            });
+        }
+
+        function saveProgress() {
+            const progressData = {
+                currentStep,
+                studentData,
+                selectedGender,
+                cart,
+                recommendedSize,
+                accuracyLevel,
+                formValues: getFormValues(),
+                timestamp: Date.now()
+            };
+            
+            localStorage.setItem('uniformProgress', JSON.stringify(progressData));
+            showAlert('Progress saved automatically', 'success');
+        }
+
+        function getFormValues() {
+            const formData = {};
+            document.querySelectorAll('input, select, textarea').forEach(element => {
+                if (element.id && element.value) {
+                    formData[element.id] = element.value;
+                }
+            });
+            return formData;
+        }
+
+        function restoreFormValues(formValues) {
+            Object.keys(formValues).forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.value = formValues[id];
+                }
+            });
+        }
+
+        function startPerformanceMonitoring() {
+            // Monitor page performance
+            if ('performance' in window) {
+                window.addEventListener('load', function() {
+                    const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
+                    console.log(`Dashboard loaded in ${loadTime}ms`);
+                    
+                    if (loadTime > 5000) {
+                        showAlert('Dashboard loaded slowly. Check your connection for better performance.', 'warning');
+                    }
+                });
+            }
+            
+            // Memory usage monitoring
+            setInterval(function() {
+                if ('memory' in performance) {
+                    const used = performance.memory.usedJSHeapSize / 1048576;
+                    if (used > 50) {
+                        console.warn('High memory usage detected:', used.toFixed(2), 'MB');
+                    }
+                }
+            }, 60000);
+        }
+
+        // Advanced cart persistence
+        function persistCartToServer() {
+            if (cart.length > 0) {
+                fetch(`${AWS_CONFIG.apiGatewayUrl}/cart/save`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getUserToken()}`
+                    },
+                    body: JSON.stringify({
+                        userId: getUserId(),
+                        cart: cart,
+                        timestamp: Date.now()
+                    })
+                }).catch(error => {
+                    console.error('Cart persistence failed:', error);
+                });
+            }
+        }
+
+        // Enhanced error handling
+        window.addEventListener('error', function(event) {
+            console.error('JavaScript error:', event.error);
+            showAlert('An error occurred. Please refresh the page if issues persist.', 'error');
+        });
+
+        window.addEventListener('unhandledrejection', function(event) {
+            console.error('Unhandled promise rejection:', event.reason);
+            event.preventDefault();
+        });
+
+        // Advanced auto-save with conflict resolution
+        setInterval(() => {
+            if (Object.keys(studentData).length > 0 || selectedGender || cart.length > 0) {
+                const currentProgress = {
+                    currentStep,
+                    studentData,
+                    selectedGender,
+                    cart,
+                    recommendedSize,
+                    accuracyLevel,
+                    formValues: getFormValues(),
+                    version: Date.now(),
+                    lastSaved: new Date().toISOString()
+                };
+                
+                const existingProgress = localStorage.getItem('uniformProgress');
+                if (existingProgress) {
+                    const existing = JSON.parse(existingProgress);
+                    // Check for conflicts (multiple tabs)
+                    if (existing.version > currentProgress.version - 30000) {
+                        // Potential conflict - merge data
+                        currentProgress.cart = mergeCartData(existing.cart || [], currentProgress.cart);
+                    }
+                }
+                
+                localStorage.setItem('uniformProgress', JSON.stringify(currentProgress));
+                persistCartToServer();
+            }
+        }, 15000); // Save every 15 seconds
+
+        function mergeCartData(existingCart, newCart) {
+            const merged = [...existingCart];
+            
+            newCart.forEach(newItem => {
+                const existingIndex = merged.findIndex(item => item.id === newItem.id);
+                if (existingIndex >= 0) {
+                    // Take the higher quantity
+                    if (newItem.quantity > merged[existingIndex].quantity) {
+                        merged[existingIndex] = newItem;
+                    }
+                } else {
+                    merged.push(newItem);
+                }
+            });
+            
+            return merged;
+        }
+
+        // Service Worker registration for offline support
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                console.log('Service Worker registered successfully');
+            }).catch(function(error) {
+                console.log('Service Worker registration failed:', error);
+            });
+        }
+
+        // Advanced analytics tracking
+        function trackUserInteraction(action, details) {
+            const event = {
+                action: action,
+                details: details,
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent,
+                viewport: {
+                    width: window.innerWidth,
+                    height: window.innerHeight
+                }
+            };
+            
+            // Send to analytics service
+            fetch(`${AWS_CONFIG.apiGatewayUrl}/analytics`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(event)
+            }).catch(error => {
+                // Fail silently for analytics
+                console.debug('Analytics tracking failed:', error);
+            });
+        }
+
+        // Track important user actions
+        ['nextStep', 'prevStep', 'addToCart', 'submitOrder'].forEach(functionName => {
+            const original = window[functionName];
+            if (original) {
+                window[functionName] = function(...args) {
+                    trackUserInteraction(functionName, { step: currentStep, args: args });
+                    return original.apply(this, args);
+                };
+            }
+        });
+
+        // Complete validation system
+        function runCompleteValidation() {
+            const validationResults = {
+                step1: validateStep1(),
+                step2: validateStep2(), 
+                step3: validateStep3(),
+                overall: true
+            };
+            
+            validationResults.overall = validationResults.step1 && validationResults.step2 && validationResults.step3;
+            
+            if (!validationResults.overall) {
+                const issues = [];
+                if (!validationResults.step1) issues.push('Student information incomplete');
+                if (!validationResults.step2) issues.push('Measurements invalid');
+                if (!validationResults.step3) issues.push('No items in cart');
+                
+                showAlert(`Please complete: ${issues.join(', ')}`, 'warning');
+            }
+            
+            return validationResults;
+        }
+
+        function initializeApp() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('dateOfBirth').max = today;
+            
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            if (savedTheme === 'dark') {
+                toggleTheme();
+            }
+            
+            setupFormValidations();
+            loadUserProfile();
+            loadOrderHistory();
+            
+            showAlert('Welcome to UniForm Smart! Let\'s create your perfect uniform profile.', 'info');
+        }
+
+        function setupFormValidations() {
+            const requiredFields = ['studentName', 'rollNumber', 'class', 'division', 'dateOfBirth', 'height', 'weight'];
+            
+            requiredFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.addEventListener('input', debounce(updateStepValidation, 300));
+                    field.addEventListener('change', updateStepValidation);
+                    field.addEventListener('blur', validateField);
+                }
+            });
+        }
+
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        function validateField(event) {
+            const field = event.target;
+            const value = field.value.trim();
+            
+            field.classList.remove('error');
+            
+            if (field.hasAttribute('required') && !value) {
+                field.classList.add('error');
+                return false;
+            }
+            
+            if (field.type === 'number') {
+                const numValue = parseFloat(value);
+                const min = parseFloat(field.min);
+                const max = parseFloat(field.max);
+                
+                if (value && (isNaN(numValue) || numValue < min || numValue > max)) {
+                    field.classList.add('error');
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+
+        // Enhanced Step Management
+        function nextStep() {
+            if (!validateCurrentStep()) {
+                document.querySelector('.step-validation.incomplete').scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
+
+            if (currentStep < 5) {
+                hideStep(currentStep);
+                currentStep++;
+                showStep(currentStep);
+                updateStepper();
+                
+                if (currentStep === 3) {
+                    loadGarments();
+                }
+                
+                if (currentStep === 4) {
+                    generateOrderSummary();
+                }
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                hideStep(currentStep);
+                currentStep--;
+                showStep(currentStep);
+                updateStepper();
+            }
+        }
+
+        function showStep(step) {
+            const stepContent = document.getElementById(`content-step-${step}`);
+            stepContent.classList.add('active');
+            document.getElementById(`step-${step}`).classList.add('active');
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Add entrance animation
+            stepContent.style.animation = 'fadeIn 0.6s ease-out';
+        }
+
+        function hideStep(step) {
+            document.getElementById(`content-step-${step}`).classList.remove('active');
+        }
+
+        function updateStepper() {
+            for (let i = 1; i <= 5; i++) {
+                const stepElement = document.getElementById(`step-${i}`);
+                stepElement.classList.remove('active', 'completed');
+                
+                if (i < currentStep) {
+                    stepElement.classList.add('completed');
+                } else if (i === currentStep) {
+                    stepElement.classList.add('active');
+                }
+            }
+        }
+
+        // Step 1: Student Information
+        function selectGender(gender) {
+            selectedGender = gender;
+            document.getElementById('gender').value = gender;
+            
+            document.querySelectorAll('.gender-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            document.querySelector(`[data-gender="${gender}"]`).classList.add('selected');
+            
+            updateStepValidation();
+            showAlert(`${gender === 'M' ? 'Male' : 'Female'} profile selected - specialized measurements available in next step.`, 'success');
+        }
+
+        function calculateAge() {
+            const dob = document.getElementById('dateOfBirth').value;
+            if (dob) {
+                const today = new Date();
+                const birthDate = new Date(dob);
+                let age = today.getFullYear() - birthDate.getFullYear();
+                const monthDiff = today.getMonth() - birthDate.getMonth();
+                
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
+                }
+                
+                document.getElementById('age').value = age;
+                studentData.age = age;
+                
+                updateAgeHints(age);
+                updateStepValidation();
+            }
+        }
+
+        function updateAgeHints(age) {
+            const helper = document.getElementById('ageHelper');
+            
+            if (age < 5) {
+                helper.textContent = 'Age seems young for school uniforms. Please verify.';
+                helper.className = 'form-helper error';
+            } else if (age > 18) {
+                helper.textContent = 'Age seems high for school uniforms. Please verify.';
+                helper.className = 'form-helper warning';
+            } else if (age >= 5 && age <= 12) {
+                helper.textContent = 'Growing age - we\'ll add extra room for growth.';
+                helper.className = 'form-helper success';
+            } else {
+                helper.textContent = 'Perfect age for precise uniform fitting.';
+                helper.className = 'form-helper success';
+            }
+        }
+
+        // Step 2: Enhanced Measurements with AI-powered size calculation
+        function validateMeasurements() {
+            const height = parseFloat(document.getElementById('height').value);
+            const weight = parseFloat(document.getElementById('weight').value);
+            
+            if (height && weight && height >= 80 && height <= 250 && weight >= 10 && weight <= 200) {
+                updateRecommendations(height, weight);
+                updateStep2Validation(true);
+                updateBMI(height, weight);
+            } else {
+                updateStep2Validation(false);
+            }
+        }
+
+        function updateAccuracy() {
+            const additionalMeasurements = ['chest', 'waist', 'shoulder', 'sleeveLength'].filter(id => {
+                const value = document.getElementById(id).value;
+                return value && parseFloat(value) > 0;
+            });
+
+            const accuracyIndicator = document.getElementById('accuracyIndicator');
+            const accuracyText = document.getElementById('accuracyText');
+            
+            if (additionalMeasurements.length > 0) {
+                accuracyLevel = additionalMeasurements.length >= 3 ? 'premium' : 'enhanced';
+                const improvement = additionalMeasurements.length * 8; // 8% per measurement
+                
+                accuracyIndicator.style.display = 'block';
+                accuracyIndicator.className = 'alert alert-success';
+                accuracyText.textContent = `Excellent! ${additionalMeasurements.length} additional measurements boost accuracy by ${improvement}%. Premium sizing activated.`;
+                
+                // Update confidence in size panel
+                if (recommendedSize) {
+                    recommendedSize.confidence = Math.min(0.98, recommendedSize.confidence + (additionalMeasurements.length * 0.05));
+                    updateSizePanel();
+                }
+            } else {
+                accuracyLevel = 'basic';
+                accuracyIndicator.style.display = 'none';
+            }
+        }
+
+        function updateRecommendations(height, weight) {
+            const bmi = weight / Math.pow(height / 100, 2);
+            let size = 'M';
+            let confidence = 0.85;
+
+            // Advanced AI size calculation
+            if (height < 110) size = 'XS';
+            else if (height < 130) size = 'S';
+            else if (height < 150) size = 'M';
+            else if (height < 170) size = 'L';
+            else if (height < 185) size = 'XL';
+            else size = 'XXL';
+
+            // BMI and gender adjustments
+            if (selectedGender === 'F' && bmi > 22) {
+                size = adjustSizeUp(size);
+            } else if (selectedGender === 'M' && bmi > 25) {
+                size = adjustSizeUp(size);
+            }
+
+            // Age-based adjustments
+            if (studentData.age && studentData.age <= 12) {
+                confidence = Math.min(0.95, confidence + 0.08);
+            }
+
+            // Additional measurements bonus
+            const additionalCount = ['chest', 'waist', 'shoulder', 'sleeveLength'].filter(id => 
+                document.getElementById(id).value && parseFloat(document.getElementById(id).value) > 0
+            ).length;
+            
+            confidence = Math.min(0.98, confidence + (additionalCount * 0.03));
+
+            recommendedSize = { size, confidence };
+            updateSizePanel();
+        }
+
+        function adjustSizeUp(currentSize) {
+            const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+            const currentIndex = sizes.indexOf(currentSize);
+            return currentIndex < sizes.length - 1 ? sizes[currentIndex + 1] : currentSize;
+        }
+
+        function updateSizePanel() {
+            if (!recommendedSize) return;
+            
+            const sizeInfo = sizeMapping[recommendedSize.size];
+            document.getElementById('recommendedSize').textContent = recommendedSize.size;
+            document.getElementById('sizeCode').textContent = `Code: ${sizeInfo.code}`;
+            document.getElementById('confidenceFill').style.width = `${recommendedSize.confidence * 100}%`;
+            document.getElementById('confidenceText').textContent = `${(recommendedSize.confidence * 100).toFixed(0)}% confidence`;
+            
+            // Update selected size display in step 3
+            const selectedSizeElement = document.getElementById('selectedSize');
+            if (selectedSizeElement) {
+                selectedSizeElement.textContent = `${recommendedSize.size} (${sizeInfo.code})`;
+            }
+            
+            updateSizeHints();
+        }
+
+        function updateSizeHints() {
+            if (!recommendedSize) return;
+            
+            const hints = [];
+            const sizeInfo = sizeMapping[recommendedSize.size];
+            
+            hints.push(`Size ${recommendedSize.size} selected for height range ${sizeInfo.heightRange}`);
+            
+            if (accuracyLevel === 'premium') {
+                hints.push('Premium accuracy with additional measurements');
+            } else if (accuracyLevel === 'enhanced') {
+                hints.push('Enhanced accuracy - add more measurements for premium precision');
+            } else {
+                hints.push('Basic sizing - add chest/waist measurements for better accuracy');
+            }
+            
+            if (studentData.age <= 12) {
+                hints.push('Growth allowance automatically added for children');
+            }
+            
+            if (recommendedSize.confidence >= 0.95) {
+                hints.push('Excellent confidence level - minimal return risk');
+            } else if (recommendedSize.confidence >= 0.85) {
+                hints.push('Good confidence level - reliable sizing');
+            }
+            
+            document.getElementById('sizeHints').innerHTML = hints.join('<br>');
+        }
+
+        function updateBMI(height, weight) {
+            const bmi = weight / Math.pow(height / 100, 2);
+            document.getElementById('bmiValue').textContent = bmi.toFixed(1);
+            
+            // BMI category for reference
+            let category = 'Normal';
+            if (bmi < 18.5) category = 'Underweight';
+            else if (bmi > 25) category = 'Overweight';
+            
+            // Could add BMI category display if needed
+        }
+
+        function generateRecommendations() {
+            if (!validateCurrentStep()) return;
+            
+            showLoadingOverlay('Generating AI-powered size recommendations...');
+            
+            setTimeout(() => {
+                studentData.height = parseFloat(document.getElementById('height').value);
+                studentData.weight = parseFloat(document.getElementById('weight').value);
+                studentData.chest = parseFloat(document.getElementById('chest').value) || null;
+                studentData.waist = parseFloat(document.getElementById('waist').value) || null;
+                studentData.shoulder = parseFloat(document.getElementById('shoulder').value) || null;
+                studentData.sleeveLength = parseFloat(document.getElementById('sleeveLength').value) || null;
+                
+                // Final validation and recommendation generation
+                validateMeasurements();
+                updateAccuracy();
+                
+                hideLoadingOverlay();
+                showAlert('AI size recommendations generated successfully! Proceed to garment selection.', 'success');
+                nextStep();
+            }, 2000);
+        }
+
+        // Step 3: Enhanced Garment Selection with Cart System
+        function loadGarments() {
+            const container = document.getElementById('garmentsGrid');
+            container.innerHTML = '';
+            
+            const filteredGarments = garmentDatabase.filter(garment => 
+                garment.gender === selectedGender || garment.gender === 'unisex'
+            );
+            
+            filteredGarments.forEach((garment, index) => {
+                setTimeout(() => {
+                    const card = createGarmentCard(garment);
+                    card.style.animation = `fadeIn 0.6s ease-out ${index * 0.1}s both`;
+                    container.appendChild(card);
+                }, index * 100);
+            });
+        }
+
+        function createGarmentCard(garment) {
+            const card = document.createElement('div');
+            card.className = 'garment-card';
+            
+            card.innerHTML = `
+                <div class="garment-image">
+                    <div class="emoji-fallback">${garment.emoji}</div>
+                    <div class="garment-badge">${garment.category}</div>
+                </div>
+                <div class="garment-info">
+                    <div class="garment-name">${garment.name}</div>
+                    <div class="garment-price">₹${garment.basePrice}</div>
+                    <div style="color: var(--text-secondary); font-size: 0.9rem; margin: 8px 0;">
+                        ${garment.description}
+                    </div>
+                    <div class="garment-controls">
+                        <div class="quantity-selector">
+                            <label style="font-size: 0.9rem; font-weight: 600;">Qty:</label>
+                            <input type="number" class="quantity-input" id="qty-${garment.id}" 
+                                   min="0" max="10" value="0" onchange="updateGarmentQuantity('${garment.id}')">
+                        </div>
+                        <button class="btn btn-outline" onclick="addToCart('${garment.id}')" id="btn-${garment.id}">
+                            Add to Cart
+                        </button>
+                    </div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 8px; text-align: center;">
+                        Size: ${recommendedSize ? recommendedSize.size : '-'} (${recommendedSize ? sizeMapping[recommendedSize.size].code : '----'})
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+
+        function updateGarmentQuantity(garmentId) {
+            const quantity = parseInt(document.getElementById(`qty-${garmentId}`).value) || 0;
+            const button = document.getElementById(`btn-${garmentId}`);
+            const card = button.closest('.garment-card');
+            
+            if (quantity > 0) {
+                button.textContent = 'Update Cart';
+                button.classList.remove('btn-outline');
+                button.classList.add('btn-success');
+                card.classList.add('in-cart');
+            } else {
+                button.textContent = 'Add to Cart';
+                button.classList.add('btn-outline');
+                button.classList.remove('btn-success');
+                card.classList.remove('in-cart');
+            }
+        }
+
+        // Enhanced Cart System
+        function addToCart(garmentId) {
+            const quantity = parseInt(document.getElementById(`qty-${garmentId}`).value) || 0;
+            
+            if (quantity === 0) {
+                showAlert('Please select quantity before adding to cart', 'warning');
+                return;
+            }
+            
+            const garment = garmentDatabase.find(g => g.id === garmentId);
+            const existingItemIndex = cart.findIndex(item => item.id === garmentId);
+            
+            if (existingItemIndex >= 0) {
+                cart[existingItemIndex].quantity = quantity;
+                cart[existingItemIndex].total = quantity * garment.basePrice;
+            } else {
+                cart.push({
+                    id: garmentId,
+                    name: garment.name,
+                    emoji: garment.emoji,
+                    price: garment.basePrice,
+                    quantity: quantity,
+                    size: recommendedSize?.size || 'M',
+                    sizeCode: sizeMapping[recommendedSize?.size || 'M']?.code || '1003',
+                    total: quantity * garment.basePrice
+                });
+            }
+            
+            updateCartUI();
+            showAlert(`${garment.name} ${quantity > 1 ? `(${quantity} pieces)` : ''} added to cart!`, 'success');
+        }
+
+        function updateCartUI() {
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const totalAmount = cart.reduce((sum, item) => sum + item.total, 0);
+            
+            const cartCount = document.getElementById('cartCount');
+            
+            if (totalItems > 0) {
+                cartCount.textContent = totalItems;
+                cartCount.style.display = 'flex';
+            } else {
+                cartCount.style.display = 'none';
+            }
+            
+            document.getElementById('cartItemsCount').textContent = cart.length;
+            document.getElementById('totalQuantity').textContent = totalItems;
+            document.getElementById('estimatedTotal').textContent = `₹${totalAmount}`;
+            
+            updateStep3Validation();
+        }
+
+        function showCart() {
+            const cartContainer = document.getElementById('cartItems');
+            const clearBtn = document.getElementById('clearCartBtn');
+            const checkoutBtn = document.getElementById('checkoutBtn');
+            
+            if (cart.length === 0) {
+                cartContainer.innerHTML = `
+                    <div class="text-center" style="padding: 60px;">
+                        <div style="font-size: 4rem; margin-bottom: 20px;">🛒</div>
+                        <h4>Your cart is empty</h4>
+                        <p style="color: var(--text-secondary); margin-top: 10px;">Add some garments to get started!</p>
+                    </div>
+                `;
+                clearBtn.style.display = 'none';
+                checkoutBtn.style.display = 'none';
+            } else {
+                cartContainer.innerHTML = cart.map(item => `
+                    <div class="cart-item">
+                        <div class="cart-item-image">${item.emoji}</div>
+                        <div class="cart-item-details">
+                            <div class="cart-item-name">${item.name}</div>
+                            <div class="cart-item-size">Size: ${item.size} (${item.sizeCode})</div>
+                            <div class="cart-item-price">₹${item.price} each</div>
+                        </div>
+                        <div class="quantity-controls">
+                            <button class="quantity-btn" onclick="updateCartQuantity('${item.id}', -1)">−</button>
+                            <div class="quantity-display">${item.quantity}</div>
+                            <button class="quantity-btn" onclick="updateCartQuantity('${item.id}', 1)">+</button>
+                        </div>
+                        <div style="font-weight: 700; font-size: 1.1rem; color: var(--success-color);">₹${item.total}</div>
+                        <button onclick="removeFromCart('${item.id}')" style="background: var(--danger-color); color: white; border: none; border-radius: 8px; padding: 8px 12px; cursor: pointer; font-size: 0.9rem;">Remove</button>
+                    </div>
+                `).join('');
+                
+                const totalAmount = cart.reduce((sum, item) => sum + item.total, 0);
+                cartContainer.innerHTML += `
+                    <div style="border-top: 2px solid var(--border-color); padding-top: 20px; margin-top: 20px; text-align: right;">
+                        <h3 style="color: var(--text-primary);">Total: ₹${totalAmount}</h3>
+                    </div>
+                `;
+                
+                clearBtn.style.display = 'inline-block';
+                checkoutBtn.style.display = 'inline-block';
+            }
+            
+            showModal('cartModal');
+        }
+
+        function updateCartQuantity(itemId, change) {
+            const itemIndex = cart.findIndex(item => item.id === itemId);
+            if (itemIndex >= 0) {
+                cart[itemIndex].quantity += change;
+                if (cart[itemIndex].quantity <= 0) {
+                    cart.splice(itemIndex, 1);
+                } else {
+                    cart[itemIndex].total = cart[itemIndex].quantity * cart[itemIndex].price;
+                }
+                updateCartUI();
+                showCart(); // Refresh cart display
+            }
+        }
+
+        function removeFromCart(itemId) {
+            cart = cart.filter(item => item.id !== itemId);
+            updateCartUI();
+            showCart();
+            showAlert('Item removed from cart', 'info');
+        }
+
+        function clearCart() {
+            cart = [];
+            updateCartUI();
+            showCart();
+            showAlert('Cart cleared', 'info');
+        }
+
+        function proceedToCheckout() {
+            closeModal('cartModal');
+            if (currentStep < 4) {
+                nextStep();
+            }
+        }
+
+        // Step 4: Enhanced Order Summary with PDF Export
+        function generateOrderSummary() {
+            const container = document.getElementById('orderSummary');
+            const totalAmount = cart.reduce((sum, item) => sum + item.total, 0);
+            const tax = Math.round(totalAmount * 0.18); // 18% GST
+            const finalTotal = totalAmount + tax;
+            
+            container.innerHTML = `
+                <div class="animate-fadeIn">
+                    <div class="summary-section">
+                        <h4>👤 Student Information</h4>
+                        <div class="summary-item">
+                            <span class="summary-label">Name:</span>
+                            <span class="summary-value">${document.getElementById('studentName').value}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Roll Number:</span>
+                            <span class="summary-value">${document.getElementById('rollNumber').value}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Class-Division:</span>
+                            <span class="summary-value">${document.getElementById('class').value}-${document.getElementById('division').value}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Age:</span>
+                            <span class="summary-value">${studentData.age} years</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Gender:</span>
+                            <span class="summary-value">${selectedGender === 'M' ? 'Male' : 'Female'}</span>
+                        </div>
+                    </div>
+
+                    <div class="summary-section">
+                        <h4>📏 Measurements & Size</h4>
+                        <div class="summary-item">
+                            <span class="summary-label">Height:</span>
+                            <span class="summary-value">${studentData.height} cm</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Weight:</span>
+                            <span class="summary-value">${studentData.weight} kg</span>
+                        </div>
+                        ${studentData.chest ? `
+                        <div class="summary-item">
+                            <span class="summary-label">Chest:</span>
+                            <span class="summary-value">${studentData.chest} cm</span>
+                        </div>
+                        ` : ''}
+                        ${studentData.waist ? `
+                        <div class="summary-item">
+                            <span class="summary-label">Waist:</span>
+                            <span class="summary-value">${studentData.waist} cm</span>
+                        </div>
+                        ` : ''}
+                        <div class="summary-item">
+                            <span class="summary-label">Recommended Size:</span>
+                            <span class="summary-value">${recommendedSize.size} (${sizeMapping[recommendedSize.size].code})</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">AI Confidence:</span>
+                            <span class="summary-value">${(recommendedSize.confidence * 100).toFixed(0)}%</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Accuracy Level:</span>
+                            <span class="summary-value" style="text-transform: capitalize;">${accuracyLevel}</span>
+                        </div>
+                    </div>
+
+                    <div class="summary-section">
+                        <h4>🛒 Order Items</h4>
+                        ${cart.map(item => `
+                            <div class="summary-item">
+                                <span class="summary-label">${item.emoji} ${item.name}</span>
+                                <span class="summary-value">${item.quantity}x @ ₹${item.price} = ₹${item.total}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div class="summary-section">
+                        <h4>💰 Pricing Summary</h4>
+                        <div class="summary-item">
+                            <span class="summary-label">Subtotal:</span>
+                            <span class="summary-value">₹${totalAmount}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">GST (18%):</span>
+                            <span class="summary-value">₹${tax}</span>
+                        </div>
+                        <div class="summary-item" style="border-top: 2px solid var(--primary-color); padding-top: 15px; margin-top: 15px;">
+                            <span class="summary-label"><strong>Final Total:</strong></span>
+                            <span class="summary-value"><strong style="color: var(--success-color); font-size: 1.2rem;">₹${finalTotal}</strong></span>
+                        </div>
+                    </div>
+
+                    <div class="summary-section">
+                        <h4>📦 Delivery Information</h4>
+                        <div class="summary-item">
+                            <span class="summary-label">Estimated Delivery:</span>
+                            <span class="summary-value">7-10 business days</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Production Time:</span>
+                            <span class="summary-value">5-7 days</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Shipping:</span>
+                            <span class="summary-value">Free delivery</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Enhanced PDF Export functionality
+        function exportToPDF() {
+            showLoadingOverlay('Generating comprehensive PDF report...');
+            
+            const orderData = {
+                orderInfo: {
+                    orderId: 'ORD-' + Date.now(),
+                    date: new Date().toLocaleDateString('en-IN'),
+                    time: new Date().toLocaleTimeString('en-IN')
+                },
+                studentInfo: {
+                    name: document.getElementById('studentName').value,
+                    rollNumber: document.getElementById('rollNumber').value,
+                    registerNumber: document.getElementById('registerNumber').value,
+                    class: document.getElementById('class').value,
+                    division: document.getElementById('division').value,
+                    age: studentData.age,
+                    gender: selectedGender === 'M' ? 'Male' : 'Female'
+                },
+                measurements: {
+                    height: studentData.height,
+                    weight: studentData.weight,
+                    chest: studentData.chest || 'Not provided',
+                    waist: studentData.waist || 'Not provided',
+                    shoulder: studentData.shoulder || 'Not provided',
+                    sleeveLength: studentData.sleeveLength || 'Not provided',
+                    bmi: (studentData.weight / Math.pow(studentData.height / 100, 2)).toFixed(1)
+                },
+                sizeRecommendation: {
+                    size: recommendedSize.size,
+                    code: sizeMapping[recommendedSize.size].code,
+                    confidence: (recommendedSize.confidence * 100).toFixed(0) + '%',
+                    accuracyLevel: accuracyLevel
+                },
+                orderItems: cart,
+                pricing: {
+                    subtotal: cart.reduce((sum, item) => sum + item.total, 0),
+                    tax: Math.round(cart.reduce((sum, item) => sum + item.total, 0) * 0.18),
+                    total: cart.reduce((sum, item) => sum + item.total, 0) + Math.round(cart.reduce((sum, item) => sum + item.total, 0) * 0.18)
+                }
+            };
+            
+            // Simulate PDF generation with jsPDF (would be actual implementation)
+            setTimeout(() => {
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(orderData, null, 2));
+                const downloadAnchorNode = document.createElement('a');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", `uniform_order_${orderData.orderInfo.orderId}.json`);
+                document.body.appendChild(downloadAnchorNode);
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+                
+                hideLoadingOverlay();
+                showAlert('Order summary exported successfully! Check your downloads.', 'success');
+            }, 2000);
+        }
+
+        // Enhanced Order Submission with AWS integration structure
+        async function submitOrder() {
+            showLoadingOverlay('Submitting your order to our production system...');
+            
+            const orderId = 'ORD-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5).toUpperCase();
+            
+            const orderData = {
+                orderId: orderId,
+                studentId: generateStudentId(),
+                orderDate: new Date().toISOString(),
+                status: 'PENDING',
+                studentInfo: {
+                    name: document.getElementById('studentName').value,
+                    rollNumber: document.getElementById('rollNumber').value,
+                    registerNumber: document.getElementById('registerNumber').value || null,
+                    class: document.getElementById('class').value,
+                    division: document.getElementById('division').value,
+                    dateOfBirth: document.getElementById('dateOfBirth').value,
+                    age: studentData.age,
+                    gender: selectedGender
+                },
+                measurements: {
+                    height: studentData.height,
+                    weight: studentData.weight,
+                    chest: studentData.chest,
+                    waist: studentData.waist,
+                    shoulder: studentData.shoulder,
+                    sleeveLength: studentData.sleeveLength,
+                    bmi: (studentData.weight / Math.pow(studentData.height / 100, 2)).toFixed(1),
+                    accuracyLevel: accuracyLevel
+                },
+                sizeRecommendation: {
+                    size: recommendedSize.size,
+                    code: sizeMapping[recommendedSize.size].code,
+                    confidence: recommendedSize.confidence,
+                    method: 'AI Enhanced Sizing'
+                },
+                items: cart,
+                pricing: {
+                    subtotal: cart.reduce((sum, item) => sum + item.total, 0),
+                    tax: Math.round(cart.reduce((sum, item) => sum + item.total, 0) * 0.18),
+                    total: cart.reduce((sum, item) => sum + item.total, 0) + Math.round(cart.reduce((sum, item) => sum + item.total, 0) * 0.18),
+                    currency: 'INR'
+                },
+                deliveryInfo: {
+                    estimatedDays: 10,
+                    productionDays: 7,
+                    shippingMethod: 'Standard',
+                    trackingId: null
+                }
+            };
+            
+            try {
+                // Simulate AWS RDS MySQL insertion
+                await saveOrderToDatabase(orderData);
+                
+                // Update local storage and order history
+                localStorage.setItem('lastOrder', JSON.stringify(orderData));
+                orderHistory.unshift(orderData);
+                localStorage.setItem('orderHistory', JSON.stringify(orderHistory));
+                
+                // Update order confirmation display
+                document.getElementById('orderConfirmation').innerHTML = `
+                    <div class="summary-section">
+                        <h4>🎉 Order Confirmation</h4>
+                        <div class="summary-item">
+                            <span class="summary-label">Order ID:</span>
+                            <span class="summary-value" style="font-family: monospace; font-weight: bold;">${orderData.orderId}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Student:</span>
+                            <span class="summary-value">${orderData.studentInfo.name}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Items Ordered:</span>
+                            <span class="summary-value">${cart.length} types, ${cart.reduce((sum, item) => sum + item.quantity, 0)} total pieces</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Total Amount:</span>
+                            <span class="summary-value">₹${orderData.pricing.total}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Size:</span>
+                            <span class="summary-value">${orderData.sizeRecommendation.size} (${orderData.sizeRecommendation.code})</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Status:</span>
+                            <span class="summary-value" style="color: var(--success-color); font-weight: bold;">Order Confirmed</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Expected Delivery:</span>
+                            <span class="summary-value">${new Date(Date.now() + 10 * 24 * 60 * 60 * 1000).toLocaleDateString('en-IN')}</span>
+                        </div>
+                    </div>
+
+                    <div style="background: #f0fdf4; border: 1px solid #22c55e; border-radius: 12px; padding: 20px; margin-top: 20px;">
+                        <h5 style="color: #065f46; margin-bottom: 15px;">📱 What's Next?</h5>
+                        <ul style="color: #065f46; line-height: 1.8;">
+                            <li>📧 Email confirmation sent to your registered address</li>
+                            <li>👨‍🔧 Our expert tailors will review your measurements</li>
+                            <li>✂️ Production will begin within 24 hours</li>
+                            <li>📱 SMS/WhatsApp updates throughout the process</li>
+                            <li>🚚 Free delivery to your address</li>
+                        </ul>
+                    </div>
+                `;
+                
+                hideLoadingOverlay();
+                showAlert('🎉 Order submitted successfully! Check your email for confirmation.', 'success');
+                nextStep();
+                
+                // Clear cart after successful order
+                cart = [];
+                updateCartUI();
+                
+            } catch (error) {
+                hideLoadingOverlay();
+                showAlert('Error submitting order. Please try again or contact support.', 'error');
+                console.error('Order submission error:', error);
+            }
+        }
+
+        // Database interaction functions (AWS RDS MySQL ready)
+        async function saveOrderToDatabase(orderData) {
+            // This would integrate with AWS API Gateway + Lambda + RDS MySQL
+            try {
+                const response = await fetch(`${AWS_CONFIG.apiGatewayUrl}/orders`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getUserToken()}`,
+                        'X-API-Key': 'your-api-key-here'
+                    },
+                    body: JSON.stringify(orderData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                return await response.json();
+                
+            } catch (error) {
+                // Fallback to local storage for demo
+                console.log('Using local storage fallback');
+                localStorage.setItem(`order_${orderData.orderId}`, JSON.stringify(orderData));
+                return { success: true, orderId: orderData.orderId };
+            }
+        }
+
+        async function fetchOrderHistory() {
+            try {
+                const response = await fetch(`${AWS_CONFIG.apiGatewayUrl}/orders/user/${getUserId()}`, {
+                    headers: {
+                        'Authorization': `Bearer ${getUserToken()}`,
+                        'X-API-Key': 'your-api-key-here'
+                    }
+                });
+                
+                if (response.ok) {
+                    orderHistory = await response.json();
+                } else {
+                    // Fallback to local storage
+                    const saved = localStorage.getItem('orderHistory');
+                    orderHistory = saved ? JSON.parse(saved) : [];
+                }
+                
+                displayOrderHistory();
+                
+            } catch (error) {
+                console.error('Failed to fetch order history:', error);
+                // Use local storage fallback
+                const saved = localStorage.getItem('orderHistory');
+                orderHistory = saved ? JSON.parse(saved) : [];
+                displayOrderHistory();
+            }
+        }
+
+        function generateStudentId() {
+            return 'STU-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+        }
+
+        function getUserToken() {
+            return localStorage.getItem('userToken') || 'demo-token-' + Date.now();
+        }
+
+        function getUserId() {
+            return localStorage.getItem('userId') || 'demo-user-' + Date.now();
+        }
+
+        // Account Management System
+        function showAccount() {
+            loadUserProfile();
+            fetchOrderHistory();
+            showModal('accountModal');
+        }
+
+        function showAccountTab(tab) {
+            document.querySelectorAll('.account-tab').forEach(t => t.classList.add('hidden'));
+            document.getElementById(tab + 'Tab').classList.remove('hidden');
+            
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function loadUserProfile() {
+            const savedProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+            document.getElementById('userEmail').value = savedProfile.email || '';
+            document.getElementById('userPhone').value = savedProfile.phone || '';
+            document.getElementById('userAddress').value = savedProfile.address || '';
+            document.getElementById('emailNotifications').checked = savedProfile.emailNotifications !== false;
+            document.getElementById('smsNotifications').checked = savedProfile.smsNotifications !== false;
+        }
+
+        function saveProfile() {
+            const profile = {
+                email: document.getElementById('userEmail').value,
+                phone: document.getElementById('userPhone').value,
+                address: document.getElementById('userAddress').value,
+                updatedAt: new Date().toISOString()
+            };
+            
+            localStorage.setItem('userProfile', JSON.stringify(profile));
+            showAlert('Profile updated successfully!', 'success');
+        }
+
+        function saveSettings() {
+            const settings = {
+                emailNotifications: document.getElementById('emailNotifications').checked,
+                smsNotifications: document.getElementById('smsNotifications').checked,
+                updatedAt: new Date().toISOString()
+            };
+            
+            const profile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+            Object.assign(profile, settings);
+            localStorage.setItem('userProfile', JSON.stringify(profile));
+            
+            showAlert('Settings saved successfully!', 'success');
+        }
+
+        function loadOrderHistory() {
+            const saved = localStorage.getItem('orderHistory');
+            if (saved) {
+                orderHistory = JSON.parse(saved);
+            }
+        }
+
+        function displayOrderHistory() {
+            const container = document.getElementById('orderHistory');
+            
+            if (orderHistory.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center" style="padding: 40px;">
+                        <div style="font-size: 3rem; margin-bottom: 15px;">📦</div>
+                        <h4>No orders yet</h4>
+                        <p style="color: var(--text-secondary);">Your order history will appear here</p>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = orderHistory.slice(0, 10).map(order => `
+                    <div style="border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; margin-bottom: 15px; transition: all 0.3s ease;" 
+                         onmouseover="this.style.boxShadow='var(--shadow)'" 
+                         onmouseout="this.style.boxShadow='none'">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <strong style="font-family: monospace;">${order.orderId}</strong>
+                            <span style="background: var(--success-color); color: white; padding: 4px 12px; border-radius: 15px; font-size: 0.8rem; font-weight: 600;">
+                                ${order.status}
+                            </span>
+                        </div>
+                        <div style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6;">
+                            <div><strong>Student:</strong> ${order.studentInfo.name}</div>
+                            <div><strong>Items:</strong> ${order.items.length} types, ${order.items.reduce((sum, item) => sum + item.quantity, 0)} pieces</div>
+                            <div><strong>Total:</strong> ₹${order.pricing.total}</div>
+                            <div><strong>Date:</strong> ${new Date(order.orderDate).toLocaleDateString('en-IN')}</div>
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <button class="btn btn-outline" onclick="viewOrderDetails('${order.orderId}')" 
+                                    style="padding: 8px 16px; font-size: 0.9rem;">
+                                View Details
+                            </button>
+                            <button class="btn btn-outline" onclick="trackSpecificOrder('${order.orderId}')" 
+                                    style="padding: 8px 16px; font-size: 0.9rem; margin-left: 10px;">
+                                Track Order
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function viewOrderDetails(orderId) {
+            const order = orderHistory.find(o => o.orderId === orderId);
+            if (order) {
+                closeModal('accountModal');
+                showTrackingInfo(order);
+            }
+        }
+
+        function trackSpecificOrder(orderId) {
+            const order = orderHistory.find(o => o.orderId === orderId);
+            if (order) {
+                closeModal('accountModal');
+                showTrackingInfo(order);
+            }
+        }
+
+        // Enhanced Order Tracking System
+        function trackOrder() {
+            const lastOrder = JSON.parse(localStorage.getItem('lastOrder') || '{}');
+            if (lastOrder.orderId) {
+                showTrackingInfo(lastOrder);
+            } else {
+                showAlert('No recent orders found. Please check your order history in Account section.', 'warning');
+            }
+        }
+
+        function showTrackingInfo(order) {
+            const container = document.getElementById('trackingInfo');
+            
+            // Enhanced order progress simulation
+            const stages = [
+                { 
+                    name: 'Order Received', 
+                    status: 'completed', 
+                    date: order.orderDate,
+                    description: 'Your order has been confirmed and is in our system'
+                },
+                { 
+                    name: 'Measurements Reviewed', 
+                    status: 'completed', 
+                    date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+                    description: 'Expert tailors have reviewed your measurements'
+                },
+                { 
+                    name: 'Materials Prepared', 
+                    status: 'active', 
+                    date: null,
+                    description: 'High-quality fabric and materials being prepared'
+                },
+                { 
+                    name: 'Cutting in Progress', 
+                    status: 'pending', 
+                    date: null,
+                    description: 'Precision cutting according to your measurements'
+                },
+                { 
+                    name: 'Stitching & Assembly', 
+                    status: 'pending', 
+                    date: null,
+                    description: 'Expert stitching and quality assembly'
+                },
+                { 
+                    name: 'Quality Check', 
+                    status: 'pending', 
+                    date: null,
+                    description: 'Thorough quality inspection and finishing'
+                },
+                { 
+                    name: 'Packed & Shipped', 
+                    status: 'pending', 
+                    date: null,
+                    description: 'Carefully packed and dispatched for delivery'
+                },
+                { 
+                    name: 'Delivered', 
+                    status: 'pending', 
+                    date: null,
+                    description: 'Successfully delivered to your address'
+                }
+            ];
+            
+            const estimatedDelivery = new Date(Date.now() + 8 * 24 * 60 * 60 * 1000);
+            
+            container.innerHTML = `
+                <div style="margin-bottom: 30px; background: var(--light-bg); padding: 25px; border-radius: 12px;">
+                    <h4>Order: ${order.orderId}</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                        <div><strong>Student:</strong> ${order.studentInfo.name}</div>
+                        <div><strong>Items:</strong> ${order.items.reduce((sum, item) => sum + item.quantity, 0)} pieces</div>
+                        <div><strong>Size:</strong> ${order.sizeRecommendation.size} (${order.sizeRecommendation.code})</div>
+                        <div><strong>Amount:</strong> ₹${order.pricing.total}</div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 30px;">
+                    <h5>Order Progress</h5>
+                    ${stages.map((stage, index) => `
+                        <div class="tracking-stage ${stage.status}">
+                            <div class="tracking-icon">
+                                ${stage.status === 'completed' ? '✓' : stage.status === 'active' ? '⏳' : '○'}
+                            </div>
+                            <div class="tracking-details">
+                                <h6>${stage.name}</h6>
+                                <p style="font-size: 0.9rem; color: var(--text-secondary); margin: 5px 0;">
+                                    ${stage.description}
+                                </p>
+                                ${stage.date ? `<div class="tracking-date">${new Date(stage.date).toLocaleDateString('en-IN')}</div>` : ''}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div style="background: var(--light-bg); padding: 20px; border-radius: 12px; border-left: 4px solid var(--success-color);">
+                    <h5>Delivery Information</h5>
+                    <p><strong>Estimated Delivery:</strong> ${estimatedDelivery.toLocaleDateString('en-IN')}</p>
+                    <p><strong>Production Status:</strong> ${stages.find(s => s.status === 'active')?.name || 'In Progress'}</p>
+                    <p><strong>Contact Support:</strong> +91-9876543210 (WhatsApp available)</p>
+                    <div style="margin-top: 15px;">
+                        <button class="btn btn-outline" onclick="contactSupport()" style="margin-right: 10px;">
+                            Contact Support
+                        </button>
+                        <button class="btn btn-outline" onclick="downloadTrackingInfo('${order.orderId}')">
+                            Download Receipt
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            showModal('trackOrderModal');
+        }
+
+        function downloadTrackingInfo(orderId) {
+            const order = orderHistory.find(o => o.orderId === orderId);
+            if (order) {
+                const trackingData = JSON.stringify(order, null, 2);
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(trackingData);
+                const downloadAnchorNode = document.createElement('a');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", `tracking_${orderId}.json`);
+                document.body.appendChild(downloadAnchorNode);
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+                
+                showAlert('Tracking information downloaded successfully!', 'success');
+            }
+        }
+
+        // Validation Functions
+        function validateCurrentStep() {
+            switch (currentStep) {
+                case 1:
+                    return validateStep1();
+                case 2:
+                    return validateStep2();
+                case 3:
+                    return validateStep3();
+                default:
+                    return true;
+            }
+        }
+
+        function validateStep1() {
+            const required = ['studentName', 'rollNumber', 'class', 'division', 'dateOfBirth'];
+            let valid = true;
+            let missingFields = [];
+            
+            required.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (!field.value.trim()) {
+                    valid = false;
+                    missingFields.push(field.previousElementSibling.textContent.replace(' *', ''));
+                    field.classList.add('error');
+                } else {
+                    field.classList.remove('error');
+                }
+            });
+            
+            if (!selectedGender) {
+                valid = false;
+                missingFields.push('Gender');
+            }
+            
+            return valid;
+        }
+
+        function validateStep2() {
+            const height = parseFloat(document.getElementById('height').value);
+            const weight = parseFloat(document.getElementById('weight').value);
+            
+            let valid = !isNaN(height) && !isNaN(weight) && 
+                       height >= 80 && height <= 250 && 
+                       weight >= 10 && weight <= 200;
+                       
+            if (!valid) {
+                if (isNaN(height) || height < 80 || height > 250) {
+                    document.getElementById('height').classList.add('error');
+                }
+                if (isNaN(weight) || weight < 10 || weight > 200) {
+                    document.getElementById('weight').classList.add('error');
+                }
+            } else {
+                document.getElementById('height').classList.remove('error');
+                document.getElementById('weight').classList.remove('error');
+            }
+            
+            return valid;
+        }
+
+        function validateStep3() {
+            return cart.length > 0 && cart.some(item => item.quantity > 0);
+        }
+
+        function updateStepValidation() {
+            updateStep1Validation();
+            updateStep2Validation();
+            updateStep3Validation();
+        }
+
+        function updateStep1Validation() {
+            const validation = document.getElementById('step1-validation');
+            const nextBtn = document.getElementById('step1NextBtn');
+            
+            if (validateStep1()) {
+                validation.className = 'step-validation complete';
+                validation.innerHTML = '<span class="validation-icon">✅</span><span>All required information completed - ready to proceed!</span>';
+                nextBtn.disabled = false;
+            } else {
+                validation.className = 'step-validation incomplete';
+                validation.innerHTML = '<span class="validation-icon">⚠️</span><span>Please complete all required fields and select gender</span>';
+                nextBtn.disabled = true;
+            }
+        }
+
+        function updateStep2Validation(isValid = null) {
+            const validation = document.getElementById('step2-validation');
+            const nextBtn = document.getElementById('step2NextBtn');
+            
+            if (isValid === null) {
+                isValid = validateStep2();
+            }
+            
+            if (isValid) {
+                validation.className = 'step-validation complete';
+                validation.innerHTML = '<span class="validation-icon">✅</span><span>Measurements completed - AI sizing ready!</span>';
+                nextBtn.disabled = false;
+            } else {
+                validation.className = 'step-validation incomplete';
+                validation.innerHTML = '<span class="validation-icon">⚠️</span><span>Please enter valid height (80-250 cm) and weight (10-200 kg)</span>';
+                nextBtn.disabled = true;
+            }
+        }
+
+        function updateStep3Validation() {
+            const validation = document.getElementById('step3-validation');
+            const nextBtn = document.getElementById('step3NextBtn');
+            
+            if (validateStep3()) {
+                const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+                validation.className = 'step-validation complete';
+                validation.innerHTML = `<span class="validation-icon">✅</span><span>Cart ready: ${totalItems} item(s) selected for checkout</span>`;
+                nextBtn.disabled = false;
+            } else {
+                validation.className = 'step-validation incomplete';
+                validation.innerHTML = '<span class="validation-icon">⚠️</span><span>Please add at least one garment to cart</span>';
+                nextBtn.disabled = true;
+            }
+        }
+
+        // Help System Functions
+        function showHelp() {
+            showModal('helpModal');
+        }
+
+        function showMeasurementTips() {
+            const content = `
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h4>Professional Measurement Techniques</h4>
+                    <p style="color: var(--text-secondary);">Follow these guidelines for 95%+ accuracy</p>
+                </div>
+                
+                <div style="margin-bottom: 25px;">
+                    <h5>Essential Measurements</h5>
+                    <div style="background: #f0fdf4; padding: 20px; border-radius: 12px; border-left: 4px solid var(--success-color);">
+                        <div style="margin-bottom: 15px;">
+                            <strong>Height:</strong>
+                            <ul style="margin: 5px 0; padding-left: 20px;">
+                                <li>Stand straight against a wall, feet together</li>
+                                <li>Look straight ahead, not up or down</li>
+                                <li>Mark the highest point of head against wall</li>
+                                <li>Measure from floor to mark with measuring tape</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <strong>Weight:</strong>
+                            <ul style="margin: 5px 0; padding-left: 20px;">
+                                <li>Use digital scale for accuracy</li>
+                                <li>Weigh in light clothing (underwear only)</li>
+                                <li>Same time daily (preferably morning)</li>
+                                <li>On hard, flat surface, not carpet</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 25px;">
+                    <h5>Optional but Recommended</h5>
+                    <div style="background: #eff6ff; padding: 20px; border-radius: 12px; border-left: 4px solid var(--info-color);">
+                        <div style="margin-bottom: 15px;">
+                            <strong>Chest/Bust:</strong> Around fullest part, tape parallel to floor, breathe normally
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <strong>Waist:</strong> Natural waistline (narrowest part), usually above hip bones
+                        </div>
+                        <div style="margin-bottom: 15px;">
+                            <strong>Shoulder:</strong> Point to point across back, not across front
+                        </div>
+                        <div>
+                            <strong>Sleeve:</strong> Shoulder to wrist with arm slightly bent at elbow
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background: #fef3c7; padding: 20px; border-radius: 12px; border-left: 4px solid var(--warning-color);">
+                    <h6>Pro Tips for Accuracy:</h6>
+                    <ul style="line-height: 1.6;">
+                        <li>Have someone help you measure</li>
+                        <li>Use fabric measuring tape, not metal ruler</li>
+                        <li>Keep tape snug but not tight</li>
+                        <li>Take measurements over light, fitted clothing</li>
+                        <li>Measure twice to verify accuracy</li>
+                        <li>Stand naturally - don't alter posture</li>
+                    </ul>
+                </div>
+            `;
+            
+            document.getElementById('measurementGuideContent').innerHTML = content;
+            showModal('measurementTipsModal');
+        }
+
+        function showSizeChart() {
+            const content = `
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h4>Universal Size Chart</h4>
+                    <p style="color: var(--text-secondary);">Reference guide for size selection</p>
+                </div>
+                
+                <div style="overflow-x: auto; margin-bottom: 25px;">
+                    <table style="width: 100%; border-collapse: collapse; background: var(--white-bg);">
+                        <thead>
+                            <tr style="background: var(--light-bg);">
+                                <th style="padding: 12px; border: 1px solid var(--border-color); text-align: left;">Size</th>
+                                <th style="padding: 12px; border: 1px solid var(--border-color); text-align: left;">Code</th>
+                                <th style="padding: 12px; border: 1px solid var(--border-color); text-align: left;">Height (cm)</th>
+                                <th style="padding: 12px; border: 1px solid var(--border-color); text-align: left;">Age Range</th>
+                                <th style="padding: 12px; border: 1px solid var(--border-color); text-align: left;">Typical Use</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${Object.entries(sizeMapping).map(([size, info]) => `
+                                <tr>
+                                    <td style="padding: 12px; border: 1px solid var(--border-color); font-weight: 600;">${size}</td>
+                                    <td style="padding: 12px; border: 1px solid var(--border-color); font-family: monospace;">${info.code}</td>
+                                    <td style="padding: 12px; border: 1px solid var(--border-color);">${info.heightRange}</td>
+                                    <td style="padding: 12px; border: 1px solid var(--border-color);">${info.ageRange}</td>
+                                    <td style="padding: 12px; border: 1px solid var(--border-color);">${
+                                        size === 'XS' ? 'Young children' :
+                                        size === 'S' ? 'Primary school' :
+                                        size === 'M' ? 'Middle school' :
+                                        size === 'L' ? 'High school' :
+                                        size === 'XL' ? 'Senior students' :
+                                        'Adult/Special'
+                                    }</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div style="background: #f0fdf4; padding: 20px; border-radius: 12px;">
+                    <h6>Important Notes:</h6>
+                    <ul style="line-height: 1.6; color: #065f46;">
+                        <li>These are reference ranges - our AI considers individual body proportions</li>
+                        <li>Growth allowance is automatically added for children under 12</li>
+                        <li>Additional measurements (chest, waist) provide more precise sizing</li>
+                        <li>When in doubt, our system typically recommends the larger size for comfort</li>
+                    </ul>
+                </div>
+            `;
+            
+            document.getElementById('sizeChartContent').innerHTML = content;
+            showModal('sizeChartModal');
+        }
+
+        function contactSupport() {
+            const userAgent = navigator.userAgent;
+            const supportMessage = `Hello! I need help with my uniform order. My details:
+- Order ID: ${localStorage.getItem('lastOrder') ? JSON.parse(localStorage.getItem('lastOrder')).orderId : 'New Order'}
+- Device: ${userAgent.includes('Mobile') ? 'Mobile' : 'Desktop'}
+- Time: ${new Date().toLocaleString('en-IN')}
+
+Please help me with:`;
+            
+            const whatsappUrl = `https://wa.me/919876543210?text=${encodeURIComponent(supportMessage)}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        // Utility Functions
+        function toggleTheme() {
+            const body = document.body;
+            const themeToggle = document.querySelector('.theme-toggle');
+            
+            if (currentTheme === 'light') {
+                body.setAttribute('data-theme', 'dark');
+                themeToggle.innerHTML = '☀️ Light Mode';
+                currentTheme = 'dark';
+            } else {
+                body.removeAttribute('data-theme');
+                themeToggle.innerHTML = '🌙 Dark Mode';
+                currentTheme = 'light';
+            }
+            
+            localStorage.setItem('theme', currentTheme);
+        }
+
+        function showModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.style.display = 'block';
+            setTimeout(() => modal.classList.add('show'), 10);
+            
+            // Focus management for accessibility
+            const firstFocusable = modal.querySelector('button, input, select, textarea, [tabindex]:not([tabindex="-1"])');
+            if (firstFocusable) {
+                firstFocusable.focus();
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('show');
+            setTimeout(() => modal.style.display = 'none', 300);
+        }
+
+        function showLoadingOverlay(message) {
+            document.getElementById('loadingMessage').textContent = message;
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+
+        function hideLoadingOverlay() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        function showAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('alertContainer');
+            const alertId = 'alert_' + Date.now();
+            
+            const icons = {
+                success: '✅',
+                error: '❌',
+                warning: '⚠️',
+                info: 'ℹ️'
+            };
+            
+            const alert = document.createElement('div');
+            alert.id = alertId;
+            alert.className = `alert alert-${type}`;
+            alert.innerHTML = `
+                <span style="font-size: 1.2rem;">${icons[type] || 'ℹ️'}</span>
+                <span style="flex: 1;">${message}</span>
+                <button onclick="removeAlert('${alertId}')" style="background: none; border: none; color: inherit; font-size: 1.4rem; cursor: pointer; margin-left: auto; min-width: 32px; min-height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: all 0.3s ease;" onmouseover="this.style.background='rgba(0,0,0,0.1)'" onmouseout="this.style.background='none'">&times;</button>
+            `;
+            
+            alertContainer.appendChild(alert);
+            
+            // Auto remove after 6 seconds
+            setTimeout(() => removeAlert(alertId), 6000);
+        }
+
+        function removeAlert(alertId) {
+            const alert = document.getElementById(alertId);
+            if (alert) {
+                alert.style.opacity = '0';
+                alert.style.transform = 'translateX(100%)';
+                setTimeout(() => alert.remove(), 300);
+            }
+        }
+
+        function startNewOrder() {
+            if (confirm('Start a new order? Current progress will be lost.')) {
+                // Reset all data
+                currentStep = 1;
+                studentData = {};
+                selectedGender = '';
+                cart = [];
+                recommendedSize = null;
+                accuracyLevel = 'basic';
+                
+                // Reset forms
+                document.getElementById('studentInfoForm').reset();
+                document.getElementById('measurementsForm').reset();
+                
+                // Reset UI
+                document.querySelectorAll('.gender-option').forEach(opt => opt.classList.remove('selected'));
+                document.querySelectorAll('.garment-card').forEach(card => card.classList.remove('in-cart'));
+                
+                updateCartUI();
+                updateStepValidation();
+                
+                // Go to first step
+                hideStep(5);
+                showStep(1);
+                updateStepper();
+                
+                showAlert('New order started! Please fill in your details.', 'info');
+            }
+        }
+
+        // Enhanced keyboard shortcuts and accessibility
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const openModal = document.querySelector('.modal.show, .modal[style*="display: block"]');
+                if (openModal) {
+                    closeModal(openModal.id);
+                }
+            }
+            
+            // Navigation shortcuts
+            if (e.ctrlKey || e.metaKey) {
+                switch (e.key) {
+                    case 'ArrowRight':
+                        e.preventDefault();
+                        if (currentStep < 5 && validateCurrentStep()) {
+                            nextStep();
+                        }
+                        break;
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        if (currentStep > 1) {
+                            prevStep();
+                        }
+                        break;
+                    case 'h':
+                        e.preventDefault();
+                        showHelp();
+                        break;
+                    case 'c':
+                        e.preventDefault();
+                        showCart();
+                        break;
+                }
+            }
+        });
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    closeModal(modal.id);
+                }
+            });
+        }
+
+        // Enhanced auto-save progress
+        setInterval(() => {
+            if (Object.keys(studentData).length > 0 || selectedGender || cart.length > 0) {
+                const progressData = {
+                    currentStep,
+                    studentData,
+                    selectedGender,
+                    cart,
+                    recommendedSize,
+                    accuracyLevel,
+                    lastSaved: new Date().toISOString()
+                };
+                localStorage.setItem('uniformProgress', JSON.stringify(progressData));
+            }
+        }, 30000); // Save every 30 seconds
+
+        // Load saved progress on page load
+        window.addEventListener('load', function() {
+            const savedProgress = localStorage.getItem('uniformProgress');
+            if (savedProgress) {
+                const progress = JSON.parse(savedProgress);
+                const lastSaved = new Date(progress.lastSaved);
+                const now = new Date();
+                const hoursSince = (now - lastSaved) / (1000 * 60 * 60);
+                
+                if (hoursSince < 24 && confirm('Found saved progress from earlier. Would you like to continue where you left off?')) {
+                    // Restore progress
+                    currentStep = progress.currentStep;
+                    studentData = progress.studentData || {};
+                    selectedGender = progress.selectedGender || '';
+                    cart = progress.cart || [];
+                    recommendedSize = progress.recommendedSize;
+                    accuracyLevel = progress.accuracyLevel || 'basic';
+                    
+                    // Restore UI state
+                    if (selectedGender) {
+                        selectGender(selectedGender);
+                    }
+                    
+                    if (recommendedSize) {
+                        updateSizePanel();
+                    }
+                    
+                    updateCartUI();
+                    updateStepValidation();
+                    
+                    // Go to correct step
+                    hideStep(1);
+                    showStep(currentStep);
+                    updateStepper();
+                    
+                    showAlert('Progress restored successfully!', 'success');
+                }
+            }
+        });
+
+        // Performance monitoring
+        window.addEventListener('load', function() {
+            const loadTime = performance.now();
+            console.log(`UniForm Smart Dashboard loaded in ${loadTime.toFixed(2)}ms`);
+        });
+
+        // Error handling for network issues
+        window.addEventListener('online', function() {
+            showAlert('Connection restored - all features available', 'success');
+        });
+
+        window.addEventListener('offline', function() {
+            showAlert('You are offline. Some features may be limited until connection is restored.', 'warning');
+        });
+
+        // Initialize tooltips and help text
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add helpful tooltips to form fields
+            const tooltips = {
+                'height': 'Stand straight against wall, measure from floor to top of head',
+                'weight': 'Use digital scale, weigh in light clothing',
+                'chest': 'Around fullest part of chest, parallel to floor',
+                'waist': 'Natural waistline, usually above hip bones'
+            };
+            
+            Object.keys(tooltips).forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.title = tooltips[fieldId];
+                }
+            });
+        });
+    </script>
+</body>
+</html>
