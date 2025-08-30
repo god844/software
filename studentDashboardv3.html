@@ -1479,9 +1479,9 @@
                                         <div class="form-helper">Optional registration number</div>
                                     </div>
                                     
-                                    <div class="form-group">
+                                  <div class="form-group">
                                         <label for="class">Class *</label>
-                                        <select id="class" name="class" required>
+                                        <select id="class" name="class" required onchange="toggleCustomClass()">
                                             <option value="">Select Class</option>
                                             <option value="1">Class 1</option>
                                             <option value="2">Class 2</option>
@@ -1495,12 +1495,19 @@
                                             <option value="10">Class 10</option>
                                             <option value="11">Class 11</option>
                                             <option value="12">Class 12</option>
+                                            <option value="nursery">Nursery</option>
+                                            <option value="kg1">KG1</option>
+                                            <option value="kg2">KG2</option>
+                                            <option value="prep">Preparatory</option>
+                                            <option value="custom">Other (Custom Entry)</option>
                                         </select>
+                                        <input type="text" id="customClass" name="customClass" placeholder="Enter custom class (e.g., Pre-K, Foundation, Grade 13)" style="display: none; margin-top: 10px; padding: 16px 20px; border: 2px solid var(--border-color); border-radius: 12px; font-size: 1rem; background: var(--white-bg); color: var(--text-primary); transition: all 0.3s ease;" oninput="updateStep1Validation()">
+                                        <div class="form-helper" style="display: none;" id="customClassHelper">Enter any class level not listed above</div>
                                     </div>
                                     
                                     <div class="form-group">
                                         <label for="division">Division *</label>
-                                        <select id="division" name="division" required>
+                                        <select id="division" name="division" required onchange="toggleCustomDivision()">
                                             <option value="">Select Division</option>
                                             <option value="A">Division A</option>
                                             <option value="B">Division B</option>
@@ -1508,7 +1515,18 @@
                                             <option value="D">Division D</option>
                                             <option value="E">Division E</option>
                                             <option value="F">Division F</option>
+                                            <option value="G">Division G</option>
+                                            <option value="H">Division H</option>
+                                            <option value="1">Section 1</option>
+                                            <option value="2">Section 2</option>
+                                            <option value="3">Section 3</option>
+                                            <option value="Alpha">Alpha</option>
+                                            <option value="Beta">Beta</option>
+                                            <option value="Gamma">Gamma</option>
+                                            <option value="custom">Other (Custom Entry)</option>
                                         </select>
+                                        <input type="text" id="customDivision" name="customDivision" placeholder="Enter custom division/section (e.g., Red House, Morning Batch)" style="display: none; margin-top: 10px; padding: 16px 20px; border: 2px solid var(--border-color); border-radius: 12px; font-size: 1rem; background: var(--white-bg); color: var(--text-primary); transition: all 0.3s ease;" oninput="updateStep1Validation()">
+                                        <div class="form-helper" style="display: none;" id="customDivisionHelper">Enter any division/section name not listed above</div>
                                     </div>
                                     
                                     <div class="form-group">
@@ -4251,6 +4269,45 @@ Please help me with:`;
                 }
             });
         });
+        function toggleCustomClass() {
+    const classSelect = document.getElementById('class');
+    const customClassInput = document.getElementById('customClass');
+    const customClassHelper = document.getElementById('customClassHelper');
+    
+    if (classSelect.value === 'custom') {
+        customClassInput.style.display = 'block';
+        customClassHelper.style.display = 'block';
+        customClassInput.required = true;
+        customClassInput.focus();
+        showAlert('Please enter your custom class level (e.g., Pre-K, Foundation, Grade 13)', 'info');
+    } else {
+        customClassInput.style.display = 'none';
+        customClassHelper.style.display = 'none';
+        customClassInput.required = false;
+        customClassInput.value = '';
+    }
+    updateStep1Validation();
+}
+
+function toggleCustomDivision() {
+    const divisionSelect = document.getElementById('division');
+    const customDivisionInput = document.getElementById('customDivision');
+    const customDivisionHelper = document.getElementById('customDivisionHelper');
+    
+    if (divisionSelect.value === 'custom') {
+        customDivisionInput.style.display = 'block';
+        customDivisionHelper.style.display = 'block';
+        customDivisionInput.required = true;
+        customDivisionInput.focus();
+        showAlert('Please enter your custom division/section name (e.g., Red House, Morning Batch)', 'info');
+    } else {
+        customDivisionInput.style.display = 'none';
+        customDivisionHelper.style.display = 'none';
+        customDivisionInput.required = false;
+        customDivisionInput.value = '';
+    }
+    updateStep1Validation();
+}
     </script>
 </body>
 </html>
