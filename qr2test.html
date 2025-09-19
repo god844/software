@@ -265,6 +265,33 @@
             }
         }
 
+        .scanned-image-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            animation: scaleIn 0.5s ease;
+        }
+
+        .scanned-image-label {
+            font-size: 14px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .scanned-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            object-fit: contain;
+        }
+
         .result-box {
             background: linear-gradient(135deg, #e3ffe7 0%, #d9e7ff 100%);
             border-radius: 15px;
@@ -528,6 +555,11 @@
                 <path d="M8 12l2.5 2.5L16 9" stroke="#00ff88" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             
+            <div class="scanned-image-container" id="scanned-image-container" style="display: none;">
+                <div class="scanned-image-label">Scanned Image</div>
+                <img id="scanned-image" class="scanned-image" src="" alt="Scanned QR Code Image">
+            </div>
+            
             <div class="result-box">
                 <div class="result-label">Scanned Result</div>
                 <div class="result-text" id="result-text"></div>
@@ -548,6 +580,7 @@
     <script>
         let html5QrcodeScanner = null;
         let scanHistory = JSON.parse(localStorage.getItem('qrHistory') || '[]');
+        let currentScannedImage = null;
 
         // Drag and drop functionality
         const uploadArea = document.getElementById('upload-area');
@@ -572,6 +605,10 @@
         });
 
         function startScanning() {
+            // Clear any previous scanned image when starting camera scan
+            document.getElementById('scanned-image-container').style.display = 'none';
+            currentScannedImage = null;
+            
             document.getElementById('start-btn').disabled = true;
             document.getElementById('stop-btn').disabled = false;
             document.getElementById('scan-line').style.display = 'block';
@@ -616,7 +653,7 @@
                 cameraId,
                 config,
                 (decodedText, decodedResult) => {
-                    handleScanSuccess(decodedText);
+                    handleScanSuccess(decodedText, null);
                     html5QrCode.stop();
                     document.getElementById('start-btn').disabled = false;
                     document.getElementById('stop-btn').disabled = true;
@@ -670,25 +707,48 @@
         }
 
         function handleFile(file) {
+            // Store the image for display
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                currentScannedImage = e.target.result;
+            };
+            reader.readAsDataURL(file);
+
+            // Scan the QR code from the image
             const html5QrCode = new Html5Qrcode("reader");
             
             html5QrCode.scanFile(file, true)
                 .then(decodedText => {
-                    handleScanSuccess(decodedText);
+                    handleScanSuccess(decodedText, currentScannedImage);
                 })
                 .catch(err => {
                     console.error('Error scanning file:', err);
                     showNotification('No QR code found in the image', 'error');
+                    // Still show the uploaded image even if no QR code found
+                    if (currentScannedImage) {
+                        document.getElementById('scanned-image').src = currentScannedImage;
+                        document.getElementById('scanned-image-container').style.display = 'block';
+                        document.getElementById('result-container').style.display = 'block';
+                        document.getElementById('result-text').textContent = 'No QR code detected in this image';
+                    }
                 });
         }
 
-        function handleScanSuccess(decodedText) {
+        function handleScanSuccess(decodedText, imageData) {
             document.getElementById('result-text').textContent = decodedText;
             document.getElementById('result-container').style.display = 'block';
             
+            // Display the scanned image if available
+            if (imageData) {
+                document.getElementById('scanned-image').src = imageData;
+                document.getElementById('scanned-image-container').style.display = 'block';
+            } else {
+                document.getElementById('scanned-image-container').style.display = 'none';
+            }
+            
             showNotification('QR Code scanned successfully!', 'success');
             
-            addToHistory(decodedText);
+            addToHistory(decodedText, imageData);
         }
 
         function copyResult() {
@@ -700,10 +760,11 @@
             });
         }
 
-        function addToHistory(text) {
+        function addToHistory(text, imageData) {
             const historyItem = {
                 text: text,
-                time: new Date().toLocaleString()
+                time: new Date().toLocaleString(),
+                image: imageData ? imageData.substring(0, 50) + '...' : null // Store truncated image reference
             };
             
             scanHistory.unshift(historyItem);
@@ -722,7 +783,9 @@
                 
                 historyList.innerHTML = scanHistory.map(item => `
                     <div class="history-item">
-                        <div class="history-text">${item.text.substring(0, 50)}${item.text.length > 50 ? '...' : ''}</div>
+                        <div class="history-text">
+                            ${item.image ? '📷 ' : ''}${item.text.substring(0, 50)}${item.text.length > 50 ? '...' : ''}
+                        </div>
                         <div class="history-time">${item.time}</div>
                     </div>
                 `).join('');
