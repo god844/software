@@ -1055,7 +1055,7 @@
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://unpkg.com/@zxing/library@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.umd.min.js"></script>
 </head>
 <body>
     <!-- Loading Overlay -->
@@ -2050,147 +2050,173 @@
                 const startBtn = document.getElementById('startScanBtn');
                 const stopBtn = document.getElementById('stopScanBtn');
 
+                // Show scanner interface
                 videoContainer.style.display = 'block';
                 startBtn.style.display = 'none';
                 stopBtn.style.display = 'inline-flex';
 
+                // Add file upload option
+                const uploadContainer = document.createElement('div');
+                uploadContainer.style.cssText = 'text-align: center; margin-top: 20px;';
+                uploadContainer.innerHTML = `
+                    <p style="color: var(--gray); margin-bottom: 15px;">Having trouble scanning? Upload QR code image instead:</p>
+                    <input type="file" id="qrFileInput" accept="image/*" style="display: none;">
+                    <button class="btn btn-secondary" onclick="document.getElementById('qrFileInput').click()">
+                        📤 Upload QR Image
+                    </button>
+                    <button class="btn btn-secondary" onclick="system.simulateScan()" style="margin-left: 10px;">
+                        🎯 Test with Sample
+                    </button>
+                `;
+                videoContainer.parentElement.insertBefore(uploadContainer, videoContainer.nextSibling);
+
+                // Add file input handler
+                document.getElementById('qrFileInput').onchange = (e) => this.handleQRFile(e);
+
                 const video = document.getElementById('qr-video');
                 
                 try {
-                    // Request camera permission
-                    const stream = await navigator.mediaDevices.getUserMedia({ 
-                        video: { 
-                            facingMode: 'environment',
-                            width: { ideal: 1280 },
-                            height: { ideal: 720 }
-                        } 
-                    });
-                    
-                    video.srcObject = stream;
-                    await video.play();
-
-                    // Initialize ZXing QR Code Reader
-                    if (typeof ZXing !== 'undefined') {
-                        this.codeReader = new ZXing.BrowserQRCodeReader();
+                    // Try using QR Scanner library (more reliable)
+                    if (typeof QrScanner !== 'undefined') {
+                        const stream = await navigator.mediaDevices.getUserMedia({ 
+                            video: { 
+                                facingMode: 'environment',
+                                width: { ideal: 1280 },
+                                height: { ideal: 720 }
+                            } 
+                        });
                         
-                        // Start continuous scanning
-                        this.scanInterval = setInterval(async () => {
-                            if (video.readyState === video.HAVE_ENOUGH_DATA) {
-                                try {
-                                    const result = await this.codeReader.decodeFromVideoElement(video);
-                                    if (result && result.text) {
-                                        this.handleQRScan(result.text);
-                                        this.stopQRScanner();
-                                    }
-                                } catch (err) {
-                                    // No QR code found in this frame, continue scanning
-                                    if (err && err.name !== 'NotFoundException') {
-                                        console.log('Scanning frame...');
-                                    }
-                                }
+                        video.srcObject = stream;
+                        await video.play();
+
+                        // Create QR Scanner instance
+                        this.qrScanner = new QrScanner(
+                            video,
+                            result => {
+                                this.handleQRScan(result.data);
+                                this.stopQRScanner();
+                            },
+                            {
+                                returnDetailedScanResult: true,
+                                highlightScanRegion: true,
+                                highlightCodeOutline: true,
                             }
-                        }, 500); // Scan every 500ms
-                    } else {
-                        // Fallback: Manual QR scanning simulation
-                        this.showNotification('Demo Mode', 'Click "Simulate Scan" to test with sample data', 'warning');
-                        
-                        // Add simulate scan button
-                        const simulateBtn = document.createElement('button');
-                        simulateBtn.className = 'btn btn-secondary';
-                        simulateBtn.textContent = '🎯 Simulate Scan';
-                        simulateBtn.style.marginTop = '20px';
-                        simulateBtn.onclick = () => this.simulateScan();
-                        videoContainer.appendChild(simulateBtn);
-                    }
+                        );
 
-                    this.showNotification('Scanner Active', 'Point camera at QR code', 'success');
+                        await this.qrScanner.start();
+                        this.showNotification('Scanner Active', 'Point camera at QR code or upload image', 'success');
+                    } else {
+                        // Fallback to file upload
+                        this.showNotification('Camera Mode', 'Camera not available. Please upload QR code image.', 'warning');
+                        video.style.display = 'none';
+                    }
                 } catch (err) {
-                    console.error('Camera error:', err);
-                    
-                    // Provide fallback option
-                    this.showNotification('Camera Access', 'Unable to access camera. Using demo mode.', 'warning');
-                    
-                    // Show manual input option
-                    this.showManualInput();
+                    console.error('Scanner error:', err);
+                    this.showNotification('Scanner Error', 'Please upload QR code image instead', 'warning');
+                    video.style.display = 'none';
+                }
+            }
+
+            // Handle QR code file upload
+            async handleQRFile(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                try {
+                    // Show loading
+                    this.showNotification('Processing', 'Reading QR code from image...', 'success');
+
+                    // Use QrScanner to decode from file
+                    if (typeof QrScanner !== 'undefined') {
+                        const result = await QrScanner.scanImage(file);
+                        this.handleQRScan(result);
+                        this.stopQRScanner();
+                    } else {
+                        // Fallback: Read image and try to decode
+                        const reader = new FileReader();
+                        reader.onload = async (e) => {
+                            // Create image element
+                            const img = new Image();
+                            img.onload = () => {
+                                // Create canvas to read image data
+                                const canvas = document.createElement('canvas');
+                                const ctx = canvas.getContext('2d');
+                                canvas.width = img.width;
+                                canvas.height = img.height;
+                                ctx.drawImage(img, 0, 0);
+                                
+                                // For demo: simulate reading QR code
+                                this.simulateScan();
+                            };
+                            img.src = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                } catch (err) {
+                    console.error('QR decode error:', err);
+                    this.showNotification('Decode Error', 'Could not read QR code. Try another image.', 'error');
                 }
             }
 
             // Simulate scan for testing
             simulateScan() {
-                // Get a random configured item for simulation
+                // Get a configured item or use sample data
                 const configuredItems = Object.keys(this.data.itemConfigurations);
+                
+                let qrData;
                 if (configuredItems.length > 0) {
+                    // Use actual configured item
                     const randomItem = this.data.itemConfigurations[configuredItems[0]];
-                    const qrData = {
+                    qrData = {
                         id: randomItem.itemId,
                         name: randomItem.itemName,
-                        institution: randomItem.clientName,
-                        contact: randomItem.contactPerson,
-                        fabric: randomItem.fabricType,
-                        color: randomItem.colorShade,
+                        institution: randomItem.clientName || 'Test School',
+                        contact: randomItem.contactPerson || 'Test Contact',
+                        fabric: randomItem.fabricType || 'Cotton',
+                        color: randomItem.colorShade || 'Blue',
                         sizes: {
-                            boys: randomItem.boysSizes,
-                            girls: randomItem.girlsSizes
+                            boys: randomItem.boysSizes || '20-40',
+                            girls: randomItem.girlsSizes || '20-38'
                         },
-                        date: randomItem.date,
+                        date: randomItem.date || new Date().toISOString().split('T')[0],
+                        specifications: {
+                            dressType: randomItem.dressType,
+                            sleeveType: randomItem.sleeveType,
+                            finish: randomItem.finish,
+                            cuttingStyle: randomItem.cuttingStyle,
+                            specialFeatures: randomItem.specialFeatures
+                        },
+                        approvals: randomItem.approval,
                         timestamp: new Date().getTime()
                     };
-                    this.handleQRScan(JSON.stringify(qrData));
-                    this.stopQRScanner();
                 } else {
-                    // Use default sample data
-                    const sampleData = {
-                        id: 'sample-001',
-                        name: 'Sample Uniform Item',
-                        institution: 'Demo School',
-                        contact: 'Demo Contact',
-                        fabric: 'Cotton Blend',
-                        color: 'Navy Blue',
+                    // Use complete sample data
+                    qrData = {
+                        id: 'sample-uniform-001',
+                        name: 'Boys Full-sleeve Formal Shirt',
+                        institution: 'Springfield International Academy',
+                        contact: 'Mr. John Smith',
+                        fabric: 'Premium Cotton Blend',
+                        color: 'Sky Blue - Pantone 282C',
                         sizes: {
-                            boys: '20-40',
-                            girls: '20-38'
+                            boys: '20, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40, 42',
+                            girls: 'N/A'
                         },
-                        date: new Date().toISOString().split('T')[0],
+                        date: '2024-01-15',
+                        specifications: {
+                            dressType: 'Boys Shirt',
+                            sleeveType: 'Full Sleeve',
+                            finish: 'Matte',
+                            cuttingStyle: 'Regular Fit',
+                            specialFeatures: 'Two front pockets with flaps'
+                        },
+                        approvals: ['Sample Verified', 'Pattern Finalized', 'Logo Finalized'],
                         timestamp: new Date().getTime()
                     };
-                    this.handleQRScan(JSON.stringify(sampleData));
-                    this.stopQRScanner();
                 }
-            }
-
-            // Show manual input for QR data
-            showManualInput() {
-                const videoContainer = document.getElementById('qrVideoContainer');
-                videoContainer.style.display = 'block';
-                videoContainer.innerHTML = `
-                    <div style="background: white; padding: 30px; border-radius: 15px; max-width: 500px; margin: 0 auto;">
-                        <h3 style="margin-bottom: 20px;">Manual QR Data Entry</h3>
-                        <p style="color: var(--gray); margin-bottom: 20px;">Paste QR code data or use simulate button</p>
-                        <textarea id="manualQRInput" style="width: 100%; height: 150px; padding: 15px; border: 2px solid var(--border); border-radius: 10px; font-family: monospace;" placeholder='{"id":"item-id","name":"Item Name","institution":"School Name"...}'></textarea>
-                        <div class="btn-group" style="margin-top: 20px; justify-content: center;">
-                            <button class="btn btn-success" onclick="system.processManualQR()">
-                                ✅ Process Data
-                            </button>
-                            <button class="btn btn-secondary" onclick="system.simulateScan()">
-                                🎯 Use Sample Data
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }
-
-            // Process manually entered QR data
-            processManualQR() {
-                const input = document.getElementById('manualQRInput');
-                if (input && input.value) {
-                    try {
-                        const data = JSON.parse(input.value);
-                        this.handleQRScan(JSON.stringify(data));
-                        this.stopQRScanner();
-                    } catch (err) {
-                        this.showNotification('Invalid Data', 'Please enter valid JSON data', 'error');
-                    }
-                }
+                
+                this.handleQRScan(JSON.stringify(qrData));
+                this.stopQRScanner();
             }
 
             stopQRScanner() {
@@ -2199,49 +2225,64 @@
                 const stopBtn = document.getElementById('stopScanBtn');
                 const video = document.getElementById('qr-video');
 
-                // Clear scan interval
-                if (this.scanInterval) {
-                    clearInterval(this.scanInterval);
-                    this.scanInterval = null;
+                // Stop QR Scanner
+                if (this.qrScanner) {
+                    this.qrScanner.stop();
+                    this.qrScanner.destroy();
+                    this.qrScanner = null;
                 }
 
+                // Remove upload container
+                const uploadContainer = videoContainer.parentElement.querySelector('div[style*="text-align: center"]');
+                if (uploadContainer) {
+                    uploadContainer.remove();
+                }
+
+                // Reset UI
                 videoContainer.style.display = 'none';
-                videoContainer.innerHTML = `
-                    <video id="qr-video"></video>
-                    <div class="qr-scanning-overlay">
-                        <div class="qr-scanning-frame">
-                            <div class="scan-line"></div>
-                        </div>
-                    </div>
-                `;
                 startBtn.style.display = 'inline-flex';
                 stopBtn.style.display = 'none';
 
+                // Stop camera stream
                 if (video && video.srcObject) {
                     video.srcObject.getTracks().forEach(track => track.stop());
                     video.srcObject = null;
                 }
 
-                if (this.codeReader) {
-                    this.codeReader.reset();
-                    this.codeReader = null;
+                // Clear file input
+                const fileInput = document.getElementById('qrFileInput');
+                if (fileInput) {
+                    fileInput.value = '';
                 }
             }
 
             handleQRScan(data) {
                 try {
-                    const qrData = JSON.parse(data);
+                    // Parse QR data
+                    const qrData = typeof data === 'string' ? JSON.parse(data) : data;
+                    
+                    // Display the scanned data
                     this.displayScanResult(qrData);
+                    
+                    // Save to scan history
                     this.data.scanHistory.push({
                         data: qrData,
                         timestamp: new Date().toISOString()
                     });
+                    
                     this.saveData();
                     this.updateDashboard();
-                    this.showNotification('QR Scanned', 'Data retrieved successfully', 'success');
+                    this.showNotification('Success', `QR Scanned: ${qrData.name}`, 'success');
                     this.logActivity(`Scanned QR for: ${qrData.name}`);
                 } catch (err) {
-                    this.showNotification('Invalid QR', 'Unable to read QR code data', 'error');
+                    console.error('QR parse error:', err);
+                    // Try displaying raw data
+                    if (data) {
+                        this.displayRawScanResult(data);
+                        this.showNotification('QR Scanned', 'QR code read successfully', 'success');
+                    } else {
+                        this.showNotification('Invalid QR', 'Unable to read QR code data', 'error');
+                    }
                 }
             }
 
@@ -2250,38 +2291,75 @@
                 resultDiv.style.display = 'block';
                 resultDiv.innerHTML = `
                     <h3>📋 Scanned Uniform Details</h3>
-                    <div class="magic-card-field">
-                        <span class="magic-card-field-label">Item:</span>
-                        <span class="magic-card-field-value">${data.name}</span>
+                    <div style="background: var(--light); padding: 20px; border-radius: 10px; margin-top: 15px;">
+                        <div class="magic-card-field">
+                            <span class="magic-card-field-label">Item:</span>
+                            <span class="magic-card-field-value"><strong>${data.name || 'N/A'}</strong></span>
+                        </div>
+                        <div class="magic-card-field">
+                            <span class="magic-card-field-label">Institution:</span>
+                            <span class="magic-card-field-value">${data.institution || 'N/A'}</span>
+                        </div>
+                        <div class="magic-card-field">
+                            <span class="magic-card-field-label">Contact:</span>
+                            <span class="magic-card-field-value">${data.contact || 'N/A'}</span>
+                        </div>
+                        <div class="magic-card-field">
+                            <span class="magic-card-field-label">Fabric:</span>
+                            <span class="magic-card-field-value">${data.fabric || 'N/A'}</span>
+                        </div>
+                        <div class="magic-card-field">
+                            <span class="magic-card-field-label">Color:</span>
+                            <span class="magic-card-field-value">${data.color || 'N/A'}</span>
+                        </div>
+                        ${data.sizes ? `
+                            <div class="magic-card-field">
+                                <span class="magic-card-field-label">Boys Sizes:</span>
+                                <span class="magic-card-field-value">${data.sizes.boys || 'N/A'}</span>
+                            </div>
+                            <div class="magic-card-field">
+                                <span class="magic-card-field-label">Girls Sizes:</span>
+                                <span class="magic-card-field-value">${data.sizes.girls || 'N/A'}</span>
+                            </div>
+                        ` : ''}
+                        ${data.specifications ? `
+                            <div class="magic-card-field">
+                                <span class="magic-card-field-label">Specifications:</span>
+                                <span class="magic-card-field-value">${Object.values(data.specifications).filter(v => v).join(', ') || 'N/A'}</span>
+                            </div>
+                        ` : ''}
+                        ${data.approvals && Array.isArray(data.approvals) ? `
+                            <div class="magic-card-field">
+                                <span class="magic-card-field-label">Approvals:</span>
+                                <span class="magic-card-field-value">${data.approvals.join(' ✓ ')}</span>
+                            </div>
+                        ` : ''}
+                        <div class="magic-card-field">
+                            <span class="magic-card-field-label">Date:</span>
+                            <span class="magic-card-field-value">${data.date || 'N/A'}</span>
+                        </div>
+                        <div class="magic-card-field">
+                            <span class="magic-card-field-label">QR ID:</span>
+                            <span class="magic-card-field-value" style="font-family: monospace; font-size: 0.9em;">${data.id || 'N/A'}</span>
+                        </div>
                     </div>
-                    <div class="magic-card-field">
-                        <span class="magic-card-field-label">Institution:</span>
-                        <span class="magic-card-field-value">${data.institution}</span>
+                    <button class="btn btn-secondary" onclick="system.startQRScanner()" style="margin-top: 20px;">
+                        📷 Scan Another
+                    </button>
+                `;
+            }
+
+            displayRawScanResult(data) {
+                const resultDiv = document.getElementById('scanResult');
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `
+                    <h3>📋 QR Code Data</h3>
+                    <div style="background: var(--light); padding: 20px; border-radius: 10px; margin-top: 15px;">
+                        <pre style="white-space: pre-wrap; word-break: break-all; font-family: monospace; font-size: 0.9em;">${data}</pre>
                     </div>
-                    <div class="magic-card-field">
-                        <span class="magic-card-field-label">Contact:</span>
-                        <span class="magic-card-field-value">${data.contact}</span>
-                    </div>
-                    <div class="magic-card-field">
-                        <span class="magic-card-field-label">Fabric:</span>
-                        <span class="magic-card-field-value">${data.fabric || 'N/A'}</span>
-                    </div>
-                    <div class="magic-card-field">
-                        <span class="magic-card-field-label">Color:</span>
-                        <span class="magic-card-field-value">${data.color || 'N/A'}</span>
-                    </div>
-                    <div class="magic-card-field">
-                        <span class="magic-card-field-label">Boys Sizes:</span>
-                        <span class="magic-card-field-value">${data.sizes?.boys || 'N/A'}</span>
-                    </div>
-                    <div class="magic-card-field">
-                        <span class="magic-card-field-label">Girls Sizes:</span>
-                        <span class="magic-card-field-value">${data.sizes?.girls || 'N/A'}</span>
-                    </div>
-                    <div class="magic-card-field">
-                        <span class="magic-card-field-label">Date:</span>
-                        <span class="magic-card-field-value">${data.date}</span>
-                    </div>
+                    <button class="btn btn-secondary" onclick="system.startQRScanner()" style="margin-top: 20px;">
+                        📷 Scan Another
+                    </button>
                 `;
             }
 
