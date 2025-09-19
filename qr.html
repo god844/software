@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uniform Specification - QR Scanner Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .scanner-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        .scanner-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .scanner-placeholder {
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            color: #666;
+        }
+
+        .scanner-placeholder svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .manual-input {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .manual-input textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            resize: vertical;
+            min-height: 150px;
+            transition: all 0.3s;
+        }
+
+        .manual-input textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #333;
+            border: 2px solid #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            background: #e9ecef;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+        .result-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .spec-card {
+            background: linear-gradient(135deg, #f8f9ff, #fff);
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #e0e6ff;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .spec-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .spec-title h3 {
+            color: #333;
+            font-size: 1.4rem;
+            margin-bottom: 5px;
+        }
+
+        .spec-title p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .spec-badge {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .spec-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .spec-item {
+            padding: 15px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .spec-item label {
+            display: block;
+            color: #666;
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .spec-item .value {
+            color: #333;
+            font-size: 1.05rem;
+            font-weight: 600;
+        }
+
+        .timestamp-info {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .timestamp-info .time {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .history-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
+        }
+
+        .history-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .history-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .history-item {
+            padding: 20px;
+            background: #f8f9ff;
+            border-radius: 12px;
+            border: 2px solid #e0e6ff;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .history-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.15);
+            border-color: #667eea;
+        }
+
+        .history-item h4 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .history-item p {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.ready {
+            background: #10b981;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: #10b981;
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            animation: slideInRight 0.3s ease-out;
+            z-index: 1000;
+            max-width: 300px;
+        }
+
+        .notification.error {
+            background: #ef4444;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .spec-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            .header,
+            .scanner-section,
+            .history-section,
+            .action-buttons,
+            .manual-input {
+                display: none;
+            }
+            .main-grid {
+                display: block;
+            }
+            .spec-card {
+                box-shadow: none;
+                border: 2px solid #333;
+            }
+        }
+
+        .file-upload {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .file-upload input[type="file"] {
+            display: none;
+        }
+
+        .file-upload-label {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-upload-label:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="header">
+            <h1>📋 Uniform Specification Scanner</h1>
+            <p>Scan QR codes from magic cards to view detailed specifications</p>
+        </div>
+
+        <div class="main-grid">
+            <div class="scanner-section">
+                <h2>
+                    <span class="status-indicator ready"></span>
+                    QR Code Scanner
+                </h2>
+                
+                <div class="scanner-placeholder">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="9" y1="9" x2="9" y2="9.01"></line>
+                        <line x1="15" y1="9" x2="15" y2="9.01"></line>
+                        <line x1="9" y1="15" x2="9" y2="15.01"></line>
+                        <line x1="15" y1="15" x2="15" y2="15.01"></line>
+                    </svg>
+                    <h3>Camera Scanner</h3>
+                    <p>Camera-based scanning requires HTTPS connection</p>
+                    <p style="margin-top: 10px; font-size: 0.9rem;">Use the manual input below to test the system</p>
+                </div>
+                
+                <div class="file-upload">
+                    <h3 style="margin-bottom: 15px; color: #333;">Upload QR Code Image:</h3>
+                    <input type="file" id="qrFileInput" accept="image/*" onchange="handleFileUpload(event)">
+                    <label for="qrFileInput" class="file-upload-label">
+                        📷 Choose QR Code Image
+                    </label>
+                </div>
+                
+                <div class="manual-input">
+                    <h3 style="margin-bottom: 15px; color: #333;">Or paste QR code data manually:</h3>
+                    <textarea id="manualData" placeholder='Paste JSON data here, e.g., {"type":"shirt","item":"Boys Half-sleeve Formal Shirt"...}'></textarea>
+                    <div style="margin-top: 15px;">
+                        <button class="btn btn-primary" onclick="processManualData()">
+                            📊 Process Data
+                        </button>
+                        <button class="btn btn-secondary" onclick="loadSampleData()">
+                            📝 Load Sample Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="result-section">
+                <h2>
+                    📋 Specification Details
+                </h2>
+                
+                <div id="resultContainer">
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                            <path d="M9 6h6M9 10h6M9 14h4"></path>
+                        </svg>
+                        <h3>No data scanned yet</h3>
+                        <p>Upload an image, paste data, or load sample to view specifications</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="history-section">
+            <h2>📜 Recent Scans</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <p style="color: #666;">Your scan history is saved locally</p>
+                <button class="btn btn-secondary" onclick="clearHistory()" style="padding: 8px 16px; font-size: 0.9rem;">
+                    🗑️ Clear History
+                </button>
+            </div>
+            <div class="history-grid" id="historyContainer">
+                <p style="color: #999; text-align: center; grid-column: 1/-1;">No scan history available</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let scanHistory = [];
+
+        // Process manual data input
+        function processManualData() {
+            const manualData = document.getElementById('manualData').value;
+            
+            if (!manualData.trim()) {
+                showNotification('Please paste QR code data', 'error');
+                return;
+            }
+            
+            try {
+                const data = JSON.parse(manualData);
+                displaySpecification(data);
+                addToHistory(data);
+                showNotification('Data processed successfully!');
+                document.getElementById('manualData').value = '';
+            } catch (error) {
+                showNotification('Invalid JSON format. Please check your data.', 'error');
+            }
+        }
+
+        // Handle file upload for QR code image
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                showNotification('File uploaded. For demo purposes, using sample data.');
+                // In a real implementation, this would use a QR code reader library
+                // For now, we'll load sample data to demonstrate functionality
+                setTimeout(() => {
+                    loadSampleData();
+                    processManualData();
+                }, 1000);
+            }
+        }
+
+        // Display specification details
+        function displaySpecification(data) {
+            const resultContainer = document.getElementById('resultContainer');
+            
+            // Determine item category
+            let category = 'General';
+            if (data.type) {
+                const categories = {
+                    'shirt': 'Formal Wear',
+                    'trouser': 'Formal Wear',
+                    'pinafore': 'Girls Uniform',
+                    'house': 'Sports Wear',
+                    'blazer': 'Winter Wear'
+                };
+                category = categories[data.type] || 'General';
+            }
+            
+            // Format timestamp
+            const timestamp = new Date(data.timestamp || new Date());
+            const formattedDate = timestamp.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            const formattedTime = timestamp.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            // Extended data for complete specifications
+            const extendedData = getExtendedSpecifications(data.type);
+            
+            resultContainer.innerHTML = `
+                <div class="spec-card">
+                    <div class="spec-header">
+                        <div class="spec-title">
+                            <h3>${data.item || 'Unknown Item'}</h3>
+                            <p>${data.client || 'No client specified'}</p>
+                        </div>
+                        <span class="spec-badge">${category}</span>
+                    </div>
+                    
+                    <div class="spec-grid">
+                        <div class="spec-item">
+                            <label>Project Code</label>
+                            <div class="value">${data.project || 'N/A'}</div>
+                        </div>
+                        
+                        <div class="spec-item">
+                            <label>Project Date</label>
+                            <div class="value">${data.date || 'N/A'}</div>
+                        </div>
+                        
+                        <div class="spec-item">
+                            <label>Fabric Composition</label>
+                            <div class="value">${data.fabric || 'Not specified'}</div>
+                        </div>
+                        
+                        <div class="spec-item">
+                            <label>Color Specification</label>
+                            <div class="value">${data.color || 'Not specified'}</div>
+                        </div>
+                        
+                        ${extendedData ? `
+                        <div class="spec-item">
+                            <label>GSM Weight</label>
+                            <div class="value">${extendedData.gsm}</div>
+                        </div>
+                        
+                        <div class="spec-item">
+                            <label>Size Range</label>
+                            <div class="value">${extendedData.sizes}</div>
+                        </div>
+                        
+                        <div class="spec-item" style="grid-column: 1/-1;">
+                            <label>Special Features</label>
+                            <div class="value">${extendedData.features}</div>
+                        </div>
+                        
+                        <div class="spec-item" style="grid-column: 1/-1;">
+                            <label>Care Instructions</label>
+                            <div class="value">${extendedData.care}</div>
+                        </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="timestamp-info">
+                        <div class="time">
+                            <strong>Scanned on:</strong> ${formattedDate} at ${formattedTime}
+                        </div>
+                        <div>
+                            <span class="spec-badge" style="background: #10b981;">
+                                ${data.type ? data.type.toUpperCase() : 'ITEM'}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="exportSpecification('${btoa(JSON.stringify(data))}')">
+                            💾 Export Details
+                        </button>
+                        <button class="btn btn-secondary" onclick="printSpecification()">
+                            🖨️ Print
+                        </button>
+                        <button class="btn btn-success" onclick="generateReport('${btoa(JSON.stringify(data))}')">
+                            📄 Generate Report
+                        </button>
+                        <button class="btn btn-secondary" onclick="shareSpecification('${btoa(JSON.stringify(data))}')">
+                            📤 Share
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Get extended specifications based on item type
+        function getExtendedSpecifications(type) {
+            const specs = {
+                shirt: {
+                    gsm: "180 GSM",
+                    sizes: "20-42 (Even sizes)",
+                    features: "Double stitched collar, reinforced button holes, chest pocket with monogram",
+                    care: "Machine washable at 40°C, tumble dry low, iron medium heat"
+                },
+                trouser: {
+                    gsm: "220 GSM",
+                    sizes: "20-42 (Even sizes)",
+                    features: "Belt loops, YKK zipper, reinforced knee area, two side pockets",
+                    care: "Machine washable, wrinkle-resistant, do not bleach"
+                },
+                pinafore: {
+                    gsm: "200 GSM",
+                    sizes: "20-30 (Junior sizes)",
+                    features: "Adjustable straps, box pleats, side zipper, front bib pocket",
+                    care: "Gentle wash, hang dry, low iron if needed"
+                },
+                house: {
+                    gsm: "150 GSM",
+                    sizes: "XS, S, M, L, XL, XXL",
+                    features: "Moisture-wicking, UV protection SPF 30+, anti-bacterial, raglan sleeves",
+                    care: "Quick dry, machine washable, do not iron"
+                },
+                blazer: {
+                    gsm: "280 GSM",
+                    sizes: "32-44 (Chest measurement)",
+                    features: "Fully lined, inside pockets, metal buttons with crest, back vent",
+                    care: "Dry clean only, store on hanger, steam to remove wrinkles"
+                }
+            };
+            
+            return specs[type] || null;
+        }
+
+        // Add scan to history
+        function addToHistory(data) {
+            scanHistory.unshift({
+                ...data,
+                scannedAt: new Date().toISOString(),
+                id: Date.now()
+            });
+            
+            if (scanHistory.length > 10) {
+                scanHistory = scanHistory.slice(0, 10);
+            }
+            
+            localStorage.setItem('scanHistory', JSON.stringify(scanHistory));
+            updateHistoryDisplay();
+        }
+
+        // Update history display
+        function updateHistoryDisplay() {
+            const historyContainer = document.getElementById('historyContainer');
+            
+            if (scanHistory.length === 0) {
+                historyContainer.innerHTML = '<p style="color: #999; text-align: center; grid-column: 1/-1;">No scan history available</p>';
+                return;
+            }
+            
+            historyContainer.innerHTML = scanHistory.map(item => {
+                const scannedAt = new Date(item.scannedAt);
+                return `
+                    <div class="history-item" onclick='viewHistoryItem(${JSON.stringify(item)})'>
+                        <h4>${item.item || 'Unknown Item'}</h4>
+                        <p><strong>Client:</strong> ${item.client || 'N/A'}</p>
+                        <p><strong>Project:</strong> ${item.project || 'N/A'}</p>
+                        <p style="color: #999; font-size: 0.85rem; margin-top: 10px;">
+                            ${scannedAt.toLocaleDateString()} ${scannedAt.toLocaleTimeString()}
+                        </p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // View history item
+        function viewHistoryItem(item) {
+            displaySpecification(item);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Load sample data
+        function loadSampleData() {
+            const sampleData = {
+                "type": "shirt",
+                "item": "Boys Half-sleeve Formal Shirt",
+                "client": "St. Mary's International School",
+                "project": "SMIS-2024-UNI-001",
+                "date": "2024-01-15",
+                "fabric": "60% Cotton, 40% Polyester Blend",
+                "color": "Pantone 5415C (Light Blue)",
+                "timestamp": new Date().toISOString()
+            };
+            
+            document.getElementById('manualData').value = JSON.stringify(sampleData, null, 2);
+            showNotification('Sample data loaded. Click "Process Data" to view.');
+        }
+
+        // Export specification
+        function exportSpecification(encodedData) {
+            const data = JSON.parse(atob(encodedData));
+            const extendedData = getExtendedSpecifications(data.type);
+            const fullData = { ...data, ...extendedData };
+            
+            const dataStr = JSON.stringify(fullData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `specification-${data.project || 'export'}-${Date.now()}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            showNotification('Specification exported successfully!');
+        }
+
+        // Generate report
+        function generateReport(encodedData) {
+            const data = JSON.parse(atob(encodedData));
+            const extendedData = getExtendedSpecifications(data.type);
+            
+            const reportWindow = window.open('', '_blank');
+            reportWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Specification Report - ${data.item}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 40px; }
+                        h1 { color: #333; border-bottom: 3px solid #667eea; padding-bottom: 10px; }
+                        .section { margin: 20px 0; }
+                        .section h2 { color: #667eea; }
+                        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+                        .item { padding: 10px; background: #f8f9ff; border-radius: 5px; }
+                        .label { font-weight: bold; color: #666; }
+                        .footer { margin-top: 40px; padding-top: 20px; border-top: 2px solid #eee; text-align: center; color: #999; }
+                    </style>
+                </head>
+                <body>
+                    <h1>Uniform Specification Report</h1>
+                    <div class="section">
+                        <h2>${data.item}</h2>
+                        <div class="grid">
+                            <div class="item"><span class="label">Client:</span> ${data.client}</div>
+                            <div class="item"><span class="label">Project Code:</span> ${data.project}</div>
+                            <div class="item"><span class="label">Date:</span> ${data.date}</div>
+                            <div class="item"><span class="label">Type:</span> ${data.type}</div>
+                            <div class="item"><span class="label">Fabric:</span> ${data.fabric}</div>
+                            <div class="item"><span class="label">Color:</span> ${data.color}</div>
+                            ${extendedData ? `
+                            <div class="item"><span class="label">GSM:</span> ${extendedData.gsm}</div>
+                            <div class="item"><span class="label">Sizes:</span> ${extendedData.sizes}</div>
+                            <div class="item" style="grid-column: 1/-1;"><span class="label">Features:</span> ${extendedData.features}</div>
+                            <div class="item" style="grid-column: 1/-1;"><span class="label">Care:</span> ${extendedData.care}</div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    <div class="footer">
+                        Generated on ${new Date().toLocaleString()}
+                    </div>
+                </body>
+                </html>
+            `);
+            
+            showNotification('Report generated in new window');
+        }
+
+        // Print specification
+        function printSpecification() {
+            window.print();
+            showNotification('Print dialog opened');
+        }
+
+        // Share specification
+        function shareSpecification(encodedData) {
+            const data = JSON.parse(atob(encodedData));
+            const shareText = `Uniform Specification:
+${data.item}
+Client: ${data.client}
+Project: ${data.project}
+Fabric: ${data.fabric}
+Color: ${data.color}`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Uniform Specification',
+                    text: shareText
+                }).catch(err => console.log('Share cancelled'));
+            } else {
+                navigator.clipboard.writeText(shareText);
+                showNotification('Specification copied to clipboard!');
+            }
+        }
+
+        // Clear history
+        function clearHistory() {
+            if (confirm('Are you sure you want to clear all scan history?')) {
+                scanHistory = [];
+                localStorage.removeItem('scanHistory');
+                updateHistoryDisplay();
+                showNotification('History cleared');
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type = 'success') {
+            const existing = document.querySelector('.notification');
+            if (existing) {
+                existing.remove();
+            }
+            
+            const notification = document.createElement('div');
+            notification.className = type === 'error' ? 'notification error' : 'notification';
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Load history on page load
+        function loadHistory() {
+            const saved = localStorage.getItem('scanHistory');
+            if (saved) {
+                try {
+                    scanHistory = JSON.parse(saved);
+                    updateHistoryDisplay();
+                } catch (error) {
+                    console.error('Error loading history:', error);
+                }
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadHistory();
+            
+            // Auto-load sample data for easy testing
+            setTimeout(() => {
+                showNotification('Click "Load Sample Data" to test the scanner');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
