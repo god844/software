@@ -556,8 +556,8 @@
             </svg>
             
             <div class="scanned-image-container" id="scanned-image-container" style="display: none;">
-                <div class="scanned-image-label">Scanned Image</div>
-                <img id="scanned-image" class="scanned-image" src="" alt="Scanned QR Code Image">
+                <div class="scanned-image-label">Embedded/Uploaded Image</div>
+                <img id="scanned-image" class="scanned-image" src="" alt="Image from QR Code">
             </div>
             
             <div class="result-box">
@@ -734,21 +734,45 @@
                 });
         }
 
-        function handleScanSuccess(decodedText, imageData) {
-            document.getElementById('result-text').textContent = decodedText;
-            document.getElementById('result-container').style.display = 'block';
+        function handleScanSuccess(decodedText, uploadedImageData) {
+            try {
+                // Check if the decoded text is JSON with embedded image
+                const parsed = JSON.parse(decodedText);
+                if (parsed.type === 'embedded_image') {
+                    // Display the embedded image from QR code
+                    document.getElementById('scanned-image').src = parsed.image;
+                    document.getElementById('scanned-image-container').style.display = 'block';
+                    
+                    // Display the text content
+                    document.getElementById('result-text').textContent = parsed.text;
+                    
+                    // Add to history with image
+                    addToHistory(parsed.text, parsed.image);
+                } else {
+                    // Regular QR code without embedded image
+                    handleRegularScan(decodedText, uploadedImageData);
+                }
+            } catch (e) {
+                // Not JSON, treat as regular QR code
+                handleRegularScan(decodedText, uploadedImageData);
+            }
             
-            // Display the scanned image if available
-            if (imageData) {
-                document.getElementById('scanned-image').src = imageData;
+            document.getElementById('result-container').style.display = 'block';
+            showNotification('QR Code scanned successfully!', 'success');
+        }
+        
+        function handleRegularScan(decodedText, uploadedImageData) {
+            document.getElementById('result-text').textContent = decodedText;
+            
+            // Only show uploaded image if it came from file upload (not from QR data)
+            if (uploadedImageData) {
+                document.getElementById('scanned-image').src = uploadedImageData;
                 document.getElementById('scanned-image-container').style.display = 'block';
             } else {
                 document.getElementById('scanned-image-container').style.display = 'none';
             }
             
-            showNotification('QR Code scanned successfully!', 'success');
-            
-            addToHistory(decodedText, imageData);
+            addToHistory(decodedText, uploadedImageData);
         }
 
         function copyResult() {
