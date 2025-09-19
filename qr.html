@@ -515,6 +515,9 @@
                     <label for="qrFileInput" class="file-upload-label">
                         📷 Choose QR Code Image
                     </label>
+                    <button class="btn btn-secondary" onclick="simulateQRScan()" style="margin-left: 10px;">
+                        🎯 Simulate QR Scan (Test)
+                    </button>
                 </div>
                 
                 <div class="manual-input">
@@ -834,6 +837,7 @@
         // Handle detected QR code data
         function handleQRCodeData(qrData) {
             try {
+                // First try to parse as JSON
                 const data = JSON.parse(qrData);
                 
                 // Show result in scanner
@@ -852,8 +856,39 @@
                 
             } catch (error) {
                 console.error('Error parsing QR data:', error);
-                // Try to handle non-JSON QR codes
-                showNotification('QR code detected but format not recognized', 'error');
+                console.log('Raw QR data:', qrData);
+                
+                // If it's not JSON, try to handle as plain text
+                if (qrData && qrData.length > 0) {
+                    // Check if it might be URL-encoded or has special formatting
+                    try {
+                        // Try to decode if URL encoded
+                        const decoded = decodeURIComponent(qrData);
+                        const parsedData = JSON.parse(decoded);
+                        displaySpecification(parsedData);
+                        addToHistory(parsedData);
+                        showNotification('QR Code decoded and processed!');
+                    } catch (e) {
+                        // Show raw data if all parsing fails
+                        showNotification('QR code detected but format not recognized. Check console.', 'error');
+                        console.log('Unable to parse QR data. Raw content:', qrData);
+                        
+                        // Try to display what we can
+                        const fallbackData = {
+                            type: 'unknown',
+                            item: 'QR Code Data',
+                            client: 'Unknown',
+                            project: 'N/A',
+                            date: new Date().toISOString().split('T')[0],
+                            fabric: 'See raw data',
+                            color: 'See raw data',
+                            timestamp: new Date().toISOString(),
+                            rawData: qrData
+                        };
+                        
+                        displaySpecification(fallbackData);
+                    }
+                }
             }
         }
 
@@ -1090,9 +1125,9 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Load sample data
-        function loadSampleData() {
-            const sampleData = {
+        // Simulate QR scan for testing
+        function simulateQRScan() {
+            const testData = {
                 "type": "shirt",
                 "item": "Boys Half-sleeve Formal Shirt",
                 "client": "St. Mary's International School",
@@ -1103,8 +1138,74 @@
                 "timestamp": new Date().toISOString()
             };
             
+            showNotification('Simulating QR scan...');
+            
+            setTimeout(() => {
+                handleQRCodeData(JSON.stringify(testData));
+            }, 1000);
+        }
+
+        // Load sample data
+        function loadSampleData() {
+            const sampleDataArray = [
+                {
+                    "type": "shirt",
+                    "item": "Boys Half-sleeve Formal Shirt",
+                    "client": "St. Mary's International School",
+                    "project": "SMIS-2024-UNI-001",
+                    "date": "2024-01-15",
+                    "fabric": "60% Cotton, 40% Polyester Blend",
+                    "color": "Pantone 5415C (Light Blue)",
+                    "timestamp": new Date().toISOString()
+                },
+                {
+                    "type": "trouser",
+                    "item": "Boys Formal Trousers",
+                    "client": "St. Mary's International School",
+                    "project": "SMIS-2024-UNI-002",
+                    "date": "2024-01-15",
+                    "fabric": "Poly-Viscose Blend (65-35)",
+                    "color": "Pantone 433C (Navy Blue)",
+                    "timestamp": new Date().toISOString()
+                },
+                {
+                    "type": "pinafore",
+                    "item": "Girls Pinafore for Juniors",
+                    "client": "St. Mary's International School",
+                    "project": "SMIS-2024-UNI-003",
+                    "date": "2024-01-15",
+                    "fabric": "Polyester Gabardine",
+                    "color": "Pantone 19-4052 (Classic Blue)",
+                    "timestamp": new Date().toISOString()
+                },
+                {
+                    "type": "house",
+                    "item": "House T-shirt Blue (Sapphire House)",
+                    "client": "St. Mary's International School",
+                    "project": "SMIS-2024-SPT-004",
+                    "date": "2024-01-15",
+                    "fabric": "Dry-fit Polyester Mesh",
+                    "color": "Pantone 286C (Royal Blue)",
+                    "timestamp": new Date().toISOString()
+                },
+                {
+                    "type": "blazer",
+                    "item": "Boys School Blazer",
+                    "client": "St. Mary's International School",
+                    "project": "SMIS-2024-FRM-005",
+                    "date": "2024-01-15",
+                    "fabric": "Wool-Polyester Blend (70-30)",
+                    "color": "Pantone 532C (Dark Navy)",
+                    "timestamp": new Date().toISOString()
+                }
+            ];
+            
+            // Randomly select one of the sample data
+            const randomIndex = Math.floor(Math.random() * sampleDataArray.length);
+            const sampleData = sampleDataArray[randomIndex];
+            
             document.getElementById('manualData').value = JSON.stringify(sampleData, null, 2);
-            showNotification('Sample data loaded. Click "Process Data" to view.');
+            showNotification(`Sample data loaded: ${sampleData.item}. Click "Process Data" to view.`);
         }
 
         // Export specification
