@@ -738,16 +738,30 @@
             try {
                 // Check if the decoded text is JSON with embedded image
                 const parsed = JSON.parse(decodedText);
-                if (parsed.type === 'embedded_image') {
+                
+                // Handle both formats (old and new compact)
+                if (parsed.type === 'embedded_image' || parsed.t === 'img') {
+                    let imageData, textData;
+                    
+                    if (parsed.type === 'embedded_image') {
+                        // Old format
+                        imageData = parsed.image;
+                        textData = parsed.text;
+                    } else if (parsed.t === 'img') {
+                        // New compact format
+                        imageData = 'data:image/jpeg;base64,' + parsed.i;
+                        textData = parsed.d;
+                    }
+                    
                     // Display the embedded image from QR code
-                    document.getElementById('scanned-image').src = parsed.image;
+                    document.getElementById('scanned-image').src = imageData;
                     document.getElementById('scanned-image-container').style.display = 'block';
                     
                     // Display the text content
-                    document.getElementById('result-text').textContent = parsed.text;
+                    document.getElementById('result-text').textContent = textData;
                     
                     // Add to history with image
-                    addToHistory(parsed.text, parsed.image);
+                    addToHistory(textData, imageData);
                 } else {
                     // Regular QR code without embedded image
                     handleRegularScan(decodedText, uploadedImageData);
