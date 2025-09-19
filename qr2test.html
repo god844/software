@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code Scanner - Scan & Decode QR Codes</title>
+    <title>QR Code Scanner - Professional Design</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <style>
         * {
@@ -12,83 +12,101 @@
             box-sizing: border-box;
         }
 
-        :root {
-            --primary: #06b6d4;
-            --primary-dark: #0891b2;
-            --secondary: #14b8a6;
-            --dark: #0f172a;
-            --light: #f8fafc;
-            --gray: #64748b;
-            --success: #10b981;
-            --error: #ef4444;
-        }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #0891b2 0%, #065f46 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
             position: relative;
-            overflow-x: hidden;
         }
 
-        /* Animated background waves */
-        .waves {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 200px;
-            z-index: 1;
-            opacity: 0.5;
-        }
-
-        .wave {
+        .animated-bg {
             position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 200%;
+            width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-            animation: wave 10s linear infinite;
+            overflow: hidden;
+            z-index: -1;
         }
 
-        .wave:nth-child(2) {
-            animation-delay: 2s;
-            opacity: 0.5;
+        .scan-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff88, transparent);
+            animation: scan 2s linear infinite;
+            z-index: 10;
         }
 
-        .wave:nth-child(3) {
-            animation-delay: 4s;
-            opacity: 0.3;
-        }
-
-        @keyframes wave {
+        @keyframes scan {
             0% {
-                transform: translateX(-50%);
+                top: 0;
             }
             100% {
-                transform: translateX(0);
+                top: 100%;
+            }
+        }
+
+        .floating-shape {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .shape1 {
+            width: 100px;
+            height: 100px;
+            left: 5%;
+            animation-delay: 0s;
+        }
+
+        .shape2 {
+            width: 150px;
+            height: 150px;
+            right: 5%;
+            animation-delay: 7s;
+        }
+
+        .shape3 {
+            width: 80px;
+            height: 80px;
+            left: 50%;
+            animation-delay: 14s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            25% {
+                transform: translateY(-100px) rotate(90deg);
+            }
+            50% {
+                transform: translateY(0) rotate(180deg);
+            }
+            75% {
+                transform: translateY(100px) rotate(270deg);
             }
         }
 
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-            position: relative;
-            z-index: 10;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 700px;
+            width: 100%;
+            padding: 40px;
+            animation: slideIn 0.5s ease-out;
         }
 
-        header {
-            text-align: center;
-            margin-bottom: 3rem;
-            animation: fadeInDown 0.8s ease;
-        }
-
-        @keyframes fadeInDown {
+        @keyframes slideIn {
             from {
                 opacity: 0;
-                transform: translateY(-30px);
+                transform: translateY(30px);
             }
             to {
                 opacity: 1;
@@ -97,183 +115,146 @@
         }
 
         h1 {
-            color: white;
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: pulse 2s ease infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.02);
+            }
         }
 
         .subtitle {
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 1.2rem;
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
         }
 
         .scanner-container {
-            background: white;
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            animation: fadeIn 1s ease;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        .tabs {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            border-bottom: 2px solid #e2e8f0;
-        }
-
-        .tab {
-            padding: 1rem 2rem;
-            background: none;
-            border: none;
-            color: var(--gray);
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            margin-bottom: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             position: relative;
-        }
-
-        .tab.active {
-            color: var(--primary);
-        }
-
-        .tab::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: var(--primary);
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
-        }
-
-        .tab.active::after {
-            transform: scaleX(1);
-        }
-
-        .tab-content {
-            display: none;
-            animation: slideIn 0.5s ease;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
+            background: #000;
+            min-height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         #reader {
             width: 100%;
-            max-width: 600px;
-            margin: 0 auto;
+            position: relative;
+        }
+
+        #reader video {
             border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
-        .upload-area {
-            border: 3px dashed var(--primary);
-            border-radius: 15px;
-            padding: 3rem;
-            text-align: center;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            background: linear-gradient(135deg, rgba(6,182,212,0.05), rgba(20,184,166,0.05));
+        .scan-region-highlight {
+            border: 2px solid #00ff88 !important;
+            animation: borderPulse 1.5s ease infinite;
         }
 
-        .upload-area:hover {
-            border-color: var(--primary-dark);
-            background: linear-gradient(135deg, rgba(6,182,212,0.1), rgba(20,184,166,0.1));
-            transform: scale(1.02);
-        }
-
-        .upload-area.dragover {
-            border-color: var(--secondary);
-            background: linear-gradient(135deg, rgba(6,182,212,0.2), rgba(20,184,166,0.2));
-        }
-
-        .upload-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
+        @keyframes borderPulse {
             0%, 100% {
-                transform: translateY(0);
+                border-color: #00ff88;
+                box-shadow: 0 0 0 0 rgba(0, 255, 136, 0.7);
             }
             50% {
-                transform: translateY(-10px);
+                border-color: #00cc66;
+                box-shadow: 0 0 0 10px rgba(0, 255, 136, 0);
             }
         }
 
-        #fileInput {
-            display: none;
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         .btn {
-            padding: 1rem 2rem;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
+            padding: 12px 30px;
             border: none;
             border-radius: 10px;
-            font-size: 1rem;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            display: inline-block;
-            margin: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover:before {
+            left: 100%;
         }
 
         .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(6,182,212,0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
         }
 
-        .btn-stop {
-            background: linear-gradient(135deg, var(--error), #dc2626);
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .file-upload {
+            position: relative;
+            display: inline-block;
+        }
+
+        .file-upload input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
         }
 
         .result-container {
-            margin-top: 2rem;
-            padding: 1.5rem;
-            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
-            border-radius: 15px;
             display: none;
-            animation: slideUp 0.5s ease;
+            animation: fadeIn 0.5s ease;
         }
 
-        .result-container.show {
-            display: block;
-        }
-
-        @keyframes slideUp {
+        @keyframes fadeIn {
             from {
                 opacity: 0;
                 transform: translateY(20px);
@@ -284,584 +265,495 @@
             }
         }
 
-        .result-header {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
+        .result-box {
+            background: linear-gradient(135deg, #e3ffe7 0%, #d9e7ff 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
         }
 
-        .result-icon {
-            font-size: 2rem;
-            animation: popIn 0.5s ease;
+        .result-box:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(135deg, #00ff88 0%, #00cc66 100%);
         }
 
-        @keyframes popIn {
-            from {
-                transform: scale(0);
+        .result-label {
+            font-size: 14px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .result-text {
+            font-size: 18px;
+            color: #333;
+            word-break: break-all;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            animation: highlightResult 0.5s ease;
+        }
+
+        @keyframes highlightResult {
+            0% {
+                background: #00ff88;
+                transform: scale(1.05);
             }
-            to {
+            100% {
+                background: white;
                 transform: scale(1);
             }
         }
 
-        .result-content {
-            background: white;
-            padding: 1rem;
-            border-radius: 10px;
-            word-break: break-all;
-            font-family: monospace;
-            font-size: 0.95rem;
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            margin: 20px auto;
+            display: block;
+            animation: successPop 0.5s ease;
         }
 
-        .result-image {
-            max-width: 100%;
-            height: auto;
-            border-radius: 10px;
-            margin-top: 1rem;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            animation: fadeIn 0.5s ease;
+        @keyframes successPop {
+            0% {
+                transform: scale(0);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+            }
         }
 
-        .result-link {
-            display: inline-block;
-            margin-top: 1rem;
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .result-link:hover {
-            color: var(--primary-dark);
-            transform: translateX(5px);
-        }
-
-        .result-type {
-            display: inline-block;
-            padding: 0.25rem 0.75rem;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            color: white;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-        }
-
-        .copy-btn {
-            padding: 0.5rem 1rem;
-            background: var(--success);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 1rem;
-        }
-
-        .copy-btn:hover {
-            background: #059669;
-            transform: scale(1.05);
-        }
-
-        .history {
-            margin-top: 3rem;
-            padding: 2rem;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-        }
-
-        .history h3 {
-            color: var(--dark);
-            margin-bottom: 1rem;
+        .history-container {
+            margin-top: 30px;
+            display: none;
         }
 
         .history-item {
-            padding: 1rem;
-            background: #f8fafc;
+            background: #f8f9fa;
             border-radius: 10px;
-            margin-bottom: 1rem;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             transition: all 0.3s ease;
-            animation: slideIn 0.5s ease;
+            animation: slideIn 0.3s ease;
         }
 
         .history-item:hover {
-            background: #e2e8f0;
+            background: #e9ecef;
             transform: translateX(5px);
         }
 
+        .history-text {
+            flex: 1;
+            margin-right: 10px;
+            font-size: 14px;
+            color: #333;
+        }
+
         .history-time {
-            color: var(--gray);
-            font-size: 0.85rem;
-            margin-bottom: 0.5rem;
+            font-size: 12px;
+            color: #999;
         }
 
-        .history-content {
-            color: var(--dark);
-            word-break: break-all;
+        .clear-history {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
+        .clear-history:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .camera-select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        @media (max-width: 768px) {
+        .camera-select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+            background: rgba(102, 126, 234, 0.05);
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .upload-area.dragover {
+            border-color: #00ff88;
+            background: rgba(0, 255, 136, 0.1);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
             h1 {
-                font-size: 2rem;
+                font-size: 2em;
             }
             
-            .tabs {
+            .controls {
                 flex-direction: column;
+                width: 100%;
             }
             
-            .upload-area {
-                padding: 2rem;
+            .btn {
+                width: 100%;
+            }
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #00ff88 0%, #00cc66 100%);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.3);
+            animation: slideInRight 0.5s ease, slideOutRight 0.5s ease 2.5s forwards;
+            z-index: 1000;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(400px);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+            }
+            to {
+                transform: translateX(400px);
             }
         }
     </style>
 </head>
 <body>
-    <div class="waves">
-        <div class="wave"></div>
-        <div class="wave"></div>
-        <div class="wave"></div>
+    <div class="animated-bg">
+        <div class="floating-shape shape1"></div>
+        <div class="floating-shape shape2"></div>
+        <div class="floating-shape shape3"></div>
     </div>
 
     <div class="container">
-        <header>
-            <h1>📸 QR Code Scanner</h1>
-            <p class="subtitle">Instantly scan and decode QR codes from camera or image</p>
-        </header>
+        <h1>QR Code Scanner</h1>
+        <p class="subtitle">Scan QR codes using your camera or upload an image</p>
 
         <div class="scanner-container">
-            <div class="tabs">
-                <button class="tab active" onclick="switchTab('camera')">📷 Camera Scan</button>
-                <button class="tab" onclick="switchTab('upload')">📤 Upload Image</button>
-            </div>
-
-            <div id="camera-tab" class="tab-content active">
-                <div id="reader"></div>
-                <div style="text-align: center; margin-top: 1rem;">
-                    <button id="startBtn" class="btn" onclick="startScanning()">Start Scanning</button>
-                    <button id="stopBtn" class="btn btn-stop" style="display: none;" onclick="stopScanning()">Stop Scanning</button>
+            <div id="reader">
+                <div style="text-align: center; padding: 50px; color: white;">
+                    <p style="font-size: 18px;">Click "Start Scanning" to begin</p>
                 </div>
             </div>
+            <div class="scan-line" id="scan-line" style="display: none;"></div>
+        </div>
 
-            <div id="upload-tab" class="tab-content">
-                <div class="upload-area" onclick="document.getElementById('fileInput').click()" 
-                     ondrop="handleDrop(event)" ondragover="handleDragOver(event)" 
-                     ondragleave="handleDragLeave(event)">
-                    <div class="upload-icon">📁</div>
-                    <h3>Drop your image here</h3>
-                    <p>or click to browse</p>
-                    <input type="file" id="fileInput" accept="image/*" onchange="handleFile(this.files[0])">
-                </div>
+        <select id="camera-select" class="camera-select" style="display: none;">
+            <option value="">Select Camera</option>
+        </select>
+
+        <div class="controls">
+            <button class="btn btn-primary" id="start-btn" onclick="startScanning()">
+                Start Scanning
+            </button>
+            <button class="btn btn-secondary" id="stop-btn" onclick="stopScanning()" disabled>
+                Stop Scanning
+            </button>
+        </div>
+
+        <div class="upload-area" id="upload-area" onclick="document.getElementById('file-input').click()">
+            <div class="upload-icon">📷</div>
+            <p style="color: #667eea; font-weight: 600;">Click to upload an image</p>
+            <p style="color: #999; font-size: 14px; margin-top: 10px;">or drag and drop here</p>
+            <input type="file" id="file-input" accept="image/*" style="display: none;" onchange="scanFile(event)">
+        </div>
+
+        <div class="result-container" id="result-container">
+            <svg class="success-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="11" stroke="#00ff88" stroke-width="2"/>
+                <path d="M8 12l2.5 2.5L16 9" stroke="#00ff88" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            
+            <div class="result-box">
+                <div class="result-label">Scanned Result</div>
+                <div class="result-text" id="result-text"></div>
             </div>
-
-            <div id="result" class="result-container">
-                <div class="result-header">
-                    <div class="result-icon">✅</div>
-                    <h3>QR Code Detected!</h3>
-                </div>
-                <div class="result-content" id="resultContent"></div>
+            
+            <div style="text-align: center;">
+                <button class="btn btn-primary" onclick="copyResult()">Copy to Clipboard</button>
             </div>
         </div>
 
-        <div class="history" id="history" style="display: none;">
-            <h3>📜 Scan History</h3>
-            <div id="historyList"></div>
+        <div class="history-container" id="history-container">
+            <h3 style="margin-bottom: 15px; color: #333;">Scan History</h3>
+            <div id="history-list"></div>
+            <button class="clear-history" onclick="clearHistory()">Clear History</button>
         </div>
     </div>
 
     <script>
-        let html5QrCode = null;
-        let scanHistory = [];
+        let html5QrcodeScanner = null;
+        let scanHistory = JSON.parse(localStorage.getItem('qrHistory') || '[]');
 
-        function switchTab(tab) {
-            // Update tab buttons
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
+        // Drag and drop functionality
+        const uploadArea = document.getElementById('upload-area');
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
             
-            // Update tab content
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.getElementById(tab + '-tab').classList.add('active');
-            
-            // Stop camera if switching away from camera tab
-            if (tab !== 'camera' && html5QrCode && html5QrCode.isScanning) {
-                stopScanning();
+            const file = e.dataTransfer.files[0];
+            if (file && file.type.startsWith('image/')) {
+                handleFile(file);
             }
-        }
+        });
 
         function startScanning() {
-            document.getElementById('startBtn').style.display = 'none';
-            document.getElementById('stopBtn').style.display = 'inline-block';
-            
-            html5QrCode = new Html5Qrcode("reader");
+            document.getElementById('start-btn').disabled = true;
+            document.getElementById('stop-btn').disabled = false;
+            document.getElementById('scan-line').style.display = 'block';
+
+            Html5Qrcode.getCameras().then(devices => {
+                if (devices && devices.length) {
+                    const cameraSelect = document.getElementById('camera-select');
+                    cameraSelect.innerHTML = '<option value="">Select Camera</option>';
+                    
+                    devices.forEach((device, index) => {
+                        const option = document.createElement('option');
+                        option.value = device.id;
+                        option.text = device.label || `Camera ${index + 1}`;
+                        cameraSelect.appendChild(option);
+                    });
+                    
+                    if (devices.length > 1) {
+                        cameraSelect.style.display = 'block';
+                    }
+
+                    const cameraId = devices[devices.length - 1].id;
+                    startCamera(cameraId);
+                }
+            }).catch(err => {
+                console.error('Error getting cameras:', err);
+                showNotification('Camera access denied or not available', 'error');
+                document.getElementById('start-btn').disabled = false;
+                document.getElementById('stop-btn').disabled = true;
+            });
+        }
+
+        function startCamera(cameraId) {
+            const html5QrCode = new Html5Qrcode("reader");
             
             const config = {
                 fps: 10,
                 qrbox: { width: 250, height: 250 },
                 aspectRatio: 1.0
             };
-            
+
             html5QrCode.start(
-                { facingMode: "environment" },
+                cameraId,
                 config,
                 (decodedText, decodedResult) => {
                     handleScanSuccess(decodedText);
                     html5QrCode.stop();
-                    document.getElementById('startBtn').style.display = 'inline-block';
-                    document.getElementById('stopBtn').style.display = 'none';
+                    document.getElementById('start-btn').disabled = false;
+                    document.getElementById('stop-btn').disabled = true;
+                    document.getElementById('scan-line').style.display = 'none';
+                    document.getElementById('camera-select').style.display = 'none';
                 },
                 (errorMessage) => {
-                    // Scan error, ignore
+                    // Ignore error messages during scanning
                 }
             ).catch((err) => {
-                alert(`Unable to start camera: ${err}`);
-                document.getElementById('startBtn').style.display = 'inline-block';
-                document.getElementById('stopBtn').style.display = 'none';
+                console.error('Error starting scanner:', err);
+                showNotification('Failed to start camera', 'error');
+                document.getElementById('start-btn').disabled = false;
+                document.getElementById('stop-btn').disabled = true;
             });
+
+            window.currentScanner = html5QrCode;
         }
 
+        document.getElementById('camera-select').addEventListener('change', (e) => {
+            if (e.target.value && window.currentScanner) {
+                window.currentScanner.stop().then(() => {
+                    startCamera(e.target.value);
+                });
+            }
+        });
+
         function stopScanning() {
-            if (html5QrCode && html5QrCode.isScanning) {
-                html5QrCode.stop().then(() => {
-                    document.getElementById('startBtn').style.display = 'inline-block';
-                    document.getElementById('stopBtn').style.display = 'none';
+            if (window.currentScanner) {
+                window.currentScanner.stop().then(() => {
+                    document.getElementById('reader').innerHTML = `
+                        <div style="text-align: center; padding: 50px; color: white;">
+                            <p style="font-size: 18px;">Click "Start Scanning" to begin</p>
+                        </div>
+                    `;
+                    document.getElementById('start-btn').disabled = false;
+                    document.getElementById('stop-btn').disabled = true;
+                    document.getElementById('scan-line').style.display = 'none';
+                    document.getElementById('camera-select').style.display = 'none';
                 }).catch((err) => {
                     console.error('Error stopping scanner:', err);
                 });
             }
         }
 
-        function handleDragOver(e) {
-            e.preventDefault();
-            e.currentTarget.classList.add('dragover');
-        }
-
-        function handleDragLeave(e) {
-            e.currentTarget.classList.remove('dragover');
-        }
-
-        function handleDrop(e) {
-            e.preventDefault();
-            e.currentTarget.classList.remove('dragover');
-            
-            const file = e.dataTransfer.files[0];
-            if (file && file.type.startsWith('image/')) {
+        function scanFile(event) {
+            const file = event.target.files[0];
+            if (file) {
                 handleFile(file);
             }
         }
 
         function handleFile(file) {
-            if (!file) return;
-            
             const html5QrCode = new Html5Qrcode("reader");
+            
             html5QrCode.scanFile(file, true)
                 .then(decodedText => {
                     handleScanSuccess(decodedText);
                 })
                 .catch(err => {
-                    alert('No QR code found in the image');
+                    console.error('Error scanning file:', err);
+                    showNotification('No QR code found in the image', 'error');
                 });
         }
 
         function handleScanSuccess(decodedText) {
-            // Detect content type and display accordingly
-            const resultContainer = document.getElementById('result');
-            const resultContent = document.getElementById('resultContent');
+            document.getElementById('result-text').textContent = decodedText;
+            document.getElementById('result-container').style.display = 'block';
             
-            // Clear previous content
-            resultContent.innerHTML = '';
+            showNotification('QR Code scanned successfully!', 'success');
             
-            // Detect content type
-            const contentType = detectContentType(decodedText);
-            
-            // Add type badge
-            const typeBadge = document.createElement('div');
-            typeBadge.className = 'result-type';
-            typeBadge.textContent = `📋 Type: ${contentType.type}`;
-            resultContent.appendChild(typeBadge);
-            
-            // Display content based on type
-            if (contentType.type === 'Embedded Image') {
-                // Display the embedded base64 image directly
-                const img = document.createElement('img');
-                img.className = 'result-image';
-                img.src = decodedText;
-                img.alt = 'Embedded QR Code Image';
-                resultContent.appendChild(img);
-                
-                // Add info about the embedded image
-                const infoDiv = document.createElement('div');
-                infoDiv.style.marginTop = '1rem';
-                infoDiv.style.color = 'var(--gray)';
-                infoDiv.innerHTML = `
-                    <p>📊 Image embedded directly in QR code</p>
-                    <p style="font-size: 0.9rem;">Size: ~${Math.round(decodedText.length / 1024)}KB</p>
-                `;
-                resultContent.appendChild(infoDiv);
-                
-                // Add download button for the image
-                const downloadBtn = document.createElement('button');
-                downloadBtn.className = 'copy-btn';
-                downloadBtn.textContent = '💾 Download Image';
-                downloadBtn.style.marginTop = '1rem';
-                downloadBtn.onclick = function() {
-                    const link = document.createElement('a');
-                    link.href = decodedText;
-                    link.download = 'qr-image.png';
-                    link.click();
-                };
-                resultContent.appendChild(downloadBtn);
-                
-            } else if (contentType.type === 'Image URL') {
-                // Display the URL text
-                const textDiv = document.createElement('div');
-                textDiv.style.marginBottom = '1rem';
-                textDiv.textContent = decodedText;
-                resultContent.appendChild(textDiv);
-                
-                // Display the image
-                const img = document.createElement('img');
-                img.className = 'result-image';
-                img.src = decodedText;
-                img.alt = 'QR Code Image';
-                img.onerror = function() {
-                    this.style.display = 'none';
-                    const errorMsg = document.createElement('p');
-                    errorMsg.style.color = 'var(--error)';
-                    errorMsg.style.marginTop = '1rem';
-                    errorMsg.textContent = '⚠️ Could not load image from this URL';
-                    resultContent.appendChild(errorMsg);
-                };
-                resultContent.appendChild(img);
-                
-                // Add link to open in new tab
-                const link = document.createElement('a');
-                link.className = 'result-link';
-                link.href = decodedText;
-                link.target = '_blank';
-                link.textContent = '🔗 Open image in new tab →';
-                resultContent.appendChild(link);
-                
-            } else if (contentType.type === 'URL') {
-                // Display URL with link
-                const textDiv = document.createElement('div');
-                textDiv.textContent = decodedText;
-                resultContent.appendChild(textDiv);
-                
-                const link = document.createElement('a');
-                link.className = 'result-link';
-                link.href = decodedText;
-                link.target = '_blank';
-                link.textContent = '🔗 Open link in new tab →';
-                resultContent.appendChild(link);
-                
-                // Try to fetch and display preview if it's an image URL
-                if (isImageUrl(decodedText)) {
-                    const img = document.createElement('img');
-                    img.className = 'result-image';
-                    img.src = decodedText;
-                    img.alt = 'Preview';
-                    img.onerror = function() {
-                        this.style.display = 'none';
-                    };
-                    resultContent.appendChild(img);
-                }
-                
-            } else if (contentType.type === 'Email') {
-                const textDiv = document.createElement('div');
-                textDiv.textContent = decodedText;
-                resultContent.appendChild(textDiv);
-                
-                const link = document.createElement('a');
-                link.className = 'result-link';
-                link.href = decodedText;
-                link.textContent = '📧 Open email client →';
-                resultContent.appendChild(link);
-                
-            } else if (contentType.type === 'Phone') {
-                const textDiv = document.createElement('div');
-                textDiv.textContent = decodedText;
-                resultContent.appendChild(textDiv);
-                
-                const link = document.createElement('a');
-                link.className = 'result-link';
-                link.href = decodedText;
-                link.textContent = '📞 Call this number →';
-                resultContent.appendChild(link);
-                
-            } else if (contentType.type === 'WiFi') {
-                // Parse WiFi details
-                const wifiDetails = parseWiFiString(decodedText);
-                const detailsDiv = document.createElement('div');
-                detailsDiv.innerHTML = `
-                    <p><strong>Network Name:</strong> ${wifiDetails.ssid || 'N/A'}</p>
-                    <p><strong>Password:</strong> ${wifiDetails.password || 'N/A'}</p>
-                    <p><strong>Security:</strong> ${wifiDetails.security || 'N/A'}</p>
-                `;
-                resultContent.appendChild(detailsDiv);
-                
-            } else {
-                // Plain text
-                const textDiv = document.createElement('div');
-                textDiv.textContent = decodedText;
-                resultContent.appendChild(textDiv);
-            }
-            
-            // Show result container
-            resultContainer.classList.add('show');
-            
-            // Add copy button functionality
-            const copyBtn = document.createElement('button');
-            copyBtn.className = 'copy-btn';
-            copyBtn.textContent = 'Copy to Clipboard';
-            copyBtn.onclick = function() {
-                copyResult(decodedText);
-            };
-            resultContent.appendChild(copyBtn);
-            
-            // Add to history
-            addToHistory(decodedText, contentType.type);
-            
-            // Vibrate if supported
-            if (navigator.vibrate) {
-                navigator.vibrate(200);
-            }
-            
-            // Play sound effect
-            playSuccessSound();
-        }
-        
-        function detectContentType(text) {
-            // Check if it's a base64 encoded image (data URL)
-            if (text.startsWith('data:image/')) {
-                return { type: 'Embedded Image', icon: '🖼️' };
-            }
-            // Check if it's an image URL
-            if (isImageUrl(text)) {
-                return { type: 'Image URL', icon: '🖼️' };
-            }
-            // Check if it's a URL
-            if (text.match(/^(https?:\/\/|www\.)/i)) {
-                return { type: 'URL', icon: '🌐' };
-            }
-            // Check if it's an email
-            if (text.startsWith('mailto:') || text.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-                return { type: 'Email', icon: '📧' };
-            }
-            // Check if it's a phone number
-            if (text.startsWith('tel:') || text.match(/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/)) {
-                return { type: 'Phone', icon: '📞' };
-            }
-            // Check if it's WiFi
-            if (text.startsWith('WIFI:')) {
-                return { type: 'WiFi', icon: '📶' };
-            }
-            // Default to text
-            return { type: 'Text', icon: '📝' };
-        }
-        
-        function isImageUrl(url) {
-            return /\.(jpg|jpeg|png|gif|bmp|webp|svg|ico)(\?.*)?$/i.test(url);
-        }
-        
-        function parseWiFiString(wifiString) {
-            const result = {};
-            const matches = wifiString.match(/WIFI:T:([^;]*);S:([^;]*);P:([^;]*);/);
-            if (matches) {
-                result.security = matches[1];
-                result.ssid = matches[2];
-                result.password = matches[3];
-            }
-            return result;
+            addToHistory(decodedText);
         }
 
-        function addToHistory(text, type) {
-            const now = new Date();
-            scanHistory.unshift({
-                text: text,
-                time: now.toLocaleString(),
-                type: type || 'Text'
+        function copyResult() {
+            const resultText = document.getElementById('result-text').textContent;
+            navigator.clipboard.writeText(resultText).then(() => {
+                showNotification('Copied to clipboard!', 'success');
+            }).catch(err => {
+                console.error('Error copying to clipboard:', err);
             });
+        }
+
+        function addToHistory(text) {
+            const historyItem = {
+                text: text,
+                time: new Date().toLocaleString()
+            };
             
-            // Keep only last 10 items
+            scanHistory.unshift(historyItem);
             if (scanHistory.length > 10) {
                 scanHistory.pop();
             }
             
+            localStorage.setItem('qrHistory', JSON.stringify(scanHistory));
             updateHistoryDisplay();
         }
 
         function updateHistoryDisplay() {
             if (scanHistory.length > 0) {
-                document.getElementById('history').style.display = 'block';
-                const historyList = document.getElementById('historyList');
-                historyList.innerHTML = scanHistory.map(item => {
-                    let preview = item.text;
-                    if (item.type === 'Embedded Image' && item.text.startsWith('data:image/')) {
-                        preview = `<img src="${item.text}" style="max-width: 100px; max-height: 100px; border-radius: 5px; margin-top: 0.5rem;" onerror="this.style.display='none'">
-                                  <div style="margin-top: 0.5rem;">Embedded Image (${Math.round(item.text.length / 1024)}KB)</div>`;
-                    } else if (item.type === 'Image URL' && isImageUrl(item.text)) {
-                        preview = `<img src="${item.text}" style="max-width: 100px; max-height: 100px; border-radius: 5px; margin-top: 0.5rem;" onerror="this.style.display='none'">
-                                  <div style="margin-top: 0.5rem;">${item.text.substring(0, 50)}${item.text.length > 50 ? '...' : ''}</div>`;
-                    } else if (item.text.length > 100) {
-                        preview = item.text.substring(0, 100) + '...';
-                    }
-                    
-                    return `
-                        <div class="history-item">
-                            <div class="history-time">🕐 ${item.time} | ${item.type}</div>
-                            <div class="history-content">${preview}</div>
-                        </div>
-                    `;
-                }).join('');
+                document.getElementById('history-container').style.display = 'block';
+                const historyList = document.getElementById('history-list');
+                
+                historyList.innerHTML = scanHistory.map(item => `
+                    <div class="history-item">
+                        <div class="history-text">${item.text.substring(0, 50)}${item.text.length > 50 ? '...' : ''}</div>
+                        <div class="history-time">${item.time}</div>
+                    </div>
+                `).join('');
             }
         }
 
-        function copyResult(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                // Change button text temporarily
-                const btn = event.target;
-                const originalText = btn.textContent;
-                btn.textContent = '✓ Copied!';
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                }, 2000);
-            });
+        function clearHistory() {
+            scanHistory = [];
+            localStorage.removeItem('qrHistory');
+            document.getElementById('history-container').style.display = 'none';
+            showNotification('History cleared!', 'success');
         }
 
-        function playSuccessSound() {
-            // Create a simple beep sound
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
             
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
+            if (type === 'error') {
+                notification.style.background = 'linear-gradient(135deg, #ff6b6b 0%, #feca57 100%)';
+            }
             
-            oscillator.frequency.value = 800;
-            oscillator.type = 'sine';
+            document.body.appendChild(notification);
             
-            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-            
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.1);
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
         }
+
+        // Load history on page load
+        updateHistoryDisplay();
     </script>
 </body>
 </html>
