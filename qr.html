@@ -424,6 +424,12 @@
             }
         }
 
+        @keyframes scan {
+            0% { top: 0; }
+            50% { top: calc(100% - 2px); }
+            100% { top: 0; }
+        }
+
         .file-upload {
             margin-top: 20px;
             padding: 20px;
@@ -465,9 +471,19 @@
                     QR Code Scanner
                 </h2>
                 
-                <div class="scanner-placeholder" id="scannerContainer">
+                <div class="scanner-placeholder" id="scannerContainer" style="position: relative;">
                     <video id="video" style="width: 100%; border-radius: 10px; display: none;"></video>
                     <canvas id="canvas" style="display: none;"></canvas>
+                    <div id="scanningOverlay" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10;">
+                        <div style="width: 200px; height: 200px; border: 3px solid #10b981; border-radius: 20px; position: relative;">
+                            <div style="position: absolute; top: -10px; left: -10px; width: 30px; height: 30px; border-top: 4px solid #10b981; border-left: 4px solid #10b981;"></div>
+                            <div style="position: absolute; top: -10px; right: -10px; width: 30px; height: 30px; border-top: 4px solid #10b981; border-right: 4px solid #10b981;"></div>
+                            <div style="position: absolute; bottom: -10px; left: -10px; width: 30px; height: 30px; border-bottom: 4px solid #10b981; border-left: 4px solid #10b981;"></div>
+                            <div style="position: absolute; bottom: -10px; right: -10px; width: 30px; height: 30px; border-bottom: 4px solid #10b981; border-right: 4px solid #10b981;"></div>
+                            <div id="scanLine" style="position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: #10b981; animation: scan 2s linear infinite;"></div>
+                        </div>
+                        <p style="color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); margin-top: 20px; font-weight: bold;">Scanning...</p>
+                    </div>
                     <div id="scannerPlaceholder">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
@@ -604,10 +620,13 @@
             video.style.display = 'block';
             document.getElementById('stopButton').style.display = 'inline-block';
             
-            // Access user camera
+            // Access user camera with optimized settings
             navigator.mediaDevices.getUserMedia({ 
                 video: { 
-                    facingMode: 'environment' // Try to use back camera on mobile
+                    facingMode: 'environment', // Use back camera on mobile
+                    width: { ideal: 1280 },    // Higher resolution for better detection
+                    height: { ideal: 720 },
+                    frameRate: { ideal: 30 }    // Higher frame rate
                 } 
             })
             .then(function(stream) {
@@ -615,8 +634,13 @@
                 video.setAttribute('playsinline', true); // Required for iOS Safari
                 video.play();
                 scanning = true;
-                requestAnimationFrame(tick);
-                showNotification('Camera started. Point at QR code to scan.');
+                
+                // Show scanning overlay
+                document.getElementById('scanningOverlay').style.display = 'block';
+                
+                // Start continuous scanning
+                scanContinuously();
+                showNotification('Camera started. Align QR code within the frame.');
             })
             .catch(function(err) {
                 console.error('Camera error:', err);
@@ -662,6 +686,9 @@
                 video.srcObject = null;
             }
 
+            // Hide scanning overlay
+            document.getElementById('scanningOverlay').style.display = 'none';
+            
             // Show placeholder and hide video
             document.getElementById('scannerPlaceholder').style.display = 'block';
             document.getElementById('video').style.display = 'none';
@@ -669,30 +696,139 @@
             document.getElementById('scannerResult').style.display = 'none';
         }
 
-        // QR Code scanning loop
+        // QR Code scanning loop - Optimized for speed
         function tick() {
             if (!scanning) return;
             
-            if (video.readyState === video.HAVE_ENOUGH_DATA) {
-                canvas.height = video.videoHeight;
-                canvas.width = video.videoWidth;
-                canvasContext.drawImage(video, 0, 0, canvas.width, canvas.height);
+            if (video && video.readyState === video.HAVE_ENOUGH_DATA) {
+                // Dynamically adjust canvas size for better performance
+                const width = 320; // Reduced resolution for faster processing
+                const height = (video.videoHeight / video.videoWidth) * width;
                 
-                const imageData = canvasContext.getImageData(0, 0, canvas.width, canvas.height);
+                canvas.width = width;
+                canvas.height = height;
+                canvasContext.drawImage(video, 0, 0, width, height);
                 
-                // Use jsQR library to detect QR code
+                const imageData = canvasContext.getImageData(0, 0, width, height);
+                
+                // Use jsQR with multiple inversion attempts for better detection
                 const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                    inversionAttempts: "dontInvert"
+                    inversionAttempts: "attemptBoth" // Try both normal and inverted for better detection
                 });
                 
-                if (code) {
-                    // QR code detected
+                if (code && code.data) {
+                    // Draw detection box for visual feedback
+                    drawLine(code.location.topLeftCorner, code.location.topRightCorner, "#10b981");
+                    drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "#10b981");
+                    drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "#10b981");
+                    drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "#10b981");
+                    
                     console.log("QR Code detected:", code.data);
                     handleQRCodeData(code.data);
+                } else {
+                    // Show scanning indicator
+                    updateScanningIndicator();
                 }
             }
             
-            requestAnimationFrame(tick);
+            // Faster frame rate for quicker detection
+            setTimeout(() => {
+                requestAnimationFrame(tick);
+            }, 100); // Scan 10 times per second for balance between speed and performance
+        }
+
+        // Draw line for QR code detection visualization
+        function drawLine(begin, end, color) {
+            const canvasElement = document.getElementById('video-canvas');
+            if (!canvasElement) {
+                // Create overlay canvas for drawing
+                const overlay = document.createElement('canvas');
+                overlay.id = 'video-canvas';
+                overlay.style.position = 'absolute';
+                overlay.style.top = '0';
+                overlay.style.left = '0';
+                overlay.style.width = '100%';
+                overlay.style.height = '100%';
+                overlay.style.pointerEvents = 'none';
+                video.parentElement.appendChild(overlay);
+            }
+            
+            const overlayCanvas = document.getElementById('video-canvas');
+            const ctx = overlayCanvas.getContext('2d');
+            overlayCanvas.width = video.videoWidth;
+            overlayCanvas.height = video.videoHeight;
+            
+            ctx.beginPath();
+            ctx.moveTo(begin.x, begin.y);
+            ctx.lineTo(end.x, end.y);
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = color;
+            ctx.stroke();
+        }
+
+        // Update scanning indicator
+        function updateScanningIndicator() {
+            const indicator = document.getElementById('scanningIndicator');
+            if (indicator) {
+                indicator.style.display = 'block';
+            }
+        }
+
+        // Continuous scanning function - optimized for speed
+        function scanContinuously() {
+            if (!scanning) return;
+            
+            if (video && video.readyState === video.HAVE_ENOUGH_DATA) {
+                // Use smaller canvas for faster processing
+                const scale = 0.5; // Process at 50% resolution for speed
+                const width = video.videoWidth * scale;
+                const height = video.videoHeight * scale;
+                
+                canvas.width = width;
+                canvas.height = height;
+                
+                // Draw video frame to canvas
+                canvasContext.drawImage(video, 0, 0, width, height);
+                
+                try {
+                    const imageData = canvasContext.getImageData(0, 0, width, height);
+                    
+                    // Try to detect QR code with multiple settings
+                    let code = jsQR(imageData.data, imageData.width, imageData.height, {
+                        inversionAttempts: "attemptBoth"
+                    });
+                    
+                    if (!code) {
+                        // Try with different inversion
+                        code = jsQR(imageData.data, imageData.width, imageData.height, {
+                            inversionAttempts: "invertFirst"
+                        });
+                    }
+                    
+                    if (code && code.data) {
+                        console.log("QR Code found:", code.data);
+                        
+                        // Visual feedback
+                        document.getElementById('scanningOverlay').style.display = 'none';
+                        
+                        // Process the QR code
+                        handleQRCodeData(code.data);
+                        
+                        // Stop scanning after successful detection
+                        scanning = false;
+                        return;
+                    }
+                } catch (error) {
+                    console.error('Scanning error:', error);
+                }
+            }
+            
+            // Continue scanning at high frequency
+            setTimeout(() => {
+                if (scanning) {
+                    scanContinuously();
+                }
+            }, 50); // Scan 20 times per second for fast detection
         }
 
         // Handle detected QR code data
