@@ -314,6 +314,40 @@
             font-size: 0.95rem;
         }
 
+        .result-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-top: 1rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            animation: fadeIn 0.5s ease;
+        }
+
+        .result-link {
+            display: inline-block;
+            margin-top: 1rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .result-link:hover {
+            color: var(--primary-dark);
+            transform: translateX(5px);
+        }
+
+        .result-type {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
         .copy-btn {
             padding: 0.5rem 1rem;
             background: var(--success);
@@ -442,7 +476,6 @@
                     <h3>QR Code Detected!</h3>
                 </div>
                 <div class="result-content" id="resultContent"></div>
-                <button class="copy-btn" onclick="copyResult()">Copy to Clipboard</button>
             </div>
         </div>
 
@@ -546,27 +579,223 @@
         }
 
         function handleScanSuccess(decodedText) {
-            // Show result
-            document.getElementById('resultContent').textContent = decodedText;
-            document.getElementById('result').classList.add('show');
+            // Detect content type and display accordingly
+            const resultContainer = document.getElementById('result');
+            const resultContent = document.getElementById('resultContent');
+            
+            // Clear previous content
+            resultContent.innerHTML = '';
+            
+            // Detect content type
+            const contentType = detectContentType(decodedText);
+            
+            // Add type badge
+            const typeBadge = document.createElement('div');
+            typeBadge.className = 'result-type';
+            typeBadge.textContent = `📋 Type: ${contentType.type}`;
+            resultContent.appendChild(typeBadge);
+            
+            // Display content based on type
+            if (contentType.type === 'Embedded Image') {
+                // Display the embedded base64 image directly
+                const img = document.createElement('img');
+                img.className = 'result-image';
+                img.src = decodedText;
+                img.alt = 'Embedded QR Code Image';
+                resultContent.appendChild(img);
+                
+                // Add info about the embedded image
+                const infoDiv = document.createElement('div');
+                infoDiv.style.marginTop = '1rem';
+                infoDiv.style.color = 'var(--gray)';
+                infoDiv.innerHTML = `
+                    <p>📊 Image embedded directly in QR code</p>
+                    <p style="font-size: 0.9rem;">Size: ~${Math.round(decodedText.length / 1024)}KB</p>
+                `;
+                resultContent.appendChild(infoDiv);
+                
+                // Add download button for the image
+                const downloadBtn = document.createElement('button');
+                downloadBtn.className = 'copy-btn';
+                downloadBtn.textContent = '💾 Download Image';
+                downloadBtn.style.marginTop = '1rem';
+                downloadBtn.onclick = function() {
+                    const link = document.createElement('a');
+                    link.href = decodedText;
+                    link.download = 'qr-image.png';
+                    link.click();
+                };
+                resultContent.appendChild(downloadBtn);
+                
+            } else if (contentType.type === 'Image URL') {
+                // Display the URL text
+                const textDiv = document.createElement('div');
+                textDiv.style.marginBottom = '1rem';
+                textDiv.textContent = decodedText;
+                resultContent.appendChild(textDiv);
+                
+                // Display the image
+                const img = document.createElement('img');
+                img.className = 'result-image';
+                img.src = decodedText;
+                img.alt = 'QR Code Image';
+                img.onerror = function() {
+                    this.style.display = 'none';
+                    const errorMsg = document.createElement('p');
+                    errorMsg.style.color = 'var(--error)';
+                    errorMsg.style.marginTop = '1rem';
+                    errorMsg.textContent = '⚠️ Could not load image from this URL';
+                    resultContent.appendChild(errorMsg);
+                };
+                resultContent.appendChild(img);
+                
+                // Add link to open in new tab
+                const link = document.createElement('a');
+                link.className = 'result-link';
+                link.href = decodedText;
+                link.target = '_blank';
+                link.textContent = '🔗 Open image in new tab →';
+                resultContent.appendChild(link);
+                
+            } else if (contentType.type === 'URL') {
+                // Display URL with link
+                const textDiv = document.createElement('div');
+                textDiv.textContent = decodedText;
+                resultContent.appendChild(textDiv);
+                
+                const link = document.createElement('a');
+                link.className = 'result-link';
+                link.href = decodedText;
+                link.target = '_blank';
+                link.textContent = '🔗 Open link in new tab →';
+                resultContent.appendChild(link);
+                
+                // Try to fetch and display preview if it's an image URL
+                if (isImageUrl(decodedText)) {
+                    const img = document.createElement('img');
+                    img.className = 'result-image';
+                    img.src = decodedText;
+                    img.alt = 'Preview';
+                    img.onerror = function() {
+                        this.style.display = 'none';
+                    };
+                    resultContent.appendChild(img);
+                }
+                
+            } else if (contentType.type === 'Email') {
+                const textDiv = document.createElement('div');
+                textDiv.textContent = decodedText;
+                resultContent.appendChild(textDiv);
+                
+                const link = document.createElement('a');
+                link.className = 'result-link';
+                link.href = decodedText;
+                link.textContent = '📧 Open email client →';
+                resultContent.appendChild(link);
+                
+            } else if (contentType.type === 'Phone') {
+                const textDiv = document.createElement('div');
+                textDiv.textContent = decodedText;
+                resultContent.appendChild(textDiv);
+                
+                const link = document.createElement('a');
+                link.className = 'result-link';
+                link.href = decodedText;
+                link.textContent = '📞 Call this number →';
+                resultContent.appendChild(link);
+                
+            } else if (contentType.type === 'WiFi') {
+                // Parse WiFi details
+                const wifiDetails = parseWiFiString(decodedText);
+                const detailsDiv = document.createElement('div');
+                detailsDiv.innerHTML = `
+                    <p><strong>Network Name:</strong> ${wifiDetails.ssid || 'N/A'}</p>
+                    <p><strong>Password:</strong> ${wifiDetails.password || 'N/A'}</p>
+                    <p><strong>Security:</strong> ${wifiDetails.security || 'N/A'}</p>
+                `;
+                resultContent.appendChild(detailsDiv);
+                
+            } else {
+                // Plain text
+                const textDiv = document.createElement('div');
+                textDiv.textContent = decodedText;
+                resultContent.appendChild(textDiv);
+            }
+            
+            // Show result container
+            resultContainer.classList.add('show');
+            
+            // Add copy button functionality
+            const copyBtn = document.createElement('button');
+            copyBtn.className = 'copy-btn';
+            copyBtn.textContent = 'Copy to Clipboard';
+            copyBtn.onclick = function() {
+                copyResult(decodedText);
+            };
+            resultContent.appendChild(copyBtn);
             
             // Add to history
-            addToHistory(decodedText);
+            addToHistory(decodedText, contentType.type);
             
             // Vibrate if supported
             if (navigator.vibrate) {
                 navigator.vibrate(200);
             }
             
-            // Play sound effect (optional)
+            // Play sound effect
             playSuccessSound();
         }
+        
+        function detectContentType(text) {
+            // Check if it's a base64 encoded image (data URL)
+            if (text.startsWith('data:image/')) {
+                return { type: 'Embedded Image', icon: '🖼️' };
+            }
+            // Check if it's an image URL
+            if (isImageUrl(text)) {
+                return { type: 'Image URL', icon: '🖼️' };
+            }
+            // Check if it's a URL
+            if (text.match(/^(https?:\/\/|www\.)/i)) {
+                return { type: 'URL', icon: '🌐' };
+            }
+            // Check if it's an email
+            if (text.startsWith('mailto:') || text.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+                return { type: 'Email', icon: '📧' };
+            }
+            // Check if it's a phone number
+            if (text.startsWith('tel:') || text.match(/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/)) {
+                return { type: 'Phone', icon: '📞' };
+            }
+            // Check if it's WiFi
+            if (text.startsWith('WIFI:')) {
+                return { type: 'WiFi', icon: '📶' };
+            }
+            // Default to text
+            return { type: 'Text', icon: '📝' };
+        }
+        
+        function isImageUrl(url) {
+            return /\.(jpg|jpeg|png|gif|bmp|webp|svg|ico)(\?.*)?$/i.test(url);
+        }
+        
+        function parseWiFiString(wifiString) {
+            const result = {};
+            const matches = wifiString.match(/WIFI:T:([^;]*);S:([^;]*);P:([^;]*);/);
+            if (matches) {
+                result.security = matches[1];
+                result.ssid = matches[2];
+                result.password = matches[3];
+            }
+            return result;
+        }
 
-        function addToHistory(text) {
+        function addToHistory(text, type) {
             const now = new Date();
             scanHistory.unshift({
                 text: text,
-                time: now.toLocaleString()
+                time: now.toLocaleString(),
+                type: type || 'Text'
             });
             
             // Keep only last 10 items
@@ -581,17 +810,29 @@
             if (scanHistory.length > 0) {
                 document.getElementById('history').style.display = 'block';
                 const historyList = document.getElementById('historyList');
-                historyList.innerHTML = scanHistory.map(item => `
-                    <div class="history-item">
-                        <div class="history-time">🕐 ${item.time}</div>
-                        <div class="history-content">${item.text}</div>
-                    </div>
-                `).join('');
+                historyList.innerHTML = scanHistory.map(item => {
+                    let preview = item.text;
+                    if (item.type === 'Embedded Image' && item.text.startsWith('data:image/')) {
+                        preview = `<img src="${item.text}" style="max-width: 100px; max-height: 100px; border-radius: 5px; margin-top: 0.5rem;" onerror="this.style.display='none'">
+                                  <div style="margin-top: 0.5rem;">Embedded Image (${Math.round(item.text.length / 1024)}KB)</div>`;
+                    } else if (item.type === 'Image URL' && isImageUrl(item.text)) {
+                        preview = `<img src="${item.text}" style="max-width: 100px; max-height: 100px; border-radius: 5px; margin-top: 0.5rem;" onerror="this.style.display='none'">
+                                  <div style="margin-top: 0.5rem;">${item.text.substring(0, 50)}${item.text.length > 50 ? '...' : ''}</div>`;
+                    } else if (item.text.length > 100) {
+                        preview = item.text.substring(0, 100) + '...';
+                    }
+                    
+                    return `
+                        <div class="history-item">
+                            <div class="history-time">🕐 ${item.time} | ${item.type}</div>
+                            <div class="history-content">${preview}</div>
+                        </div>
+                    `;
+                }).join('');
             }
         }
 
-        function copyResult() {
-            const text = document.getElementById('resultContent').textContent;
+        function copyResult(text) {
             navigator.clipboard.writeText(text).then(() => {
                 // Change button text temporarily
                 const btn = event.target;
