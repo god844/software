@@ -939,6 +939,28 @@
                 padding: 0;
             }
             
+            /* Hide everything when printing mode is active */
+            body.printing-mode * {
+                display: none !important;
+            }
+            
+            /* Show only the specific card being printed */
+            body.printing-mode .magic-card.print-this-card,
+            body.printing-mode .magic-card.print-this-card * {
+                display: block !important;
+            }
+            
+            body.printing-mode .magic-card.print-this-card {
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                max-width: none !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+                border: 2px solid #000 !important;
+            }
+            
             .container {
                 max-width: 100%;
                 padding: 0;
@@ -990,6 +1012,17 @@
             .magic-card-qr {
                 page-break-inside: avoid !important;
             }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { padding: 15px; }
+            .header h1 { font-size: 2rem; }
+            .uniform-grid { grid-template-columns: 1fr; }
+            .form-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .tabs { padding: 15px; gap: 10px; }
+            .tab-btn { padding: 12px 20px; font-size: 0.9rem; }
         }
     </style>
 </head>
@@ -1924,13 +1957,13 @@
                             </div>
                             
                             <div class="btn-group" style="justify-content: center; margin-top: 30px;">
-                                <button class="btn btn-success" onclick="system.downloadMagicCardPDF('${itemId}')">
+                                <button class="btn btn-success" onclick="window.system ? system.downloadMagicCardPDF('${itemId}') : alert('System not initialized')">
                                     <span>📥</span> Download PDF
                                 </button>
                                 <button class="btn" onclick="window.print()">
                                     <span>🖨️</span> Print Card
                                 </button>
-                                <button class="btn btn-secondary" onclick="system.testQR('${itemId}')">
+                                <button class="btn btn-secondary" onclick="window.system ? system.testQR('${itemId}') : alert('System not initialized')">
                                     <span>🔍</span> Test QR Code
                                 </button>
                             </div>
@@ -2150,6 +2183,7 @@
 
         // Initialize System
         const system = new UniformManagementSystem();
+        window.system = system; // Make system globally accessible
 
         // Tab Switching
         function switchTab(tabName, button) {
