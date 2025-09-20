@@ -926,21 +926,70 @@
             to { transform: translateX(0); opacity: 1; }
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .container { padding: 15px; }
-            .header h1 { font-size: 2rem; }
-            .uniform-grid { grid-template-columns: 1fr; }
-            .form-grid { grid-template-columns: 1fr; }
-            .stats-grid { grid-template-columns: 1fr; }
-            .tabs { padding: 15px; gap: 10px; }
-            .tab-btn { padding: 12px 20px; font-size: 0.9rem; }
-        }
-
+        /* Print Styles for Proper Orientation */
         @media print {
-            body { background: white; }
-            .tabs, .btn, .notification { display: none !important; }
-            .magic-card { box-shadow: none; border: 1px solid #000; page-break-inside: avoid; }
+            @page {
+                size: A4 portrait;
+                margin: 15mm;
+            }
+            
+            body {
+                background: white !important;
+                margin: 0;
+                padding: 0;
+            }
+            
+            .container {
+                max-width: 100%;
+                padding: 0;
+            }
+            
+            .tabs, .btn, .notification, .header, .btn-group {
+                display: none !important;
+            }
+            
+            .dashboard-card {
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            
+            .magic-card-container {
+                max-width: 100% !important;
+                margin: 0 !important;
+                page-break-after: always;
+            }
+            
+            .magic-card {
+                box-shadow: none !important;
+                border: 2px solid #000 !important;
+                margin: 0 !important;
+                page-break-inside: avoid !important;
+            }
+            
+            .magic-card-header {
+                background: #f0f0f0 !important;
+                color: #000 !important;
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+            
+            .magic-card-header h2,
+            .magic-card-header h3 {
+                color: #000 !important;
+            }
+            
+            .magic-card-section {
+                page-break-inside: avoid !important;
+            }
+            
+            .magic-card-images {
+                page-break-inside: avoid !important;
+            }
+            
+            .magic-card-qr {
+                page-break-inside: avoid !important;
+            }
         }
     </style>
 </head>
